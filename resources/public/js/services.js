@@ -42,6 +42,32 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     return this.http('DELETE', url, data);
   };
 
+  getTasksForInterviewers = function(interviewersList, callback) {
+     var waitingOn = 0;
+
+    for (var i=0; i<returnedData.length; i++) {
+      httpGET('/interviewer/complete-tasks?id=' + returnedData[i].id).then(function(completeTasksData) {
+        waitingOn --;
+        if (completeTasksData.length > 0) $rootScope.interviewersMap[completeTasksData[0].interviewer]['complete-tasks'] = completeTasksData;
+        if ((waitingOn == 0) && callback) callback();
+      });
+      httpGET('/interviewer/incomplete-tasks?id=' + returnedData[i].id).then(function(incompleteTasksData) {
+        waitingOn --;
+        if (incompleteTasksData.length > 0) $rootScope.interviewersMap[incompleteTasksData[0].interviewer]['incomplete-tasks'] = incompleteTasksData;
+        if ((waitingOn == 0) && callback) callback();
+      });
+      waitingOn += 2;
+    }   
+  };
+  getInterviewers = function(withTasksBoolean) {
+      httpGET('/interviewer/all').then(function(returnedData) {
+        $rootScope.interviewersList = returnedData;
+        $rootScope.interviewersMap = listToMap(returnedData);
+
+        /* after getting interviewers, get their respective tasks data */
+        if(withTasksBoolean) getTasksForInterviewers(returnedData);
+      });
+  }
 
   /* functions accessible to controllers returned below */
   return {
@@ -52,20 +78,30 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       return map;
     },
 
+    getInterviewers: function(callback) { getInterviewers(false, callback); },
+    getInterviewersWithTasks: function(callback) { getInterviewers(true, callback); },
+    
+    getInterviewerWithTasks: function(interviewerID, callback) {
+      httpGET('/interviewer/?id=' + interviewerID).then(function(returnedData) {
+        $rootScope.interviewer = returnedData[0];
 
+        var waitingOn = 2;
 
-    getTasksByApplicant: function(applicantID) {
-      console.log($rootScope.tasksList);
-      return $rootScope.tasksList;
-    },
-    getInterviewers: function(callback) {
-      httpGET('/interviewer/all').then(function(returnedData) {
-        $rootScope.interviewersList = returnedData;
-        $rootScope.interviewersMap = listToMap(returnedData);
-        if (callback) callback();
+        httpGET('/interviewer/complete-tasks?id=' + interviewerID).then(function(completeTasksData) {
+          waitingOn --;
+          $rootScope.completeTasks = completeTasksData;
+          if (completeTasksData.length > 0) $rootScope.interviewer['complete-tasks'] = completeTasksData;
+          if ((waitingOn == 0) && callback) callback();
+        });
+        httpGET('/interviewer/incomplete-tasks?id=' + interviewerID).then(function(incompleteTasksData) {
+          waitingOn --;
+          $rootScope.incompleteTasks = incompleteTasksData;
+          if (incompleteTasksData.length > 0) $rootScope.interviewer['incomplete-tasks'] = incompleteTasksData;
+          if ((waitingOn == 0) && callback) callback();
+        });
       });
     },
-    getApplicants: function(callback) {
+    getApplicantsWithTasks: function(callback) {
       httpGET('/applicant/all').then(function(returnedData) {
         $rootScope.applicantsList = returnedData;
         $rootScope.applicantsMap = listToMap(returnedData);
@@ -88,9 +124,8 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         };
       });
     },
-    getApplicant: function(applicantID, callback) {
+    getApplicantWithTasks: function(applicantID, callback) {
       httpGET('/applicant/?id=' + applicantID, applicantID).then(function(returnedData) {
-        console.log(returnedData);
         $rootScope.applicant = returnedData[0];
 
         var waitingOn = 2;
@@ -99,13 +134,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
           waitingOn --;
           $rootScope.completeTasks = completeTasksData;
           if (completeTasksData.length > 0) { $rootScope.applicant['complete-tasks'] = completeTasksData; }
-          if ((waitingOn == 0) && callback) callback();
+          if (!waitingOn && callback) callback();
         });
         httpGET('/applicant/incomplete-tasks?id=' + applicantID, applicantID).then(function(incompleteTasksData) {
           waitingOn --;
           $rootScope.incompleteTasks = incompleteTasksData;
           if (incompleteTasksData.length > 0) $rootScope.applicant['incomplete-tasks'] = incompleteTasksData;
-          if ((waitingOn == 0) && callback) callback();
+          if (!waitingOn && callback) callback();
         });
       });
     },

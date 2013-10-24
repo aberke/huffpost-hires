@@ -66,7 +66,7 @@ function AllApplicantsCntl($scope, $location, APIService) {
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);
 		});
-		APIService.getApplicants(function() {
+		APIService.getApplicantsWithTasks(function() {
 			console.log('applicantsList');
 			console.log($scope.applicantsList);
 			console.log('applicantsMap');
@@ -96,7 +96,7 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 		$scope.editApplicantInfo ? updateApplicantInfoSave() : updateApplicantInfoShow();
 	}	
 	var init = function() {
-		APIService.getApplicant($routeParams.id, function() {
+		APIService.getApplicantWithTasks($routeParams.id, function() {
 			console.log('applicant:');
 			console.log($scope.applicant);
 		});
@@ -113,13 +113,24 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 function AllInterviewersCntl($scope, UIService, APIService) {
 	/* ALEX SPANGER EDITS HERE */
 
+	var init = function() {
+		APIService.getInterviewersWithTasks(function() {
+			/* your optional callback here */
+		});
+	}
+	init();
 }
 
 function InterviewerCntl($scope, $location) {
 	/* ALEX SPANGER EDITS HERE */
 
-	var init = function() {
+	$scope.completeTasks;
+	$scope.incompleTasks;
 
+	var init = function() {
+		APIService.getInterviewerWithTasks(function() {
+			/* optional callback here */
+		});
 	}
 	init();
 }
