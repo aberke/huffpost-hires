@@ -3,7 +3,9 @@
   (:require [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]))
 
-(def db (System/getenv "DATABASE_URL"))
+(def db (if (System/getenv "DEVELOPMENT")
+			(System/getenv "DATABASE_URL")
+			(System/getenv "HEROKU_POSTGRESQL_MAROON_URL")))
 
 ; Tasks are the glue between Applicants and Interviewers.  
 ; Each task has a relation to an Interviewer and an Applicant
