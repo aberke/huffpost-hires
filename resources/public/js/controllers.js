@@ -4,7 +4,8 @@ function MainCntl($scope, $location, UIService, APIService) {
 
 	$scope.interviewersMap; //= {0:interviewer1,1:interviewer2,2:interviewer3};
 	$scope.interviewersList; //= [interviewer1, interviewer2, interviewer3];
-	
+	$scope.interviewer;
+
 	$scope.applicantsList;
 	$scope.applicantsMap; 
 	$scope.applicant;
@@ -60,17 +61,13 @@ function AllApplicantsCntl($scope, $location, APIService) {
 
 
 	var init = function() {
+		APIService.getApplicantsWithTaskCount(function() {
+			console.log('applicants list');
+			console.log($scope.applicantsList);
+		});
 		APIService.getInterviewers(function() {
-			console.log('Interviewers List:');
-			console.log($scope.interviewersList);
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);
-		});
-		APIService.getApplicantsWithTasks(function() {
-			console.log('applicantsList');
-			console.log($scope.applicantsList);
-			console.log('applicantsMap');
-			console.log($scope.applicantsMap);
 		});
 	}
 	init();
@@ -114,7 +111,7 @@ function AllInterviewersCntl($scope, UIService, APIService) {
 	/* ALEX SPANGER EDITS HERE */
 
 	var init = function() {
-		APIService.getInterviewersWithTasks(function() {
+		APIService.getInterviewersWithTaskCount(function() {
 			/* your optional callback here */
 		});
 	}
