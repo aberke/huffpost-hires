@@ -6,19 +6,40 @@
 
 
 
-;; /api/interviewer/all
+;; /api/interviewer/all?task-count=true/false
 (defn interviewers-all
-	"Returns All Interviewers in Database in json"
-	[]
-	(println "api/interviewers-all")
-	(models/query-json ["select * from interviewers order by name"]))
+	"Returns All Interviewers in Database in json 
+	and optionally adds count of complete_tasks and incomplete_tasks.
+	Dope ass SQL queries courtesy of Mike Adler"
+	[params]
+	(println (str "api/interviewers-all with params:" params))
+	(if (= (params :task-count) "true")
+		(models/query-json ["SELECT i.*, 
+								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
+								SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) AS incomplete_tasks,
+								COUNT(t.completed) AS total_tasks 
+								FROM interviewers i 
+								LEFT JOIN tasks t ON i.id=t.interviewer 
+								GROUP BY i.id;"])
+		(models/query-json ["select * from interviewers order by name"])))
 
-;; /api/applicant/all
+;; /api/applicant/all?task-count=true/false
 (defn applicants-all
-	"Returns All Interviewers in Database in json"
-	[]
-	(println "api/applicants-all")
-	(models/query-json ["select * from applicants"]))
+	"Returns All Interviewers in Database in json 
+	optionally adds count of complete_tasks and incomplete_tasks.
+	Dope ass SQL queries courtesy of Mike Adler"
+	[params]
+	(println (str "api/applicants-all with params:" params))
+	(if (= (params :task-count) "true")
+		(models/query-json ["SELECT a.*, 
+								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
+								SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) AS incomplete_tasks,
+								COUNT(t.completed) AS total_tasks 
+								FROM applicants a 
+								LEFT JOIN tasks t ON a.id=t.applicant 
+								GROUP BY a.id;"])
+		(models/query-json ["select * from applicants order by asof"])))
+
 
 ;; /api/applicant/?id='applicantID'
 (defn applicant
@@ -64,7 +85,7 @@
 	(println (str "api/handle-get-request-applicant with route: " route "; params: " params))
 	(case route
 		"" (applicant params)
-		"all" (applicants-all)
+		"all" (applicants-all params)
 		"complete-tasks" (complete-tasks-by-applicant params)
 		"incomplete-tasks" (incomplete-tasks-by-applicant params)
 		(str "Invalid api request to /api/applicant/" route)))
@@ -77,7 +98,7 @@
 
 	(case route
 		"" (interviewer params)
-		"all" (interviewers-all)
+		"all" (interviewers-all params)
 		"complete-tasks" (complete-tasks-by-interviewer params)
 		"incomplete-tasks" (incomplete-tasks-by-interviewer params)
 		(str "Invalid api request to /api/interviewer/" route)))
