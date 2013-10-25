@@ -55,17 +55,27 @@
 	(println (str "api/interviewer with params:" params))
 	(models/query-json [(str "SELECT * FROM interviewers WHERE id=" (params :id))]))
 
+;; /api/applicant/tasks?id='applicantID'
+(defn tasks-by-applicant
+	"Returns all tasks for applicant"
+	[params]
+	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id))]))
+
 ;; /api/applicant/complete-tasks?id='applicantID'
 (defn complete-tasks-by-applicant
 	"Returns all completed tasks for applicant"
 	[params]
-	(println (str "/api/applicant/complete-tasks with params:" params))
 	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=1")]))
 
-;; /api/applicant/incomplete-tasks?id='applicantID'
+;; /api/interviewer/incomplete-tasks?id='applicantID'
 (defn incomplete-tasks-by-applicant
 	[params]
 	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=0")]))
+
+;; /api/interviewer/tasks?id='applicantID'
+(defn tasks-by-interviewer
+	[params]
+	(models/query-json [(str "select * from tasks WHERE interviewer=" (params :id))]))
 
 ;; /api/interviewer/complete-tasks?id='interviewID'
 (defn complete-tasks-by-interviewer
@@ -86,6 +96,7 @@
 	(case route
 		"" (applicant params)
 		"all" (applicants-all params)
+		"tasks" (tasks-by-applicant params)
 		"complete-tasks" (complete-tasks-by-applicant params)
 		"incomplete-tasks" (incomplete-tasks-by-applicant params)
 		(str "Invalid api request to /api/applicant/" route)))
@@ -99,6 +110,7 @@
 	(case route
 		"" (interviewer params)
 		"all" (interviewers-all params)
+		"tasks" (tasks-by-interviewer params)
 		"complete-tasks" (complete-tasks-by-interviewer params)
 		"incomplete-tasks" (incomplete-tasks-by-interviewer params)
 		(str "Invalid api request to /api/interviewer/" route)))
