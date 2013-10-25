@@ -1,6 +1,6 @@
 ;; Many thanks to https://github.com/diamondap/ring-sample
 (ns huffpost-hires.models
-  (:require [cheshire.core :as json]
+  	(:require [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]))
 
 (def db (if (System/getenv "DEVELOPMENT")
@@ -21,57 +21,63 @@
 (defn make-table-applicants
 	"Create the Applicants Table in our database."
 	[]
+	(println (str "db: " db))
 	(try (jdbc/with-connection db
+		(println "0")
 		(jdbc/create-table :applicants
-						[:id :integer]
-						[:name :string]
-						[:goalie :integer] ;; id of interviewer -- relationship
-						[:email :string]
-						[:role :string]
-						[:phone :string]
-						[:resume :string] ;; for now it can be a hyperlink to a googledoc
-						[:asof :string] ;; JSON date created in javascript clientside
-						[:pass :integer] ; 0/1 boolean
-						[:completed :integer])) ; 0/1 boolean
+						[:id :serial "PRIMARY KEY"]
+						[:name "varchar(100)"]
+						[:goalie :numeric] ;; id of interviewer -- relationship
+						[:email "varchar(50)"]
+						[:position "varchar(50)"]
+						[:phone "varchar(11)"]
+						[:resume "varchar(180)"] ;; for now it can be a hyperlink to a googledoc
+						[:asof "date not null default CURRENT_DATE"] ;; JSON date created in javascript clientside
+						[:pass :numeric] ; 0/1 boolean
+						[:completed :numeric])) ; 0/1 boolean
 		(catch Exception e 
-			(println (str "EXCEPTION in make-table-applicants: " e)))))
+			(println (str "EXCEPTION in make-table-applicants: " e))
+			(.printStackTrace (.getCause e)))))
 
 (defn init-table-applicants
   []
   (make-table-applicants)
   (println "Initializing Applicants Table.")
-	(jdbc/with-connection db
+	(try (jdbc/with-connection db
 		(jdbc/insert-records :applicants
-			{:id 1 
+			{:id 1
 				:name "Alex Berke"
 				:goalie 1
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
-				:role "Developer"
+				:position "Developer"
 				:resume "www.google.com"
-				:asof "2013-10-22T20:02:02.920Z"
+				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
-			{:id 2 
+			{:id 2
 				:name "Angelina Jolie"
 				:goalie 2
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
-				:role "Developer"
+				:position "Developer"
 				:resume "www.google.com"
-				:asof "2013-10-22T20:02:02.920Z"
+				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1
 				:completed 0}
-			{:id 3 
+			{:id 3
 				:name "Mila Kunis"
 				:goalie 3
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
-				:role "Developer"
+				:position "Developer"
 				:resume "www.google.com"
-				:asof "2013-10-22T20:02:02.920Z"
+				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1 ; 0/1 boolean
-				:completed 0}))) ; 0/1 boolean
+				:completed 0})) ; 0/1 boolean
+		(catch Exception e
+			(println (str "EXCEPTION in init-table-applicants: " e))
+			(.printStackTrace (.getCause e)))))
 
 (defn make-table-interviewers
 	"Creating the Interviewers Table in our database."
@@ -79,32 +85,36 @@
 	(println "Making the Interviewers Table in database.")
 	(try (jdbc/with-connection db
 		(jdbc/create-table :interviewers
-						[:id :integer]
-						[:name :string]
-						[:email :string]
-						[:phone :string]))
+						[:id :serial "PRIMARY KEY"]
+						[:name "varchar(80)"]
+						[:email "varchar(80)"]
+						[:phone "varchar(11)"]))
 		(catch Exception e 
-			(println (str "EXCEPTION in make-table-interviewers: " e)))))
+			(println (str "EXCEPTION in make-table-interviewers: " e))
+			(.printStackTrace (.getCause e)))))
 
 (defn init-table-interviewers
 	"Fill Interviewers table with data"
 	[]
 	(make-table-interviewers)
 	(println "Initializing Interviewers table")
-	(jdbc/with-connection db
+	(try (jdbc/with-connection db
 		(jdbc/insert-records :interviewers
-			{:id 1 
+			{:id 1
 				:name "Fred Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}
-			{:id 2 
+			{:id 2
 				:name "Alice Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}
-			{:id 3 
+			{:id 3
 				:name "Amy Flintstone"
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"})))
+				:email "alexandra.berke@huffingtonpost.com"}))
+		(catch Exception e
+			(println (str "EXCEPTION in init-table-interviewers: " e))
+			(.printStackTrace (.getCause e)))))
 
 (defn make-table-tasks
 	"Create the Tasks Table in our databse"
@@ -112,22 +122,25 @@
 	(println "Making Tasks Table in database.")
 	(try (jdbc/with-connection db
 		(jdbc/create-table :tasks
-				[:id :integer]
-				[:applicant :integer] ; id of applicant -- relationship
-				[:interviewer :integer] ; id of interviewer assigned to task -- relationship
-				[:title :string]
-				[:feedback :string]
-				[:date :string] ; JSON date created in javascript clientside
-				[:feedback_due :string] ; JSON date created in javascript clientside
-				[:completed :integer] ; 0/1 boolean
-				[:pass :integer])))) ; 0/1 boolean
+				[:id :serial "PRIMARY KEY"]
+				[:applicant :serial "references applicants (id)"] ; id of applicant -- relationship
+				[:interviewer :serial "references interviewers (id)"] ; id of interviewer assigned to task -- relationship
+				[:title :text]
+				[:feedback :text]
+				[:date "varchar(180)"] ; JSON date created in javascript clientside
+				[:feedback_due "varchar(180)"] ; JSON date created in javascript clientside
+				[:completed :numeric] ; 0/1 boolean
+				[:pass :numeric]))
+		(catch Exception e 
+			(println (str "EXCEPTION in make-table-tasks: " e))
+			(.printStackTrace (.getCause e))))) ; 0/1 boolean
 
 (defn init-table-tasks
 	"Fill Tasks table with dummy data"
 	[]
 	(make-table-tasks)
 	(println "Initializing Tasks table")
-	(jdbc/with-connection db
+	(try (jdbc/with-connection db
 		(jdbc/insert-records :tasks
 			{:id 1
 				:applicant 1
@@ -165,7 +178,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 4
+			{:id 5
 				:applicant 2
 				:interviewer 2
 				:title "Phone screen"
@@ -174,7 +187,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 4
+			{:id 6
 				:applicant 3
 				:interviewer 3
 				:title "Phone screen"
@@ -182,7 +195,10 @@
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 0
-				:pass 1})))
+				:pass 1}))
+		(catch Exception e
+			(println (str "EXCEPTION in init-table-tasks: " e))
+			(.printStackTrace (.getCause e)))))
 
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
