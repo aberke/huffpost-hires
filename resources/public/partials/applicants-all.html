@@ -3,9 +3,10 @@
 
     <div id="applicants-container" class="panel panel-primary">
         <div class="panel-heading">
-            <button id="add-applicant-button" ng-click="addNewPressed()" class="add-btn btn btn-success">+</button>
+            <!-- Button trigger modal -->
+            <button id="add-applicant-button" onclick="$('#newApplicantModal').modal('show');" class="add-btn btn btn-success">+</button>
             <span>Applicants</span>
-            <input class='search' id='search-applicants' type="search" ng-model="applicants_filter" placeholder="search applicants" />
+            <input class='search' id='search-applicants' type="search" ng-model="applicants_filter" placeholder="TODO: MAKE THIS FILTER" />
         </div>
 
         <div class="panel-body">
@@ -20,18 +21,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-show="addNew==true">
-                        <td><input type='text' placeholder='Full name' ng-model='new_applicant.name'></td>
-                        <td><input type='text' placeholder='Position' ng-model='new_applicant.position'></td>
-                        <td>
-                            <select ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
-                                <option value="">-select-</option>
-                            </select>
-                        </td>
-                        <td><button id="add-applicant" ng-click="addApplicant(new_applicant)" class="btn btn-success">Add</button></td>
-                    </tr>
-
-                    <tr ng-repeat="applicant in applicantsList | filter:applicants_filter | orderBy:'asof':true">
+                    <tr ng-repeat="applicant in applicantsList | filter:applicants_filter | orderBy:'asof'">
                         <td class="applicant-name"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></td>
                         <td class="applicant-position">{{applicant.position}}</td>
                         <td class="applicant-goalie">{{interviewersMap[applicant.goalie].name}}</td>
@@ -41,5 +31,32 @@
             </table>
         </div>
     </div>
+
+  <!-- New Applicant Modal -->
+  <div class="modal fade" id="newApplicantModal" ng-model="new_applicant" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addApplicant(new_applicant)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New Applicant</h2>
+        </div>
+        <div class="modal-body">
+                        <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
+                        <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>
+                        <span class='new-input-container'>Goalie: <select required ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
+                            <option value="">-select-</option>
+                        </select></span>
+                        <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_applicant.phone'></span>
+                        <span class='new-input-container'>Email: <input type='email' placeholder='angie.jolie@gmail.com'></span>
+                        <span class='new-input-container'>Link to resume: <input type='text' placeholder='www.linkToSharedGoogleDrive.com' ng-model='new_applicant.resume'></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CLOSE</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
 </div>
 

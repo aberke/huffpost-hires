@@ -1,5 +1,5 @@
 
-function MainCntl($scope, $location, UIService, APIService) {
+function MainCntl($scope, $location, BasicService, APIService) {
 	$scope.domain = window.location.origin;
 
 	$scope.interviewersMap; //= {0:interviewer1,1:interviewer2,2:interviewer3};
@@ -21,14 +21,14 @@ function MainCntl($scope, $location, UIService, APIService) {
 		});
 	}
 
-	$scope.showAddNew = function() {
-		$scope.addNew = false;
-		$('#add-applicant-button').text('+');
-	}
-	$scope.hideAddNew = function() {
-		$scope.addNew = true;
-		$('#add-applicant-button').text('-');
-	}
+	// $scope.showAddNew = function() {
+	// 	$scope.addNew = false;
+	// 	$('#add-applicant-button').text('+');
+	// }
+	// $scope.hideAddNew = function() {
+	// 	$scope.addNew = true;
+	// 	$('#add-applicant-button').text('-');
+	// }
 
 	$scope.addNewPressed = function(){ $scope.addNew ? $scope.showAddNew() : $scope.hideAddNew(); }
 
@@ -43,19 +43,27 @@ function HomeCntl($scope){
 	}
 	init();
 }
-function AllApplicantsCntl($scope, $location, APIService) {
+function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 
 
 
 	$scope.addApplicant = function(new_applicant) {
 		console.log('new_applicant:');
 		console.log(new_applicant);
+		$('#newApplicantModal').modal('hide');
+
+		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
 
 		new_applicant.goalie = new_applicant.goalie.id;
 		/* TODO -- POST TO SERVER */
-		$scope.applicants[new_applicant.id] = new_applicant;
+		APIService.postNewApplicant(new_applicant, function() {
+			console.log('callback for postNewApplicant');
+		});
+
+		$scope.applicantsMap[new_applicant.id] = new_applicant;
+		$scope.applicantsList.push(new_applicant);
+
 		$scope.new_applicant = null;
-		$scope.hideAddNew();
 	}
 
 
@@ -112,7 +120,7 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 	init();
 }
 
-function AllInterviewersCntl($scope, UIService, APIService) {
+function AllInterviewersCntl($scope, BasicService, APIService) {
 	/* ALEX SPANGER EDITS HERE */
 
 	var init = function() {

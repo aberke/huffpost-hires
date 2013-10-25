@@ -70,6 +70,10 @@ h3 input{
 	width: 70%;
 	margin: auto;
 }
+.small-btn {
+	padding: 5px;
+	font-size: 11px;
+}
 
 .add-btn{
 	font-size: 22px;
@@ -88,6 +92,34 @@ h3 input{
 	float: right;
 }
 
+/********** New modal *****************/
+#newApplicantModal .modal-content{
+  background: url(../img/la-fleur-vintage-floral.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+.modal-header{
+	color: white;
+}
+.modal-body {
+	background-color: #F0F0F0;
+}
+.modal-footer{
+	margin: 0;
+}
+.new-input-container{
+	margin: auto;
+	width: 90%;
+	display: block;
+	padding: 10px 50px;
+	font-weight: bold;
+	color: gray;
+}
+.new-input-container input, .new-input-container select{
+	float: right;
+}
 
 
 /***** Applicants *****/

@@ -219,6 +219,12 @@
 		(jdbc/drop-table :tasks))
 		(catch Exception e (println (str "EXCEPTION in drop-tables: " e)))))
 
+
+;; ***************** config above ***************************************
+
+
+
+
 (defn query
 	"Executes a query. Returns a vector of results. Each item in the vector
 	is a hash, keyed by column name. Param sql must be a vector. To execute

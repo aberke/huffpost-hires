@@ -4,7 +4,7 @@
     <div id='applicant-info' class='row'>
         <div class="index-half-left col-xs-5 col-md-5 text-left">
             <h3><span ng-show='editApplicantInfo==false'>{{applicant.name}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.name'></h3>
-            <p><em>Position:</em> <span ng-show='editApplicantInfo==false'>{{applicant.position}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.role'></p>
+            <p><em>Position:</em> <span ng-show='editApplicantInfo==false'>{{applicant.position}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.position'></p>
             <p><em>Goalie:</em> <span ng-show='editApplicantInfo==false'>{{interviewersMap[applicant.goalie].name}}</span>
                 <select ng-show='editApplicantInfo==true' ng-model="applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
                     <option value="applicant.goalie">-select-</option>
@@ -15,7 +15,7 @@
             <button id='updateApplicantInfo-btn' ng-click="updateApplicantInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
             <a href=''>View Resume</a>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
-            <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phonenumber'></p>
+            <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phone'></p>
         </div>
     </div>
 
@@ -30,16 +30,17 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Task</th>
                         <th>Date</th>
                         <th>Assignee</th>
                         <th>Feedback Due</th>
                         <th>Feedback</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-show="addNew==true">
+                        <td><button id="add-task" ng-click="addTask()" class="btn btn-success">POST</button></td>
                         <td><input type='text' placeholder='Task name' ng-model='new_task.name'></td>
                         <td><input type='text' placeholder='Role' ng-model='new_task.role'></td>
                         <td>
@@ -47,10 +48,10 @@
                                 <option value="">-select-</option>
                             </select>
                         </td>
-                        <td><button id="add-task" ng-click="addTask()" class="btn btn-success">Add</button></td>
                     </tr>
 
                     <tr ng-repeat="task in totalTasks | orderBy:'date'">
+                        <td><button id="add-task" ng-click="editTask()" class="btn btn-warning small-btn">EDIT</button></td>
                         <td class="task-title"><a href="/applicant/{{applicant.id}}">{{task.title}}</a></td>
                         <td class="task-date">{{task.date | date:'MM/dd/yyyy @ h:mma'}}</td>
                         <td class="task-assignee">{{interviewersMap[task.interviewer].name}}</td>

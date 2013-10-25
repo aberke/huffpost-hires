@@ -7,6 +7,7 @@
             [ring.middleware.stacktrace :as trace]
             [ring.middleware.session :as session]
             [ring.middleware.session.cookie :as cookie]
+            [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
@@ -45,7 +46,7 @@
        (drawbridge req))
 
   (GET "/api/*/*" [] api/handle-get-request)
-  (POST "/api/*/*" [] api/handle-post-request)
+  (POST "/api/applicant" [] api/handle-post-request)
   (PUT "/api/*/*" [] api/handle-put-request)
   (DELETE "/api/*/*" [] api/handle-delete-request)
   (GET "/api" []
@@ -78,6 +79,7 @@
                          ((if (env :production)
                             wrap-error-page
                             trace/wrap-stacktrace))
+                         params/wrap-params
                          (site {:session {:store store}}))
                      {:port port :join? false})))
 

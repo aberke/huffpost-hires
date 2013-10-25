@@ -4,10 +4,10 @@
 ;; Handles routing api requests
 
 
+;; ******************************* GET requests below ******************************
 
-
-;; /api/interviewer/all?task-count=true/false
-(defn interviewers-all
+;; GET /api/interviewer/all?task-count=true/false
+(defn get-interviewers-all
 	"Returns All Interviewers in Database in json 
 	and optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
@@ -23,8 +23,8 @@
 								GROUP BY i.id;"])
 		(models/query-json ["select * from interviewers order by name"])))
 
-;; /api/applicant/all?task-count=true/false
-(defn applicants-all
+;; GET /api/applicant/all?task-count=true/false
+(defn get-applicants-all
 	"Returns All Interviewers in Database in json 
 	optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
@@ -41,15 +41,15 @@
 		(models/query-json ["select * from applicants order by asof"])))
 
 
-;; /api/applicant/?id='applicantID'
-(defn applicant
+;; GET /api/applicant/?id='applicantID'
+(defn get-applicant
 	"Returns specified applicant"
 	[request]
 	(println (str "api/appicant with request:" request))
 	(models/query-json [(str "SELECT * FROM applicants WHERE id=" (request :id))]))
 
-;; /api/interviewer/?id='interviewerID'
-(defn interviewer
+;; GET /api/interviewer/?id='interviewerID'
+(defn get-interviewer
 	"Returns specified interviewer"
 	[params]
 	(println (str "api/interviewer with params:" params))
@@ -94,8 +94,8 @@
 	[route params] ; route == * in the GET request
 	(println (str "api/handle-get-request-applicant with route: " route "; params: " params))
 	(case route
-		"" (applicant params)
-		"all" (applicants-all params)
+		"" (get-applicant params)
+		"all" (get-applicants-all params)
 		"tasks" (tasks-by-applicant params)
 		"complete-tasks" (complete-tasks-by-applicant params)
 		"incomplete-tasks" (incomplete-tasks-by-applicant params)
@@ -108,8 +108,8 @@
 	[route params] ; route == * in the GET request
 
 	(case route
-		"" (interviewer params)
-		"all" (interviewers-all params)
+		"" (get-interviewer params)
+		"all" (get-interviewers-all params)
 		"tasks" (tasks-by-interviewer params)
 		"complete-tasks" (complete-tasks-by-interviewer params)
 		"incomplete-tasks" (incomplete-tasks-by-interviewer params)
@@ -128,9 +128,22 @@
 			"interviewer" (handle-get-request-interviewer route-suffix params)
 			"Invalid api request")))
 
+;; ******************************* GET requests above ******************************
+
+;; POST /api/applicant
+(defn post-applicant-new
+	[params]
+	(println (str "post-applicant-new with params: " params)))
+
 (defn handle-post-request
 	[request]
-	(println "TODO: handle-post-request"))
+	(println "TODO: handle-post-request")
+	(println request)
+	(println "(:data request)")
+	(println (:data request))
+	(println "(:params request)")
+	(println (:params request))
+	"TODO")
 
 (defn handle-put-request
 	[request]

@@ -1,6 +1,15 @@
-HiresApp.factory('UIService', function($rootScope) {
+HiresApp.factory('BasicService', function($rootScope) {
 
   return {
+    formatPhonenumber: function(phonenumber) {
+      if (phonenumber == undefined || phonenumber == null || phonenumber == '') {
+        return '';
+      }
+
+      phonenumber = phonenumber.split(/[- ]/).join('');
+      if (phonenumber[0] !== '1') phonenumber = '1' + phonenumber;
+      return phonenumber;
+    },
   }
 });
 
@@ -14,10 +23,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
   http = function(method, url, data) {
     var deferred = $q.defer();
+    console.log('HTTP WITH DATA:');
+    console.log($.param(data || {}));
     $http({
       method: method,
       url: '/api' + url,
-      data: (data || {}),
+      data: $.param(data || {}),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     })
     .success(function(returnedData){
       deferred.resolve(returnedData);
@@ -139,6 +151,12 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
           if (incompleteTasksData.length > 0) $rootScope.applicant['incomplete-tasks'] = incompleteTasksData;
           if (!waitingOn && callback) callback();
         });
+      });
+    },
+    postNewApplicant: function(new_applicant, callback) {
+      httpPOST('/applicant', new_applicant).then(function(returnedData) {
+        console.log('postNewApplicant returned:');
+        console.log(returnedData);
       });
     },
 
