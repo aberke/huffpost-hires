@@ -78,6 +78,7 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 
 	$scope.completeTasks;
 	$scope.incompleTasks;
+	$scope.totalTasks;
 
 	var updateApplicantInfoShow = function(){
 		$scope.editApplicantInfo = true;
@@ -96,6 +97,10 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 		APIService.getApplicantWithTasks($routeParams.id, function() {
 			console.log('applicant:');
 			console.log($scope.applicant);
+			console.log('tasks');
+			console.log($scope.totalTasks);
+			console.log($scope.completeTasks);
+			console.log($scope.incompleteTasks);
 		});
 		APIService.getInterviewers(function() {
 			console.log('Interviewers List:');
@@ -125,7 +130,7 @@ function InterviewerCntl($scope, $location) {
 	$scope.incompleTasks;
 
 	var init = function() {
-		APIService.getInterviewerWithTasks(function() {
+		APIService.getInterviewerWithTasks($routeParams.id, function() {
 			/* optional callback here */
 		});
 	}

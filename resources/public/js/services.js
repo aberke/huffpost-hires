@@ -119,8 +119,14 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       httpGET('/applicant/?id=' + applicantID, applicantID).then(function(returnedData) {
         $rootScope.applicant = returnedData[0];
 
-        var waitingOn = 2;
+        var waitingOn = 3;
 
+        httpGET('/applicant/tasks?id=' + applicantID, applicantID).then(function(tasksData) {
+          waitingOn --;
+          $rootScope.totalTasks = tasksData;
+          if (tasksData.length > 0) $rootScope.applicant['total-tasks'] = tasksData;
+          if (!waitingOn && callback) callback();
+        });
         httpGET('/applicant/complete-tasks?id=' + applicantID, applicantID).then(function(completeTasksData) {
           waitingOn --;
           $rootScope.completeTasks = completeTasksData;
