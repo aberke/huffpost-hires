@@ -4,7 +4,7 @@
     <div id='applicant-info' class='row'>
         <div class="index-half-left col-xs-5 col-md-5 text-left">
             <h3><span ng-show='editApplicantInfo==false'>{{applicant.name}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.name'></h3>
-            <p><em>Role:</em> <span ng-show='editApplicantInfo==false'>{{applicant.role}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.role'></p>
+            <p><em>Position:</em> <span ng-show='editApplicantInfo==false'>{{applicant.position}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.role'></p>
             <p><em>Goalie:</em> <span ng-show='editApplicantInfo==false'>{{interviewersMap[applicant.goalie].name}}</span>
                 <select ng-show='editApplicantInfo==true' ng-model="applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
                     <option value="applicant.goalie">-select-</option>
@@ -15,7 +15,7 @@
             <button id='updateApplicantInfo-btn' ng-click="updateApplicantInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
             <a href=''>View Resume</a>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
-            <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phonenumber}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phonenumber'></p>
+            <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phonenumber'></p>
         </div>
     </div>
 
@@ -50,11 +50,12 @@
                         <td><button id="add-task" ng-click="addTask()" class="btn btn-success">Add</button></td>
                     </tr>
 
-                    <tr ng-repeat="task in completeTasks | orderBy:'date'">
+                    <tr ng-repeat="task in totalTasks | orderBy:'date'">
                         <td class="task-title"><a href="/applicant/{{applicant.id}}">{{task.title}}</a></td>
-                        <td class="task-date">{{applicant.role}}</td>
-                        <td class="task-assignee">{{task.interviewer}}</td>
-                        <td class="task-feedback-due">{{task.feedback_due}}</td>
+                        <td class="task-date">{{task.date | date:'MM/dd/yyyy @ h:mma'}}</td>
+                        <td class="task-assignee">{{interviewersMap[task.interviewer].name}}</td>
+                        <td class="task-feedback-due">{{task.feedback_due | date:'MM/dd/yyyy @ h:mma'}}</td>
+                        <td class="task-feedback-due">{{task.feedback}}</td>
                     </tr>
                 </tbody>
             </table>
