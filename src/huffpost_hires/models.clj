@@ -44,40 +44,76 @@
   (make-table-applicants)
   (println "Initializing Applicants Table.")
 	(try (jdbc/with-connection db
-		(jdbc/insert-records :applicants
-			{:id 1
-				:name "Alex Berke"
+		(println (jdbc/insert-records :applicants
+			{:name "Alex Berke"
 				:goalie 1
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
 				:position "Developer"
 				:resume "www.google.com"
-				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
-			{:id 2
-				:name "Angelina Jolie"
+			{:name "Angelina Jolie"
 				:goalie 2
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
 				:position "Developer"
 				:resume "www.google.com"
-				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1
 				:completed 0}
-			{:id 3
-				:name "Mila Kunis"
+			{:name "Mila Kunis"
 				:goalie 3
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
 				:position "Developer"
 				:resume "www.google.com"
-				;:asof "2013-10-22T20:02:02.920Z"
 				:pass 1 ; 0/1 boolean
-				:completed 0})) ; 0/1 boolean
+				:completed 0}))) ; 0/1 boolean
 		(catch Exception e
 			(println (str "EXCEPTION in init-table-applicants: " e))
-			(.printStackTrace (.getCause e)))))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+(defn delete-applicant
+	"Deletes and applicant given id
+	Must first delete all their tasks"
+	[applicant-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["applicant=?" applicant-id])
+    	(jdbc/delete-rows :applicants ["id=?" applicant-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-applicant: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+(defn insert-applicant
+	[name goalie phone email position resume]
+	(try (jdbc/with-connection db
+		(jdbc/insert-record :applicants
+			{:name name
+				:goalie goalie
+				:phone phone
+				:email email
+				:position position
+				:resume resume
+				:pass 1 ; 0/1 boolean
+				:completed 0}) ; 0/1 boolean)
+				true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in insert-applicant: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+(defn execute-sql
+  "Executes a sql statement. Param sql is a sql string and the following args
+   are seqs of parameters to be bound to the sql statement."
+  [sql & params]
+  (try
+  	(println (str "sql: " sql ", params: " params))
+    (jdbc/with-connection db
+      (jdbc/do-prepared sql params))
+    (catch Throwable t (prn sql) (throw t))))
 
 (defn make-table-interviewers
 	"Creating the Interviewers Table in our database."
@@ -100,21 +136,31 @@
 	(println "Initializing Interviewers table")
 	(try (jdbc/with-connection db
 		(jdbc/insert-records :interviewers
-			{:id 1
-				:name "Fred Flintstone"
+			{:name "Fred Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}
-			{:id 2
-				:name "Alice Flintstone"
+			{:name "Alice Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}
-			{:id 3
-				:name "Amy Flintstone"
+			{:name "Amy Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}))
 		(catch Exception e
 			(println (str "EXCEPTION in init-table-interviewers: " e))
 			(.printStackTrace (.getCause e)))))
+
+(defn delete-interviewer
+	"Deletes interviewer with given id
+	Must first delete all their tasks"
+	[interviewer-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["interviewer=?" interviewer-id])
+    	(jdbc/delete-rows :interviewers ["id=?" interviewer-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-interviewer: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
 
 (defn make-table-tasks
 	"Create the Tasks Table in our databse"
@@ -142,8 +188,7 @@
 	(println "Initializing Tasks table")
 	(try (jdbc/with-connection db
 		(jdbc/insert-records :tasks
-			{:id 1
-				:applicant 1
+			{:applicant 1
 				:interviewer 1
 				:title "Resume review"
 				:feedback "She is over qualified -- great internship at Huffpost!"
@@ -151,8 +196,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 2
-				:applicant 2
+			{:applicant 2
 				:interviewer 2
 				:title "Resume review"
 				:feedback "She is over qualified -- great internship at Huffpost!"
@@ -160,8 +204,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 3
-				:applicant 3
+			{:applicant 3
 				:interviewer 1
 				:title "Resume review"
 				:feedback ""
@@ -169,8 +212,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 0
 				:pass 1}
-			{:id 4
-				:applicant 1
+			{:applicant 1
 				:interviewer 2
 				:title "Phone screen"
 				:feedback "She has such a heavy accent."
@@ -178,8 +220,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 5
-				:applicant 2
+			{:applicant 2
 				:interviewer 2
 				:title "Phone screen"
 				:feedback "She has such a heavy accent."
@@ -187,8 +228,7 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 1
 				:pass 1}
-			{:id 6
-				:applicant 3
+			{:applicant 3
 				:interviewer 3
 				:title "Phone screen"
 				:feedback ""
@@ -199,6 +239,17 @@
 		(catch Exception e
 			(println (str "EXCEPTION in init-table-tasks: " e))
 			(.printStackTrace (.getCause e)))))
+
+(defn delete-task
+	"Deletes and task given id"
+	[task-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["id=?" task-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-task: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
 
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
@@ -211,13 +262,16 @@
 	"Drop ALL of the tables"
 	[]
 	(try (jdbc/with-connection db
-		(println "Dropping the applicants table")
-		(jdbc/drop-table :applicants)
+		;; must drop tasks table first because it depends on other tables
+		(println "Dropping the tasks table")	
+		(jdbc/drop-table :tasks)
 		(println "Dropping the interviewers table")	
 		(jdbc/drop-table :interviewers)
-		(println "Dropping the tasks table")	
-		(jdbc/drop-table :tasks))
-		(catch Exception e (println (str "EXCEPTION in drop-tables: " e)))))
+		(println "Dropping the applicants table")
+		(jdbc/drop-table :applicants))
+		(catch Exception e (println (str "EXCEPTION in drop-tables: " e
+			(println (str "EXCEPTION in init-table-tasks: " e))
+			(.printStackTrace (.getCause e)))))))
 
 
 ;; ***************** config above ***************************************

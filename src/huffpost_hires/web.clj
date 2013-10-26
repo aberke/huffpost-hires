@@ -46,9 +46,9 @@
        (drawbridge req))
 
   (GET "/api/*/*" [] api/handle-get-request)
-  (POST "/api/applicant" [] api/handle-post-request)
+  (POST "/api/*" [] api/handle-post-request)
   (PUT "/api/*/*" [] api/handle-put-request)
-  (DELETE "/api/*/*" [] api/handle-delete-request)
+  (DELETE "/api/*" [] api/handle-delete-request)
   (GET "/api" []
        {:status 200
         :headers {"Content-Type" "text/plain"}

@@ -45,8 +45,6 @@ function HomeCntl($scope){
 }
 function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 
-
-
 	$scope.addApplicant = function(new_applicant) {
 		console.log('new_applicant:');
 		console.log(new_applicant);
@@ -55,9 +53,10 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
 
 		new_applicant.goalie = new_applicant.goalie.id;
-		/* TODO -- POST TO SERVER */
+		
 		APIService.postNewApplicant(new_applicant, function() {
-			console.log('callback for postNewApplicant');
+			APIService.getApplicantsWithTaskCount(function(){
+			});
 		});
 
 		$scope.applicantsMap[new_applicant.id] = new_applicant;
@@ -65,8 +64,6 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 
 		$scope.new_applicant = null;
 	}
-
-
 
 	var init = function() {
 		APIService.getApplicantsWithTaskCount(function() {
@@ -80,7 +77,7 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 	}
 	init();
 }
-function ApplicantCntl($scope, $routeParams, APIService) {
+function ApplicantCntl($scope, $routeParams, $location, APIService) {
 
 	$scope.editApplicantInfo = false;
 
@@ -100,6 +97,11 @@ function ApplicantCntl($scope, $routeParams, APIService) {
 
 	$scope.updateApplicantInfo = function(){
 		$scope.editApplicantInfo ? updateApplicantInfoSave() : updateApplicantInfoShow();
+	}
+	$scope.deleteApplicant = function() {
+		APIService.deleteApplicant($scope.applicant.id, function() {
+			$location.path('/applicants');
+		});
 	}	
 	var init = function() {
 		APIService.getApplicantWithTasks($routeParams.id, function() {

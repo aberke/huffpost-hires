@@ -1,4 +1,6 @@
 
+<a id='failApplicantInfo-btn' ng-click="deleteApplicant()" class="delete-link">DELETE</a>
+
 <div class='container main-container' id='applicant-page'>
 
     <div id='applicant-info' class='row'>
@@ -13,8 +15,9 @@
         </div>
         <div class="well index-half-right col-xs-5 col-md-5 text-left">
             <button id='updateApplicantInfo-btn' ng-click="updateApplicantInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
-            <a href=''>View Resume</a>
+            <p><em>Resume:</em> <span ng-show='editApplicantInfo==false'><a ng-href='{{applicant.resume}}'> View</a></span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.resume'></p>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
+            <button ng-show='editApplicantInfo==true' id='failApplicantInfo-btn' ng-click="failApplicant()" class="float-right btn btn-danger"><h3>FAIL</h3></button>
             <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phone'></p>
         </div>
     </div>

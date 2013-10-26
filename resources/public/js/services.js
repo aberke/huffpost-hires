@@ -23,8 +23,6 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
   http = function(method, url, data) {
     var deferred = $q.defer();
-    console.log('HTTP WITH DATA:');
-    console.log($.param(data || {}));
     $http({
       method: method,
       url: '/api' + url,
@@ -153,10 +151,38 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         });
       });
     },
+
+    /* ************** POST REQUESTS ******************/
+
     postNewApplicant: function(new_applicant, callback) {
       httpPOST('/applicant', new_applicant).then(function(returnedData) {
         console.log('postNewApplicant returned:');
         console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+
+    /* ************** DELETE REQUESTS ******************/
+
+    deleteApplicant: function(applicantID, callback) {
+      httpDELETE('/applicant', {'id': applicantID}).then(function(returnedData) {
+        console.log('deleteApplicant with ID ' + applicantID);
+        console.log(returnedData);
+        if (callback && (returnedData != "ERROR")) callback();
+      });
+    },  
+    deleteInterviewer: function(interviewerID, callback) {
+      httpDELETE('/interviewer', {'id': interviewerID}).then(function(returnedData) {
+        console.log('deleteinterviewer with ID ' + interviewerID);
+        console.log(returnedData);
+        if (callback && (returnedData != "ERROR")) callback();
+      });
+    },  
+    deleteTask: function(taskID, callback) {
+      httpDELETE('/task', {'id': taskID}).then(function(returnedData) {
+        console.log('deletetask with ID ' + taskID);
+        console.log(returnedData);
+        if (callback && (returnedData != "ERROR")) callback();
       });
     },
 

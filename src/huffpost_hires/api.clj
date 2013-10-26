@@ -1,5 +1,9 @@
 (ns huffpost-hires.api
-	(require [huffpost-hires.models :as models]))
+	(require [huffpost-hires.models :as models]
+		[huffpost-hires.util :as util]
+
+
+		[cheshire.core :as json]))
 
 ;; Handles routing api requests
 
@@ -12,7 +16,7 @@
 	and optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
 	[params]
-	(println (str "api/interviewers-all with params:" params))
+	(println (str "GET api/interviewers-all with params:" params))
 	(if (= (params :task-count) "true")
 		(models/query-json ["SELECT i.*, 
 								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
@@ -29,7 +33,7 @@
 	optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
 	[params]
-	(println (str "api/applicants-all with params:" params))
+	(println (str "GET api/applicants-all with params:" params))
 	(if (= (params :task-count) "true")
 		(models/query-json ["SELECT a.*, 
 								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
@@ -130,28 +134,53 @@
 
 ;; ******************************* GET requests above ******************************
 
+;; ******************************* POST requests below ******************************
+
+;; POST /api/interviewer
+(defn post-interviewer-new
+	[params]
+	"TODO")
+
 ;; POST /api/applicant
 (defn post-applicant-new
 	[params]
-	(println (str "post-applicant-new with params: " params)))
+	(println (str "post-applicant-new with params: " params))
+	(let [name (get params :name "") 
+						goalie (util/string->number-or-0 (get params :goalie 0))
+						phone (get params :phone "")
+						email (get params :email "")
+						position (get params :position "")
+						resume (get params :resume "")]
+		(if (models/insert-applicant name goalie phone email position resume)
+			"OK"
+			"ERROR")))
 
 (defn handle-post-request
 	[request]
-	(println "TODO: handle-post-request")
-	(println request)
-	(println "(:data request)")
-	(println (:data request))
-	(println "(:params request)")
-	(println (:params request))
-	"TODO")
+	(let [params (request :params) route (params :*)]
+		(println (str "params: " params))
+		(println (str "route: " route))
+		(case route
+			"applicant" (post-applicant-new params)
+			"interviewer" (post-interviewer-new params)
+			"Invalid POST request")))
 
 (defn handle-put-request
 	[request]
+	(println "**************** API PUT *******************")
 	(println "TODO: handle-put-request"))
 
 (defn handle-delete-request
 	[request]
-	(println "TODO: handle-delete-request"))
+	(println "**************** API DELETE *******************")
+	(let [params (request :params) route (params :*) id (util/string->number (params :id))]
+		(println (str "params: " params))
+		(println (str "route: " route))
+		(case route
+			"applicant" (if (models/delete-applicant id) "OK" "ERROR")
+			"interviewer" (if (models/delete-interviewer id) "OK" "ERROR")
+			"task" (if (models/delete-task id) "OK" "ERROR")
+			"Invalid DELETE request")))
 
 
 

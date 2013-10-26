@@ -74,6 +74,16 @@ h3 input{
 	padding: 5px;
 	font-size: 11px;
 }
+.delete-link{
+	float: right;
+	margin-right: 60px;
+	color: red;
+	text-decoration: underline;
+	font-weight: bold;
+}
+.delete-link:hover {
+	cursor: pointer;
+}
 
 .add-btn{
 	font-size: 22px;
