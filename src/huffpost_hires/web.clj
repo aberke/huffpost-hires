@@ -47,7 +47,7 @@
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
-  (PUT "/api/*/*" [] api/handle-put-request)
+  (PUT "/api/*" [] api/handle-put-request)
   (DELETE "/api/*" [] api/handle-delete-request)
   (GET "/api" []
        {:status 200

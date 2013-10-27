@@ -1,28 +1,20 @@
-.width-40{
-	max-width: 40%;
-}
-.width-60{
-	max-width: 60%;
-}
-.inline-block{
-	display: inline-block;
-}
+.red { color: red;}
+
+.width-40{ max-width: 40%; }
+.width-60{ max-width: 60%; }
+
+.inline-block{ display: inline-block; }
+div.float-left, .float-left{ float:left; }
+.text-center { text-align: center; }
+div.text-left, .text-left{ text-align: left; }
+.float-right{ float: right; }
+div.text-right, .text-right, .text-right input{ text-align: right; }
+
 em{
 	font-style: normal;
 	font-weight: bold;
 }
-div.float-left, .float-left{
-	float:left;
-}
-div.text-left, .text-left{
-	text-align: left;
-}
-.float-right{
-	float: right;
-}
-div.text-right, .text-right, .text-right input{
-	text-align: right;
-}
+
 input{
 	border-radius: 8px;
 	border: none;
@@ -112,6 +104,7 @@ h3 input{
 }
 .modal-header{
 	color: white;
+	z-index: 1;
 }
 .modal-body {
 	background-color: #F0F0F0;
@@ -133,6 +126,19 @@ h3 input{
 
 
 /***** Applicants *****/
+
+
+
+/***** Applicant *****/
+#failed-banner {
+	padding: 0;
+	margin: 0 0 40px 0;
+}
+
+
+
+
+
 
 
 

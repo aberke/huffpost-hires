@@ -33,7 +33,7 @@
 	optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
 	[params]
-	(println (str "GET api/applicants-all with params:" params))
+	
 	(if (= (params :task-count) "true")
 		(models/query-json ["SELECT a.*, 
 								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
@@ -134,6 +134,22 @@
 
 ;; ******************************* GET requests above ******************************
 
+;; ********************* HELPERS **********************
+
+(defn params->applicants-attributeMap
+	[params]
+	(println "params->applicants-attributeMap -- params: " params)
+	{:id (util/string->number (get params :id))
+		:name (get params :name "")
+		:goalie (util/string->number-or-0 (get params :goalie 0))
+		:phone (get params :phone "")
+		:email (get params :email "")
+		:position (get params :position "")
+		:resume (get params :resume "")
+		:completed (get params :completed 0)
+		:pass (get params :pass 1)})
+
+
 ;; ******************************* POST requests below ******************************
 
 ;; POST /api/interviewer
@@ -145,13 +161,9 @@
 (defn post-applicant-new
 	[params]
 	(println (str "post-applicant-new with params: " params))
-	(let [name (get params :name "") 
-						goalie (util/string->number-or-0 (get params :goalie 0))
-						phone (get params :phone "")
-						email (get params :email "")
-						position (get params :position "")
-						resume (get params :resume "")]
-		(if (models/insert-applicant name goalie phone email position resume)
+	(let [attribute-map (params->applicants-attributeMap params)]
+		(println "attribute-map: " attribute-map)
+		(if (models/insert-applicant attribute-map)
 			"OK"
 			"ERROR")))
 
@@ -168,7 +180,16 @@
 (defn handle-put-request
 	[request]
 	(println "**************** API PUT *******************")
-	(println "TODO: handle-put-request"))
+	(println "TODO: handle-put-request")
+	(let [params (request :params) 
+		route (params :*) id (util/string->number (params :id))]
+		(println (str "params: " params))
+		(println (str "route: " route))
+		(case route
+			"applicant" (if (models/update-applicant id (params->applicants-attributeMap params)) "OK" "ERROR")
+			;"interviewer" (if (models/update-interviewer id) "OK" "ERROR")
+			;"task" (if (models/delete-task id) "OK" "ERROR")
+			"Invalid DELETE request")))
 
 (defn handle-delete-request
 	[request]

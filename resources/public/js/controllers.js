@@ -91,12 +91,17 @@ function ApplicantCntl($scope, $routeParams, $location, APIService) {
 	}
 	var updateApplicantInfoSave = function() {
 		/* TODO: PUT WITH APISERVICE */
-		$scope.editApplicantInfo = false;
-		$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
+		console.log('updateApplicantInfo:');
+		console.log($scope.applicant);
+		APIService.updateApplicant($scope.applicant, function() {
+			console.log('callback');
+			$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
+			$scope.editApplicantInfo = false;
+		});
 	}
 
 	$scope.updateApplicantInfo = function(){
-		$scope.editApplicantInfo ? updateApplicantInfoSave() : updateApplicantInfoShow();
+			$scope.editApplicantInfo ? updateApplicantInfoSave() : updateApplicantInfoShow();
 	}
 	$scope.deleteApplicant = function() {
 		APIService.deleteApplicant($scope.applicant.id, function() {

@@ -188,6 +188,25 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
 
 
+    /* ************** PUT REQUESTS ******************/
+    updateApplicant: function(applicant, callback) {
+      httpPUT('/applicant', applicant).then(function(returnedData) {
+        console.log('updateApplicant returned data');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+
+
+
+
+
+
+
+
+
+
+
 
 
 

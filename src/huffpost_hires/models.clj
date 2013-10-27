@@ -74,47 +74,6 @@
 			(.printStackTrace (.getCause e))
 			false))) ;; error -- return false
 
-(defn delete-applicant
-	"Deletes and applicant given id
-	Must first delete all their tasks"
-	[applicant-id]
-  	(try (jdbc/with-connection db
-    	(jdbc/delete-rows :tasks ["applicant=?" applicant-id])
-    	(jdbc/delete-rows :applicants ["id=?" applicant-id])
-    		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-applicant: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
-
-(defn insert-applicant
-	[name goalie phone email position resume]
-	(try (jdbc/with-connection db
-		(jdbc/insert-record :applicants
-			{:name name
-				:goalie goalie
-				:phone phone
-				:email email
-				:position position
-				:resume resume
-				:pass 1 ; 0/1 boolean
-				:completed 0}) ; 0/1 boolean)
-				true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in insert-applicant: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
-
-(defn execute-sql
-  "Executes a sql statement. Param sql is a sql string and the following args
-   are seqs of parameters to be bound to the sql statement."
-  [sql & params]
-  (try
-  	(println (str "sql: " sql ", params: " params))
-    (jdbc/with-connection db
-      (jdbc/do-prepared sql params))
-    (catch Throwable t (prn sql) (throw t))))
-
 (defn make-table-interviewers
 	"Creating the Interviewers Table in our database."
 	[]
@@ -148,19 +107,6 @@
 		(catch Exception e
 			(println (str "EXCEPTION in init-table-interviewers: " e))
 			(.printStackTrace (.getCause e)))))
-
-(defn delete-interviewer
-	"Deletes interviewer with given id
-	Must first delete all their tasks"
-	[interviewer-id]
-  	(try (jdbc/with-connection db
-    	(jdbc/delete-rows :tasks ["interviewer=?" interviewer-id])
-    	(jdbc/delete-rows :interviewers ["id=?" interviewer-id])
-    		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-interviewer: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
 
 (defn make-table-tasks
 	"Create the Tasks Table in our databse"
@@ -240,17 +186,6 @@
 			(println (str "EXCEPTION in init-table-tasks: " e))
 			(.printStackTrace (.getCause e)))))
 
-(defn delete-task
-	"Deletes and task given id"
-	[task-id]
-  	(try (jdbc/with-connection db
-    	(jdbc/delete-rows :tasks ["id=?" task-id])
-    		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-task: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
-
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
   []
@@ -276,8 +211,16 @@
 
 ;; ***************** config above ***************************************
 
+;; ***************************************************************
 
-
+(defn execute-sql
+  "Executes a sql statement. Param statement is a sql string and the following args
+   are seqs of parameters to be bound to the sql statement."
+  [statement & params]
+  (try
+    (jdbc/with-connection db
+      (jdbc/do-prepared statement params))
+    (catch Throwable t (prn statement) (throw t))))
 
 (defn query
 	"Executes a query. Returns a vector of results. Each item in the vector
@@ -299,3 +242,85 @@
 	vector with [sql-string params...] or just [sql-string]."
 	[statement]
 		(json/generate-string (query statement)))
+
+; **************** UPDATE BELOW *********************************
+
+(defn update-applicant
+	"This method updates an applicant entry"
+	[attribute-map]
+
+  	(let [statement (str "UPDATE applicants "
+                              "SET name='" (attribute-map :name) 
+                              	"', goalie=" (attribute-map :goalie) 
+                              	", phone='" (attribute-map :phone)
+                              	"', email='" (attribute-map :email)
+                              	"', position='" (attribute-map :position)
+                              	"', resume='" (attribute-map :resume)
+                              	"', completed=" (attribute-map :completed)
+                              	", pass=" (attribute-map :pass) " "
+                              "WHERE id=" (attribute-map :id))]
+    	(try (execute-sql statement)
+			(catch Exception e
+				(println (str "EXCEPTION in udpate-applicant: " e))
+				(.printStackTrace (.getCause e))
+				false)))) ;; error -- return false
+
+; **************** DELETE BELOW *********************************
+
+(defn delete-task
+	"Deletes and task given id"
+	[task-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["id=?" task-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-task: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+(defn delete-interviewer
+	"Deletes interviewer with given id
+	Must first delete all their tasks"
+	[interviewer-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["interviewer=?" interviewer-id])
+    	(jdbc/delete-rows :interviewers ["id=?" interviewer-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-interviewer: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+(defn delete-applicant
+	"Deletes and applicant given id
+	Must first delete all their tasks"
+	[applicant-id]
+  	(try (jdbc/with-connection db
+    	(jdbc/delete-rows :tasks ["applicant=?" applicant-id])
+    	(jdbc/delete-rows :applicants ["id=?" applicant-id])
+    		true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in delete-applicant: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
+; **************** INSERT BELOW *********************************
+
+(defn insert-applicant
+	[attribute-map]
+	(try (jdbc/with-connection db
+		(jdbc/insert-record :applicants
+			{:name (attribute-map :name)
+				:goalie (attribute-map :goalie)
+				:phone (attribute-map :phone)
+				:email (attribute-map :email)
+				:position (attribute-map :position)
+				:resume (attribute-map :resume)
+				:pass 1 ; 0/1 boolean
+				:completed 0}) ; 0/1 boolean)
+				true) ; success
+		(catch Exception e
+			(println (str "EXCEPTION in insert-applicant: " e))
+			(.printStackTrace (.getCause e))
+			false))) ;; error -- return false
+
