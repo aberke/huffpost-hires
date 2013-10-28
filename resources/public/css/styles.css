@@ -1,4 +1,6 @@
 .red { color: red;}
+.gray {color: gray;}
+.green { color: green; }
 
 .width-40{ max-width: 40%; }
 .width-60{ max-width: 60%; }
@@ -32,6 +34,18 @@ h3 input{
 	margin: auto;
 	color: red;
 }
+tr.completed-1.failed-1{
+	background-color: rgba(0,255,0,0.2);
+}
+tr.failed-1:hover{
+	background-color: rgba(0,255,0,0.4);
+}
+tr.completed-1.failed-0{
+	background-color: rgba(255,0,0,0.2);
+}
+tr.failed-0:hover{
+	background-color: rgba(255,0,0,0.4);
+}
 .main-container{
 	margin-top: 50px;
 }
@@ -63,7 +77,7 @@ h3 input{
 	margin: auto;
 }
 .small-btn {
-	padding: 5px;
+	padding: 4px;
 	font-size: 11px;
 }
 .delete-link{
@@ -94,7 +108,7 @@ h3 input{
 	float: right;
 }
 
-/********** New modal *****************/
+/********** New/edit modal *****************/
 #newApplicantModal .modal-content{
   background: url(../img/la-fleur-vintage-floral.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
@@ -104,13 +118,22 @@ h3 input{
 }
 #newTaskModal .modal-content{
   background: url(../img/phones-pattern.jpg) repeat center center fixed; 
-/*  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;*/
+}
+#editTaskModal .modal-content{
+	background-color: black;
+}
+#editTaskModal .close{
+	color: white;
+	background-color: black;
+	opacity: 1;
 }
 #newTaskModal .modal-header{
 	color: black;
+}
+.modal-header input{
+	color: white;
+	background-color: transparent;
+	font-size: 35px;
 }
 .modal-header{
 	color: white;
@@ -130,12 +153,19 @@ h3 input{
 	font-weight: bold;
 	color: gray;
 }
-.new-input-container input, .new-input-container select{
+.new-input-container input, .new-input-container select, .new-input-container textarea{
 	float: right;
 }
 .datepicker{z-index: 1051;} /* more than the modal */
 .new-input-container input.error, .new-input-container select.error{
 	border: 1px solid red;
+}
+.task-textarea{
+	height: 70px;
+	width: 100%;
+}
+.task-textarea-container{
+	height: 100px;
 }
 /***** Applicants *****/
 
@@ -145,6 +175,10 @@ h3 input{
 #failed-banner {
 	padding: 0;
 	margin: 0 0 40px 0;
+}
+
+.task-feedback-due{
+	max-width: 300px;
 }
 
 

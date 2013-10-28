@@ -21,6 +21,7 @@ HiresApp.factory('BasicService', function($rootScope) {
 
     /* handles setting up date picker for given element */
     handleDate: function(elementID, onChangeDate) {
+      console.log(elementID)
       var nowTemp = new Date();
       var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
@@ -91,7 +92,29 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         $rootScope.interviewersMap = listToMap(returnedData);
         if (callback) callback();
       });
-  }
+  };
+  getApplicantTasks = function(applicantID, callback) {
+    var waitingOn = 3;
+
+    httpGET('/applicant/tasks?id=' + applicantID, applicantID).then(function(tasksData) {
+      waitingOn --;
+      $rootScope.totalTasks = tasksData;
+      if (tasksData.length > 0) $rootScope.applicant['total-tasks'] = tasksData;
+      if (!waitingOn && callback) callback();
+    });
+    httpGET('/applicant/complete-tasks?id=' + applicantID, applicantID).then(function(completeTasksData) {
+      waitingOn --;
+      $rootScope.completeTasks = completeTasksData;
+      if (completeTasksData.length > 0) { $rootScope.applicant['complete-tasks'] = completeTasksData; }
+      if (!waitingOn && callback) callback();
+    });
+    httpGET('/applicant/incomplete-tasks?id=' + applicantID, applicantID).then(function(incompleteTasksData) {
+      waitingOn --;
+      $rootScope.incompleteTasks = incompleteTasksData;
+      if (incompleteTasksData.length > 0) $rootScope.applicant['incomplete-tasks'] = incompleteTasksData;
+      if (!waitingOn && callback) callback();
+    });
+  };
 
   /* functions accessible to controllers returned below */
   return {
@@ -161,27 +184,7 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     getApplicantWithTasks: function(applicantID, callback) {
       httpGET('/applicant/?id=' + applicantID, applicantID).then(function(returnedData) {
         $rootScope.applicant = returnedData[0];
-
-        var waitingOn = 3;
-
-        httpGET('/applicant/tasks?id=' + applicantID, applicantID).then(function(tasksData) {
-          waitingOn --;
-          $rootScope.totalTasks = tasksData;
-          if (tasksData.length > 0) $rootScope.applicant['total-tasks'] = tasksData;
-          if (!waitingOn && callback) callback();
-        });
-        httpGET('/applicant/complete-tasks?id=' + applicantID, applicantID).then(function(completeTasksData) {
-          waitingOn --;
-          $rootScope.completeTasks = completeTasksData;
-          if (completeTasksData.length > 0) { $rootScope.applicant['complete-tasks'] = completeTasksData; }
-          if (!waitingOn && callback) callback();
-        });
-        httpGET('/applicant/incomplete-tasks?id=' + applicantID, applicantID).then(function(incompleteTasksData) {
-          waitingOn --;
-          $rootScope.incompleteTasks = incompleteTasksData;
-          if (incompleteTasksData.length > 0) $rootScope.applicant['incomplete-tasks'] = incompleteTasksData;
-          if (!waitingOn && callback) callback();
-        });
+        getApplicantTasks(applicantID, callback);
       });
     },
 
@@ -234,6 +237,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         console.log('updateApplicant returned data');
         console.log(returnedData);
         if (callback) callback();
+      });
+    },
+    updateTask: function(task, callback) {
+      httpPUT('/task', task).then(function(returnedData) {
+        console.log('updateTask returned data:');
+        console.log(returnedData);
+        getApplicantTasks(task.applicant, callback);
       });
     },
 

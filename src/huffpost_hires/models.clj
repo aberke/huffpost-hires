@@ -32,6 +32,7 @@
 						[:goalie :numeric] ;; id of interviewer -- relationship
 						[:email "varchar(50)"]
 						[:position "varchar(50)"]
+						[:referral "varchar(50)"]
 						[:phone "varchar(11)"]
 						[:resume "varchar(180)"] ;; for now it can be a hyperlink to a googledoc
 						[:asof "date not null default CURRENT_DATE"] ;; JSON date created in javascript clientside
@@ -51,23 +52,26 @@
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"
 				:position "Developer"
-				:resume "www.google.com"
+				:referral "Alexandra Berke"
+				:resume "http://www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
 			{:name "Angelina Jolie"
 				:goalie 2
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"
+				:email "angie.jj@gmail.com"
 				:position "Developer"
-				:resume "www.google.com"
+				:referral "Alexandra Berke"
+				:resume "http://www.google.com"
 				:pass 1
 				:completed 0}
 			{:name "Mila Kunis"
 				:goalie 3
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"
+				:email "mila.kunis@yahoo.com"
 				:position "Developer"
-				:resume "www.google.com"
+				:referral "Alexandra Berke"
+				:resume "http://www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0}))) ; 0/1 boolean
 		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
@@ -115,6 +119,7 @@
 				[:applicant :serial "references applicants (id)"] ; id of applicant -- relationship
 				[:interviewer :serial "references interviewers (id)"] ; id of interviewer assigned to task -- relationship
 				[:title :text]
+				[:description :text]
 				[:feedback :text]
 				[:date "varchar(180)"] ; JSON date created in javascript clientside
 				[:feedback_due "varchar(180)"] ; JSON date created in javascript clientside
@@ -133,6 +138,7 @@
 			{:applicant 1
 				:interviewer 1
 				:title "Resume review"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback "She is over qualified -- great internship at Huffpost!"
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -141,6 +147,7 @@
 			{:applicant 2
 				:interviewer 2
 				:title "Resume review"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback "She is over qualified -- great internship at Huffpost!"
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -149,6 +156,7 @@
 			{:applicant 3
 				:interviewer 1
 				:title "Resume review"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback ""
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -157,6 +165,7 @@
 			{:applicant 1
 				:interviewer 2
 				:title "Phone screen"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback "She has such a heavy accent."
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -165,6 +174,7 @@
 			{:applicant 2
 				:interviewer 2
 				:title "Phone screen"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback "She has such a heavy accent."
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -173,6 +183,7 @@
 			{:applicant 3
 				:interviewer 3
 				:title "Phone screen"
+				:description "Double check she'd fit in with the operations team based on her Ruby background."
 				:feedback ""
 				:date "2013-10-22T20:02:02.920Z"
 				:feedback_due "2013-10-22T20:02:02.920Z"
@@ -240,7 +251,6 @@
 ; **************** UPDATE BELOW *********************************
 
 (defn update-applicant
-	"This method updates an applicant entry"
 	[attribute-map]
 
   	(let [statement (str "UPDATE applicants "
@@ -249,6 +259,7 @@
                               	", phone='" (attribute-map :phone)
                               	"', email='" (attribute-map :email)
                               	"', position='" (attribute-map :position)
+                              	"', referral='" (attribute-map :referral)
                               	"', resume='" (attribute-map :resume)
                               	"', completed=" (attribute-map :completed)
                               	", pass=" (attribute-map :pass) " "
@@ -256,6 +267,22 @@
     	(try (execute-sql statement)
 			(catch Exception e (util/handle-exception "update-applicant" e))))) ;; error -- return false
 
+(defn update-task
+	[attribute-map]
+
+  	(let [statement (str "UPDATE tasks "
+                              "SET applicant=" (attribute-map :applicant) 
+                              	", interviewer=" (attribute-map :interviewer) 
+                              	", title='" (attribute-map :title)
+                              	", description='" (attribute-map :description)
+                              	"', feedback='" (attribute-map :feedback)
+                              	"', date='" (attribute-map :date)
+                              	"', feedback_due='" (attribute-map :feedback_due)
+                              	"', completed=" (attribute-map :completed)
+                              	", pass=" (attribute-map :pass) " "
+                              "WHERE id=" (attribute-map :id))]
+    	(try (execute-sql statement)
+			(catch Exception e (util/handle-exception "update-task" e))))) ;; error -- return false
 
 ; **************** DELETE BELOW *********************************
 

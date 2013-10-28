@@ -81,13 +81,51 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 
 	$scope.editApplicantInfo = false;
 	$scope.new_task = {};
+	$scope.edit_task;
 
 	$scope.completeTasks;
 	$scope.incompleTasks;
 	$scope.totalTasks;
 
-	$scope.addTask = function(new_task) {
+	var disableFailTaskBtn = function() { $('#edit-task-fail-btn').attr("disabled", "disabled"); };
+	var enableFailTaskBtn = function() { $('#edit-task-fail-btn').removeAttr('disabled', 'disabled'); };
+	var disablePassTaskBtn = function() { $('#edit-task-pass-btn').attr("disabled", "disabled"); };
+	var enablePassTaskBtn = function() { $('#edit-task-pass-btn').removeAttr('disabled', 'disabled'); };
 
+	$scope.editTask = function(task) {
+		$scope.edit_task = task;
+		$('#editTaskModal').modal('show');
+
+		if (task.completed==1 && task.pass == 0) disableFailTaskBtn();
+		if (task.completed == 1 && task.pass == 1) disablePassTaskBtn();
+	}
+	$scope.failTask = function() {
+		console.log('failTask')
+		$scope.edit_task.pass = 0;
+		$scope.edit_task.completed = 1;
+		enablePassTaskBtn();
+		disableFailTaskBtn();
+	}
+	$scope.passTask = function() {
+		console.log('passTask')
+		$scope.edit_task.pass = 1;
+		$scope.edit_task.completed = 1;
+		enableFailTaskBtn();
+		disablePassTaskBtn();
+	}
+	$scope.updateTask = function() {
+		console.log('updateTask: ');
+		console.log($scope.edit_task);
+
+		if ($scope.edit_task.interviewer && (typeof $scope.edit_task.interviewer != 'number')) {
+			$scope.edit_task.interviewer = $scope.edit_task.interviewer.id;
+		}
+		APIService.updateTask($scope.edit_task, function() {
+			$('#editTaskModal').modal('hide');
+		});
+	};
+
+	$scope.addTask = function(new_task) {
 		if( BasicService.checkInputEmpty([
 			'new-task-title', 
 			'new-task-interviewer',
@@ -100,13 +138,10 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		new_task.applicant = $scope.applicant.id;
 		new_task.interviewer = new_task.interviewer.id;
 
-		new_task.date = new_task.date.toJSON();
-		new_task.feedback_due = new_task.feedback_due.toJSON();
-
 		APIService.postNewTask(new_task, function() {
 			$scope.incompleteTasks.push(new_task);
 			$scope.totalTasks.push(new_task);
-		})
+		});
 	}
 
 	var updateApplicantInfoShow = function(){
@@ -114,7 +149,6 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		$('#updateApplicantInfo-btn').html('<h3>Save</h3>');
 	}
 	var updateApplicantInfoSave = function() {
-		/* TODO: PUT WITH APISERVICE */
 		console.log('updateApplicantInfo:');
 		console.log($scope.applicant);
 		APIService.updateApplicant($scope.applicant, function() {
@@ -153,10 +187,16 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 
 	angular.element(document).ready(function () {
 		BasicService.handleDate('new-task-date', function(date) {
-			$scope.new_task.date = date;
+			$scope.new_task.date = date.toJSON();
 		});
 		BasicService.handleDate('new-task-feedback-due', function(date) {
-			$scope.new_task.feedback_due = date;
+			$scope.new_task.feedback_due = date.toJSON();
+		});
+		BasicService.handleDate('edit-task-date', function(date) {
+			$scope.edit_task.date = date.toJSON();
+		});
+		BasicService.handleDate('edit-task-feedback-due', function(date) {
+			$scope.edit_task.feedback_due = date.toJSON();
 		});
 	});
 }

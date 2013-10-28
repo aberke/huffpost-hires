@@ -145,6 +145,7 @@
 		:phone (get params :phone "")
 		:email (get params :email "")
 		:position (get params :position "")
+		:referral (get params :referral "")
 		:resume (get params :resume "")
 		:completed (util/string->number (get params :completed 0))
 		:pass (util/string->number (get params :pass 1))})
@@ -156,6 +157,7 @@
 		:applicant (util/string->number-or-0 (get params :applicant))
 		:interviewer (util/string->number-or-0 (get params :interviewer))
 		:title (get params :title "")
+		:description (get params :description "")
 		:feedback (get params :feedback "")
 		:date (get params :date "")
 		:feedback_due (get params :feedback_due "")
@@ -172,13 +174,16 @@
 ;; POST /api/applicant
 (defn post-applicant-new
 	[params]
-	(println (str "post-applicant-new with params: " params))
-	(let [attribute-map (params->applicants-attributeMap params)]
-		(println "attribute-map: " attribute-map)
-		(if (models/insert-applicant attribute-map)
-			"OK"
-			"ERROR")))
+	(if (models/insert-applicant (params->applicants-attributeMap params))
+		"OK"
+		"ERROR"))
 
+;; POST /api/task
+(defn post-task-new
+	[params]
+	(if (models/insert-task (params->tasks-attributeMap params))
+		"OK"
+		"ERROR"))
 
 (defn handle-post-request
 	[request]
@@ -189,8 +194,10 @@
 		(case route
 			"applicant" (post-applicant-new params)
 			"interviewer" (post-interviewer-new params)
-			"task" (if (models/insert-task (params->tasks-attributeMap params)) "OK" "ERROR")
+			"task" (post-task-new params)
 			"Invalid POST request")))
+
+;; ******************************* PUT requests below ******************************
 
 (defn handle-put-request
 	[request]
@@ -201,9 +208,9 @@
 		(println (str "params: " params))
 		(println (str "route: " route))
 		(case route
-			"applicant" (if (models/update-applicant id (params->applicants-attributeMap params)) "OK" "ERROR")
+			"applicant" (if (models/update-applicant (params->applicants-attributeMap params)) "OK" "ERROR")
 			;"interviewer" (if (models/update-interviewer id) "OK" "ERROR")
-			;"task" (if (models/delete-task id) "OK" "ERROR")
+			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid DELETE request")))
 
 (defn handle-delete-request

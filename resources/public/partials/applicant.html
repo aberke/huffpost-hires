@@ -14,12 +14,13 @@
                     <option value="applicant.goalie">-select-</option>
                 </select>
             </p>
+            <p><em>Referral:</em> <span ng-show='editApplicantInfo==false'>{{applicant.referral}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.referral'></p>
         </div>
         <div id='applicant-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
             <button id='updateApplicantInfo-btn' ng-click="updateApplicantInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
             <p><em>Resume: </em> <span ng-show='editApplicantInfo==false'><a ng-href='{{applicant.resume}}'> View</a></span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.resume'></p>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
-            <button ng-show='editApplicantInfo==true' id='failApplicantInfo-btn' ng-click="applicant.pass=0" class="float-right btn btn-danger"><h5>FAIL</h5></button>
+            <button ng-show='editApplicantInfo==true' id='failApplicantInfo-btn' ng-click="applicant.pass=0; applicant.completed=1" class="float-right btn btn-danger"><h5>FAIL</h5></button>
             <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phone'></p>
         </div>
     </div>
@@ -45,24 +46,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-show="addNew==true">
-                        <td><button id="add-task" ng-click="addTask()" class="btn btn-success">POST</button></td>
-                        <td><input type='text' placeholder='Task name' ng-model='new_task.name'></td>
-                        <td><input type='text' placeholder='Role' ng-model='new_task.role'></td>
+                    <tr ng-repeat="task in totalTasks | orderBy:'date'" class="failed-{{task.pass}}">
                         <td>
-                            <select ng-model="new_task.goalie" ng-options="interviewer.name for interviewer in interviewers">
-                                <option value="">-select-</option>
-                            </select>
+                            <button ng-show="!task.edit" id="edit-task-btn" ng-click="editTask(task)" class="btn btn-warning small-btn">edit &gt;</button>
                         </td>
-                    </tr>
-
-                    <tr ng-repeat="task in totalTasks | orderBy:'date'">
-                        <td><button id="add-task" ng-click="editTask()" class="btn btn-warning small-btn">EDIT</button></td>
-                        <td class="task-title"><a href="/applicant/{{applicant.id}}">{{task.title}}</a></td>
-                        <td class="task-date">{{task.date | date:'MM/dd/yyyy @ h:mma'}}</td>
-                        <td class="task-assignee">{{interviewersMap[task.interviewer].name}}</td>
-                        <td class="task-feedback-due">{{task.feedback_due | date:'MM/dd/yyyy @ h:mma'}}</td>
-                        <td class="task-feedback-due">{{task.feedback}}</td>
+                        <td class="task-title">
+                            <span ng-show="!task.edit">{{task.title}}</span>
+                        </td>
+                        <td class="task-date">
+                            <span ng-show="!task.edit">{{task.date | date:'MM/dd/yyyy @ h:mma'}}</span>
+                        </td>
+                        <td class="task-assignee">
+                            <span ng-show="!task.edit">{{interviewersMap[task.interviewer].name}}</span>
+                        </td>
+                        <td class="task-feedback-due">
+                            <span ng-show="!task.edit">{{task.feedback_due | date:'MM/dd/yyyy'}}</span>
+                        </td>
+                        <td class="task-feedback-due">
+                            <span>{{task.feedback}}</span>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -85,10 +87,54 @@
                 </select>
             </span>
             <span class='new-input-container'>Date occurring: 
-                <input required size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-date" ng-required="new_task.date" >
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-date">
             </span>
             <span class='new-input-container'>Feedback due: 
-                <input required size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-feedback-due" ng-required="new_task.feedback_due" >
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-feedback-due">
+            </span>
+            <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='task.description' class='task-textarea'></textarea></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</div>
+
+    <!-- EDIT Task Modal -->
+  <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="updateTask()" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title"><input ng-model="edit_task.title"></h2>
+        </div>
+        <div class="modal-body">
+            <h4 class='text-center gray'>Status: 
+                <span ng-show="edit_task.pass==0" class="red text-center">FAILED</span> 
+                <span ng-show="edit_task.pass==1 && edit_task.completed==1" class="green">PASSED</span>
+                <span ng-show="edit_task.completed==0" class="gray">INCOMPLETE</span>
+            </h3>
+            <span class='new-input-container'>Interviewer assigned: 
+                <select id='new-task-interviewer' ng-model="edit_task.interviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">-select-</option>
+                </select>
+            </span>
+            <span class='new-input-container'>Date occurring: 
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-date">
+            </span>
+            <span class='new-input-container'>Feedback due: 
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due">
+            </span>
+            <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='edit_task.description' class='task-textarea'></textarea></span>
+            <span class='new-input-container task-textarea-container'>Feedback: 
+                <textarea ng-model='edit_task.feedback' class='task-textarea'></textarea>
+            </span>
+            <span class='new-input-container'>
+                <button id='edit-task-pass-btn' ng-click="passTask()" class="btn btn-default">Pass</button>
+                <button id='edit-task-fail-btn' ng-click="failTask()" class="red btn btn-default">Fail</button>
             </span>
         </div>
         <div class="modal-footer">
