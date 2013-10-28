@@ -27,7 +27,8 @@
 
     <div id="tasks-container" class="panel panel-primary">
         <div class="panel-heading">
-            <button id="add-applicant-button" ng-click="addNewPressed()" class="add-btn btn btn-success">+</button>
+            <!-- Button trigger modal -->
+            <button id="add-task-button" onclick="$('#newTaskModal').modal('show');" class="add-btn btn btn-success">+</button>
             <span>Tasks</span>
         </div>
 
@@ -67,4 +68,37 @@
             </table>
         </div>
     </div>
+
+    <!-- New Task Modal -->
+  <div class="modal fade" id="newTaskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addTask(new_task)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New Task</h2>
+        </div>
+        <div class="modal-body">
+            <span class='new-input-container'>Title: <input id='new-task-title' required type='text' size="25" placeholder='eg, phone screen' ng-model='new_task.title'></span>
+            <span class='new-input-container'>Interviewer assigned: 
+                <select required id='new-task-interviewer' ng-model="new_task.interviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">-select-</option>
+                </select>
+            </span>
+            <span class='new-input-container'>Date occurring: 
+                <input required size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-date" ng-required="new_task.date" >
+            </span>
+            <span class='new-input-container'>Feedback due: 
+                <input required size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-feedback-due" ng-required="new_task.feedback_due" >
+            </span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 </div>
+
+    <link href="lib/date-picker/datepicker.css" rel="stylesheet">
+    <script src="lib/date-picker/bootstrap-datepicker.js"></script>

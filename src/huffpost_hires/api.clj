@@ -33,7 +33,7 @@
 	optionally adds count of complete_tasks and incomplete_tasks.
 	Dope ass SQL queries courtesy of Mike Adler"
 	[params]
-	
+
 	(if (= (params :task-count) "true")
 		(models/query-json ["SELECT a.*, 
 								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
@@ -141,14 +141,26 @@
 	(println "params->applicants-attributeMap -- params: " params)
 	{:id (util/string->number (get params :id))
 		:name (get params :name "")
-		:goalie (util/string->number-or-0 (get params :goalie 0))
+		:goalie (util/string->number-or-0 (get params :goalie))
 		:phone (get params :phone "")
 		:email (get params :email "")
 		:position (get params :position "")
 		:resume (get params :resume "")
-		:completed (get params :completed 0)
-		:pass (get params :pass 1)})
+		:completed (util/string->number (get params :completed 0))
+		:pass (util/string->number (get params :pass 1))})
 
+(defn params->tasks-attributeMap
+	[params]
+	(println "params->tasks-attributeMap -- params: " params)
+	{:id (util/string->number (get params :id))
+		:applicant (util/string->number-or-0 (get params :applicant))
+		:interviewer (util/string->number-or-0 (get params :interviewer))
+		:title (get params :title "")
+		:feedback (get params :feedback "")
+		:date (get params :date "")
+		:feedback_due (get params :feedback_due "")
+		:completed (util/string->number-or-0 (get params :completed))
+		:pass (util/string->number (get params :pass 1))})
 
 ;; ******************************* POST requests below ******************************
 
@@ -167,14 +179,17 @@
 			"OK"
 			"ERROR")))
 
+
 (defn handle-post-request
 	[request]
+	(println "**************** API POST *******************")
 	(let [params (request :params) route (params :*)]
 		(println (str "params: " params))
 		(println (str "route: " route))
 		(case route
 			"applicant" (post-applicant-new params)
 			"interviewer" (post-interviewer-new params)
+			"task" (if (models/insert-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid POST request")))
 
 (defn handle-put-request

@@ -1,6 +1,39 @@
 HiresApp.factory('BasicService', function($rootScope) {
 
   return {
+
+    /* handles checking if given input or select elements are empty and colors with class 'error' if so */
+    checkInputEmpty: function(elementIDsList) {
+      /* first remove previous errors */
+      $('.error').removeClass('error');
+
+      var error = false;
+      for(var i=0; i < elementIDsList.length; i++) {
+        var elt = $('#' + elementIDsList[i]);
+        console.log(elt.val());
+        if(!elt.val()) {
+          elt.addClass('error');
+          error = true;
+        }
+      }
+      return error;
+    },
+
+    /* handles setting up date picker for given element */
+    handleDate: function(elementID, onChangeDate) {
+      var nowTemp = new Date();
+      var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+
+      var datePicker = $('#' + elementID).datepicker({
+        onRender: function(date) {
+          return date.valueOf() < now.valueOf() ? 'disabled' : ''
+        }
+      }).on('changeDate', function(ev) {
+        datePicker.hide();
+        onChangeDate(ev.date);
+      }).data('datepicker');
+    },
+
     formatPhonenumber: function(phonenumber) {
       if (phonenumber == undefined || phonenumber == null || phonenumber == '') {
         return '';
@@ -157,6 +190,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     postNewApplicant: function(new_applicant, callback) {
       httpPOST('/applicant', new_applicant).then(function(returnedData) {
         console.log('postNewApplicant returned:');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+    postNewTask: function(new_task, callback) {
+      httpPOST('/task', new_task).then(function(returnedData) {
+        console.log('postNewTask');
         console.log(returnedData);
         if (callback) callback();
       });

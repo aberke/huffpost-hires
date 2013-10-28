@@ -102,6 +102,16 @@ h3 input{
   -o-background-size: cover;
   background-size: cover;
 }
+#newTaskModal .modal-content{
+  background: url(../img/phones-pattern.jpg) repeat center center fixed; 
+/*  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;*/
+}
+#newTaskModal .modal-header{
+	color: black;
+}
 .modal-header{
 	color: white;
 	z-index: 1;
@@ -123,8 +133,10 @@ h3 input{
 .new-input-container input, .new-input-container select{
 	float: right;
 }
-
-
+.datepicker{z-index: 1051;} /* more than the modal */
+.new-input-container input.error, .new-input-container select.error{
+	border: 1px solid red;
+}
 /***** Applicants *****/
 
 

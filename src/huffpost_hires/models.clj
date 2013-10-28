@@ -1,7 +1,9 @@
 ;; Many thanks to https://github.com/diamondap/ring-sample
 (ns huffpost-hires.models
   	(:require [cheshire.core :as json]
-            [clojure.java.jdbc :as jdbc]))
+            [clojure.java.jdbc :as jdbc]
+
+            [huffpost-hires.util :as util]))
 
 (def db (if (System/getenv "DEVELOPMENT")
 			(System/getenv "DATABASE_URL")
@@ -35,9 +37,8 @@
 						[:asof "date not null default CURRENT_DATE"] ;; JSON date created in javascript clientside
 						[:pass :numeric] ; 0/1 boolean
 						[:completed :numeric])) ; 0/1 boolean
-		(catch Exception e 
-			(println (str "EXCEPTION in make-table-applicants: " e))
-			(.printStackTrace (.getCause e)))))
+		(catch Exception e (util/handle-exception "make-table-applicants" e)))) ;; error -- return false
+
 
 (defn init-table-applicants
   []
@@ -69,10 +70,8 @@
 				:resume "www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0}))) ; 0/1 boolean
-		(catch Exception e
-			(println (str "EXCEPTION in init-table-applicants: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
+		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
+
 
 (defn make-table-interviewers
 	"Creating the Interviewers Table in our database."
@@ -84,9 +83,8 @@
 						[:name "varchar(80)"]
 						[:email "varchar(80)"]
 						[:phone "varchar(11)"]))
-		(catch Exception e 
-			(println (str "EXCEPTION in make-table-interviewers: " e))
-			(.printStackTrace (.getCause e)))))
+		(catch Exception e (util/handle-exception "make-table-interviewers" e)))) ;; error -- return false
+
 
 (defn init-table-interviewers
 	"Fill Interviewers table with data"
@@ -104,9 +102,8 @@
 			{:name "Amy Flintstone"
 				:phone "12223334444"
 				:email "alexandra.berke@huffingtonpost.com"}))
-		(catch Exception e
-			(println (str "EXCEPTION in init-table-interviewers: " e))
-			(.printStackTrace (.getCause e)))))
+		(catch Exception e (util/handle-exception "init-table-interviewers" e)))) ;; error -- return false
+
 
 (defn make-table-tasks
 	"Create the Tasks Table in our databse"
@@ -123,9 +120,8 @@
 				[:feedback_due "varchar(180)"] ; JSON date created in javascript clientside
 				[:completed :numeric] ; 0/1 boolean
 				[:pass :numeric]))
-		(catch Exception e 
-			(println (str "EXCEPTION in make-table-tasks: " e))
-			(.printStackTrace (.getCause e))))) ; 0/1 boolean
+		(catch Exception e (util/handle-exception "make-table-tasks" e)))) ;; error -- return false
+
 
 (defn init-table-tasks
 	"Fill Tasks table with dummy data"
@@ -182,9 +178,8 @@
 				:feedback_due "2013-10-22T20:02:02.920Z"
 				:completed 0
 				:pass 1}))
-		(catch Exception e
-			(println (str "EXCEPTION in init-table-tasks: " e))
-			(.printStackTrace (.getCause e)))))
+		(catch Exception e (util/handle-exception "init-table-tasks" e)))) ;; error -- return false
+
 
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
@@ -204,9 +199,8 @@
 		(jdbc/drop-table :interviewers)
 		(println "Dropping the applicants table")
 		(jdbc/drop-table :applicants))
-		(catch Exception e (println (str "EXCEPTION in drop-tables: " e
-			(println (str "EXCEPTION in init-table-tasks: " e))
-			(.printStackTrace (.getCause e)))))))
+		(catch Exception e (util/handle-exception "drop-tables" e)))) ;; error -- return false
+
 
 
 ;; ***************** config above ***************************************
@@ -260,10 +254,8 @@
                               	", pass=" (attribute-map :pass) " "
                               "WHERE id=" (attribute-map :id))]
     	(try (execute-sql statement)
-			(catch Exception e
-				(println (str "EXCEPTION in udpate-applicant: " e))
-				(.printStackTrace (.getCause e))
-				false)))) ;; error -- return false
+			(catch Exception e (util/handle-exception "update-applicant" e))))) ;; error -- return false
+
 
 ; **************** DELETE BELOW *********************************
 
@@ -273,10 +265,7 @@
   	(try (jdbc/with-connection db
     	(jdbc/delete-rows :tasks ["id=?" task-id])
     		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-task: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
+		(catch Exception e (util/handle-exception "delete-task" e))))
 
 (defn delete-interviewer
 	"Deletes interviewer with given id
@@ -286,25 +275,45 @@
     	(jdbc/delete-rows :tasks ["interviewer=?" interviewer-id])
     	(jdbc/delete-rows :interviewers ["id=?" interviewer-id])
     		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-interviewer: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
+		(catch Exception e (util/handle-exception "delete-interviewer" e)))) ;; error -- return false
 
 (defn delete-applicant
 	"Deletes and applicant given id
-	Must first delete all their tasks"
+	Must first delete all their tasks since tasks reference applicant"
 	[applicant-id]
   	(try (jdbc/with-connection db
     	(jdbc/delete-rows :tasks ["applicant=?" applicant-id])
     	(jdbc/delete-rows :applicants ["id=?" applicant-id])
     		true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in delete-applicant: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
+		(catch Exception e (util/handle-exception "delete-applicant" e)))) ;; error -- return false
 
 ; **************** INSERT BELOW *********************************
+
+(defn insert-task
+	[attribute-map]
+	(try (jdbc/with-connection db
+		(jdbc/insert-record :tasks
+			{:applicant (attribute-map :applicant)
+				:interviewer (attribute-map :interviewer)
+				:title (attribute-map :title)
+				:date (attribute-map :date)
+				:feedback (attribute-map :feedback)
+				:feedback_due (attribute-map :feedback_due)
+				:completed 0
+				:pass 1})
+		true)
+	(catch Exception e (util/handle-exception "insert-task" e))))
+
+(defn insert-interviewer
+	[attribute-map]
+	(try (jdbc/with-connection db
+		(jdbc/insert-record :interviewers
+			{:name (attribute-map :name)
+				:phone (attribute-map :phone)
+				:email (attribute-map :email)})
+				true) ; success
+		(catch Exception e (util/handle-exception "insert-interviewer" e)))) ;; error -- return false
+
 
 (defn insert-applicant
 	[attribute-map]
@@ -319,8 +328,4 @@
 				:pass 1 ; 0/1 boolean
 				:completed 0}) ; 0/1 boolean)
 				true) ; success
-		(catch Exception e
-			(println (str "EXCEPTION in insert-applicant: " e))
-			(.printStackTrace (.getCause e))
-			false))) ;; error -- return false
-
+		(catch Exception e (util/handle-exception "insert-applicant" e)))) ;; error -- return false

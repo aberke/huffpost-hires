@@ -77,13 +77,37 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 	}
 	init();
 }
-function ApplicantCntl($scope, $routeParams, $location, APIService) {
+function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService) {
 
 	$scope.editApplicantInfo = false;
+	$scope.new_task = {};
 
 	$scope.completeTasks;
 	$scope.incompleTasks;
 	$scope.totalTasks;
+
+	$scope.addTask = function(new_task) {
+
+		if( BasicService.checkInputEmpty([
+			'new-task-title', 
+			'new-task-interviewer',
+			'new-task-date',
+			'new-task-feedback-due'
+		])) { return false; }
+
+		$('#newTaskModal').modal('hide');
+
+		new_task.applicant = $scope.applicant.id;
+		new_task.interviewer = new_task.interviewer.id;
+
+		new_task.date = new_task.date.toJSON();
+		new_task.feedback_due = new_task.feedback_due.toJSON();
+
+		APIService.postNewTask(new_task, function() {
+			$scope.incompleteTasks.push(new_task);
+			$scope.totalTasks.push(new_task);
+		})
+	}
 
 	var updateApplicantInfoShow = function(){
 		$scope.editApplicantInfo = true;
@@ -125,6 +149,16 @@ function ApplicantCntl($scope, $routeParams, $location, APIService) {
 		});
 	}
 	init();
+
+
+	angular.element(document).ready(function () {
+		BasicService.handleDate('new-task-date', function(date) {
+			$scope.new_task.date = date;
+		});
+		BasicService.handleDate('new-task-feedback-due', function(date) {
+			$scope.new_task.feedback_due = date;
+		});
+	});
 }
 
 function AllInterviewersCntl($scope, BasicService, APIService) {

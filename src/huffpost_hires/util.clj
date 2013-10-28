@@ -12,3 +12,11 @@
 	[n]
 	(let [n (if (string? n) (read-string n) n)]
 		(if (number? n) n nil)))
+
+
+(defn handle-exception
+	"Helper to print out stack trace upon exception"
+	[function exception]
+	(println (str "EXCEPTION in function " function ": " exception))
+		(.printStackTrace (.getCause exception))
+		false)
