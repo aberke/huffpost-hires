@@ -9,5 +9,5 @@ pom.xml
 /target
 /.lein-*
 .nrepl-port
-
 env.sh
+/env.sh
