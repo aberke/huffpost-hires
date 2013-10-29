@@ -1,4 +1,5 @@
-(ns huffpost-hires.util)
+(ns huffpost-hires.util
+	(require [clojure.string :as string-helper]))
 
 
 (defn string->number-or-0
@@ -20,3 +21,9 @@
 	(println (str "EXCEPTION in function " function ": " exception))
 		(.printStackTrace (.getCause exception))
 		false)
+
+(defn string->sql-safe
+	"Helper to use before inserting item in a SQL statement
+	Escapes special characters, namely, ' "
+	[string]
+	(string-helper/replace string #"'" "''"))

@@ -274,7 +274,7 @@
                               "SET applicant=" (attribute-map :applicant) 
                               	", interviewer=" (attribute-map :interviewer) 
                               	", title='" (attribute-map :title)
-                              	", description='" (attribute-map :description)
+                              	"', description='" (attribute-map :description)
                               	"', feedback='" (attribute-map :feedback)
                               	"', date='" (attribute-map :date)
                               	"', feedback_due='" (attribute-map :feedback_due)
