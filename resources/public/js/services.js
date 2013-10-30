@@ -201,7 +201,7 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       httpPOST('/task', new_task).then(function(returnedData) {
         console.log('postNewTask');
         console.log(returnedData);
-        if (callback) callback();
+        getApplicantTasks(new_task.applicant, callback);
       });
     },
 

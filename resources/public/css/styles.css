@@ -2,6 +2,7 @@
 .gray {color: gray;}
 .green { color: green; }
 
+.width-10 { max-width: 10px; }
 .width-40{ max-width: 40%; }
 .width-60{ max-width: 60%; }
 
@@ -11,6 +12,8 @@ div.float-left, .float-left{ float:left; }
 div.text-left, .text-left{ text-align: left; }
 .float-right{ float: right; }
 div.text-right, .text-right, .text-right input{ text-align: right; }
+
+.cursor-pointer{ cursor: pointer; }
 
 em{
 	font-style: normal;
@@ -168,6 +171,81 @@ tr.failed-0:hover{
 	height: 100px;
 }
 /***** Applicants *****/
+
+#applicants-heading{
+	display: block;
+	border-bottom: 3px solid gray;
+	padding: 10px;
+	margin-bottom: 30px;
+}
+#applicants-heading .add-btn{
+	margin-bottom: 10px;
+}
+#applicants-heading-title{
+	display: inline-block;
+}
+
+#stages-container{
+	margin-bottom: 50px;
+	padding-bottom: 30px;
+	border-bottom: 3px solid gray;
+}
+
+.stage-column{
+	width: 16%;
+	display: inline-block;
+	vertical-align: top;
+}
+.stage-column .well{
+	padding: 10px;
+}
+.stage-column-title-container{
+	display: block;
+	height: 50px;
+	text-align: center;
+}
+.stage-column-title-container h5{
+	font-weight: bold;
+}
+.stage-column-inner{
+	height: 350px;
+	overflow-y: scroll;
+}
+.applicant-card{
+	margin: 5px 0;
+	background-color: white;
+	border: 1px solid rgba(255,165,0,0.5);
+	padding: 5px;
+	font-size: 12px;
+	cursor: pointer;
+}
+.applicant-card:hover{
+	background-color: rgba(255,165,0,0.3);
+}
+.applicant-card-name, .applicant-card-position, .applicant-card-goalie{
+	display: inline-block;
+	width: 100%;
+}
+.applicant-card-name{
+	font-weight: 500;
+	text-transform: uppercase;
+	color: purple;
+}
+.applicant-card-position{
+	font-size: 8px;
+	text-transform: uppercase;
+	color: gray;
+}
+.applicant-card-goalie{
+	font-size: 12px;
+}
+.applicant-card-goalie img{
+	float: right;
+}
+
+
+
+
 
 
 

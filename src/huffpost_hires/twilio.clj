@@ -37,7 +37,7 @@
              (get-in exception-info [:object :body]))))
              (vector :status :message :code))))))
 
-(defn send-text
+(defn send-sms
   "Send an SMS message"
   [to-number body]
   (let [url (make-request-url) msg {:From from-number :To to-number :Body body}]

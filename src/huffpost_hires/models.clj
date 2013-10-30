@@ -33,6 +33,7 @@
 						[:email "varchar(50)"]
 						[:position "varchar(50)"]
 						[:referral "varchar(50)"]
+						[:notes :text]
 						[:phone "varchar(11)"]
 						[:resume "varchar(180)"] ;; for now it can be a hyperlink to a googledoc
 						[:asof "date not null default CURRENT_DATE"] ;; JSON date created in javascript clientside
@@ -53,6 +54,7 @@
 				:email "alexandra.berke@huffingtonpost.com"
 				:position "Developer"
 				:referral "Alexandra Berke"
+				:notes "Recent graduate"
 				:resume "http://www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
@@ -61,6 +63,7 @@
 				:phone "12223334444"
 				:email "angie.jj@gmail.com"
 				:position "Developer"
+				:notes "Junior developer -- previously worked as a designer.  She also has a busy home life."
 				:referral "Alexandra Berke"
 				:resume "http://www.google.com"
 				:pass 1
@@ -70,6 +73,7 @@
 				:phone "12223334444"
 				:email "mila.kunis@yahoo.com"
 				:position "Developer"
+				:notes "Recent graduate"
 				:referral "Alexandra Berke"
 				:resume "http://www.google.com"
 				:pass 1 ; 0/1 boolean
@@ -259,6 +263,7 @@
                               	", phone='" (attribute-map :phone)
                               	"', email='" (attribute-map :email)
                               	"', position='" (attribute-map :position)
+                              	"', notes='" (attribute-map :notes)
                               	"', referral='" (attribute-map :referral)
                               	"', resume='" (attribute-map :resume)
                               	"', completed=" (attribute-map :completed)
@@ -351,6 +356,7 @@
 				:phone (attribute-map :phone)
 				:email (attribute-map :email)
 				:position (attribute-map :position)
+				:notes (attribute-map :notes)
 				:resume (attribute-map :resume)
 				:pass 1 ; 0/1 boolean
 				:completed 0}) ; 0/1 boolean)

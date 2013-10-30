@@ -93,6 +93,8 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 	var enablePassTaskBtn = function() { $('#edit-task-pass-btn').removeAttr('disabled', 'disabled'); };
 
 	$scope.editTask = function(task) {
+		console.log('editTask:');
+		console.log(task);
 		$scope.edit_task = task;
 		$('#editTaskModal').modal('show');
 
@@ -122,9 +124,14 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		}
 		APIService.updateTask($scope.edit_task, function() {
 			$('#editTaskModal').modal('hide');
+			$('.popover-hover').popover({trigger: 'hover'});
 		});
 	};
-
+	$scope.deleteTask = function(task) {
+		APIService.deleteTask(task.id, function() {
+			console.log('deleteTask callback')
+		});
+	}
 	$scope.addTask = function(new_task) {
 		if( BasicService.checkInputEmpty([
 			'new-task-title', 
@@ -138,10 +145,7 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		new_task.applicant = $scope.applicant.id;
 		new_task.interviewer = new_task.interviewer.id;
 
-		APIService.postNewTask(new_task, function() {
-			$scope.incompleteTasks.push(new_task);
-			$scope.totalTasks.push(new_task);
-		});
+		APIService.postNewTask(new_task);
 	}
 
 	var updateApplicantInfoShow = function(){
@@ -174,6 +178,8 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 			console.log($scope.totalTasks);
 			console.log($scope.completeTasks);
 			console.log($scope.incompleteTasks);
+			
+			$('.popover-hover').popover({trigger: 'hover'});
 		});
 		APIService.getInterviewers(function() {
 			console.log('Interviewers List:');

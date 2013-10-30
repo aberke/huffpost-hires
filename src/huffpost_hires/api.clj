@@ -145,6 +145,7 @@
 		:phone (get params :phone "")
 		:email (get params :email "")
 		:position (util/string->sql-safe (get params :position ""))
+		:notes (util/string->sql-safe (get params :notes ""))
 		:referral (util/string->sql-safe (get params :referral ""))
 		:resume (get params :resume "")
 		:completed (util/string->number (get params :completed 0))
