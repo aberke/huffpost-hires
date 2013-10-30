@@ -13,6 +13,7 @@ Running Locally
 * Download jvm and leiningen so that you can call ```lein```
 * clone the repo
 * Install postgres and create a table called huffpost_hires that is accessible from the url ```postgresql://localhost:5432/huffpost_hires```
+* Get the environment variables file from Alex ```env.sh``` and store it in the root directory.
 * Within the root folder of huffpost-hires setup the environment ```$ source env.sh```
 * Start up the REPL ```$ lein repl```
 * Build the tables
