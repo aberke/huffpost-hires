@@ -50,7 +50,7 @@ tr.failed-0:hover{
 	background-color: rgba(255,0,0,0.4);
 }
 .main-container{
-	margin-top: 50px;
+	margin-top: 30px;
 }
 .dropdown-item {
 	padding: 4px 10px;
@@ -170,12 +170,49 @@ tr.failed-0:hover{
 .task-textarea-container{
 	height: 100px;
 }
+#new-applicant-status{
+	text-align: center;
+}
+#new-applicant-status .status{
+	display: inline-block;
+	color: orange;
+}
+#new-applicant-status select{
+	width: 15px;
+	color: orange;
+	border: none;
+	background-color: black;
+}
+
 /***** Applicants *****/
+
+#no-pending-container { height: 50px; }
+#pending-container{
+	width: 100%;
+}
+#pending-container .title{
+	text-decoration: underline;
+	text-align: right;
+	margin-right: 20px;
+}
+.pending-applicant{
+	display: block;
+	width: 100%;
+	float: right;
+	margin: 3px;
+}
+.pending-applicant a{
+	background-color: yellow;
+	padding: 3px;
+	text-align: right;
+	float: right;
+	cursor: pointer;
+}
 
 #applicants-heading{
 	display: block;
 	border-bottom: 3px solid gray;
-	padding: 10px;
+	padding: 0 10px 10px 10px;
 	margin-bottom: 30px;
 }
 #applicants-heading .add-btn{

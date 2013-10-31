@@ -10,6 +10,21 @@
 
 ;; ******************************* GET requests below ******************************
 
+;; GET /api/stage/all
+(defn get-stages-all
+	"Returns all stages"
+	[params]
+	(models/query-json ["SELECT * FROM stages ORDER BY number"]))
+
+;; GET /api/stage/applicants?stage=number&pass=0/1
+(defn get-applicants-by-stage
+	"Returns all applicants for given stage and passing status
+	Defaults to stage=0 (pending) and pass=1 (passing true)"
+	[params]
+	(models/query-json [(str "SELECT * FROM applicants 
+							WHERE stage=" (get params :stage 0)
+							" AND pass=" (get params :pass 1))]))
+
 ;; GET /api/interviewer/all?task-count=true/false
 (defn get-interviewers-all
 	"Returns All Interviewers in Database in json 
@@ -26,6 +41,13 @@
 								LEFT JOIN tasks t ON i.id=t.interviewer 
 								GROUP BY i.id;"])
 		(models/query-json ["select * from interviewers order by name"])))
+
+
+;; GET /api/applicant/rejected
+(defn get-applicants-rejected
+	"Returns all rejected applicants, ordered by asof date"
+	[params]
+	(models/query-json ["SELECT * FROM applicants WHERE pass=0 ORDER BY asof"]))
 
 ;; GET /api/applicant/all?task-count=true/false
 (defn get-applicants-all
@@ -92,6 +114,16 @@
 	[params]
 	(models/query-json [(str "select * from tasks where interviewer=" (params :id) " AND completed=0")]))
 
+(defn handle-get-request-stage
+	"Routing helper for handle-get-request:
+	Called upon GET request to url /api/stage/*"
+	[route params]
+	(println (str "api/handle-get-request-stage with route: " route "; params: " params))
+	(case route
+		"all" (get-stages-all params)
+		"applicants" (get-applicants-by-stage params)
+		(str "Invalid api request to /api/stage/" route)))
+
 (defn handle-get-request-applicant
 	"routing helper for handle-get-request:
 	Called upon GET request to url /api/applicant/*"
@@ -100,6 +132,7 @@
 	(case route
 		"" (get-applicant params)
 		"all" (get-applicants-all params)
+		"rejected" (get-applicants-rejected params)
 		"tasks" (tasks-by-applicant params)
 		"complete-tasks" (complete-tasks-by-applicant params)
 		"incomplete-tasks" (incomplete-tasks-by-applicant params)
@@ -128,6 +161,7 @@
 		(println (str "params: " params))
 		(println (str "route:" route))
 		(case route-prefix
+			"stage" (handle-get-request-stage route-suffix params)
 			"applicant" (handle-get-request-applicant route-suffix params)
 			"interviewer" (handle-get-request-interviewer route-suffix params)
 			"Invalid api request")))
@@ -141,6 +175,7 @@
 	(println "params->applicants-attributeMap -- params: " params)
 	{:id (util/string->number (get params :id))
 		:name (util/string->sql-safe (get params :name ""))
+		:stage (util/string->number-or-0 (get params :stage 0))
 		:goalie (util/string->number-or-0 (get params :goalie))
 		:phone (get params :phone "")
 		:email (get params :email "")

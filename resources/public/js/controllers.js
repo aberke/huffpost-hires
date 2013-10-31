@@ -13,24 +13,13 @@ function MainCntl($scope, $location, BasicService, APIService) {
 	$scope.tasksMap;
 	$scope.tasksList;
 
-	$scope.addNew = false;
+	$scope.stagesList;
 
 	$scope.interviewerByName = function(name) {
 		$.each($scope.interviewersList, function(){
 			if ($(this).name === name) return $(this);
 		});
 	}
-
-	// $scope.showAddNew = function() {
-	// 	$scope.addNew = false;
-	// 	$('#add-applicant-button').text('+');
-	// }
-	// $scope.hideAddNew = function() {
-	// 	$scope.addNew = true;
-	// 	$('#add-applicant-button').text('-');
-	// }
-
-	$scope.addNewPressed = function(){ $scope.addNew ? $scope.showAddNew() : $scope.hideAddNew(); }
 
 	var init = function() {
 		$('.popover-hover').popover({trigger: 'hover'});	
@@ -45,31 +34,53 @@ function HomeCntl($scope){
 }
 function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 
+	$scope.rejectedApplicants = [];
+
+	$scope.stagesWithApplicants = {}; //= {stage_number: {name: [applicants]}};
+
 	$scope.addApplicant = function(new_applicant) {
-		console.log('new_applicant:');
-		console.log(new_applicant);
 		$('#newApplicantModal').modal('hide');
 
+		if (new_applicant.stage) { new_applicant.stage = new_applicant.stage.number; }
 		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
-
 		new_applicant.goalie = new_applicant.goalie.id;
+
+		console.log('new_applicant:');
+		console.log(new_applicant);
 		
 		APIService.postNewApplicant(new_applicant, function() {
-			APIService.getApplicantsWithTaskCount(function(){
-			});
+			getApplicants();
 		});
 
-		$scope.applicantsMap[new_applicant.id] = new_applicant;
-		$scope.applicantsList.push(new_applicant);
+		// $scope.applicantsMap[new_applicant.id] = new_applicant;
+		// $scope.applicantsList.push(new_applicant);
 
 		$scope.new_applicant = null;
 	}
 
-	var init = function() {
-		APIService.getApplicantsWithTaskCount(function() {
-			console.log('applicants list');
+	var getApplicants = function(){
+		APIService.getStagesWithApplicants($scope.stagesWithApplicants);
+
+		APIService.getRejectedApplicants(function() {
+			console.log('got applicants rejected:')
+			console.log($scope.rejectedApplicants);
+		});
+
+		APIService.getAllApplicants(function() {
+			console.log('got all applicants:');
 			console.log($scope.applicantsList);
 		});
+	}
+
+	var init = function() {
+		console.log($scope.stagesWithApplicants);
+
+		getApplicants();
+
+		// APIService.getApplicantsWithTaskCount(function() {
+		// 	console.log('applicants list');
+		// 	console.log($scope.applicantsList);
+		// });
 		APIService.getInterviewers(function() {
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);

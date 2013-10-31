@@ -2,6 +2,11 @@
 <div class='container main-container' id='applicants-all'>
 
     <span id="applicants-heading">
+        <div ng-show="!stagesWithApplicants.0.applicants.length" id="no-pending-container"></div>
+        <div ng-show="stagesWithApplicants.0.applicants.length" id="pending-container">
+            <h4 class="title">Pending</h4>
+            <span class="pending-applicant" ng-repeat="applicant in stagesWithApplicants.0.applicants"><a>{{applicant.name}}</a></span>
+        </div>
             <!-- Button trigger modal -->
             <button onclick="$('#newApplicantModal').modal('show');" class="add-btn btn btn-success">+</button>
             <h2 id="applicants-heading-title">Applicants</h2>
@@ -10,150 +15,10 @@
 <div id="stages-container" class="row">
 
 
-  <div class="stage-column">
+  <div class="stage-column" ng-repeat="stage in stagesWithApplicants" ng-show="stage.name!='Pending'&&stage.name!='Hired'">
     <span class="stage-column-title-container">
-        <h4>6</h4>
-        <h5>Homework Sent</h5>
-    </span>
-    <div class="stage-column-inner well">
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-    </div>
-    </div>
-  <div class="stage-column">
-    <span class="stage-column-title-container">
-        <h4>6</h4>
-        <h5>Homework Recieved</h5>
-    </span>
-    <div class="stage-column-inner well">
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-    </div>
-    </div>
-  <div class="stage-column">
-    <span class="stage-column-title-container">
-        <h4>6</h4>
-        <h5>Phone Screen Scheduled</h5>
-    </span>
-    <div class="stage-column-inner well">
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-    </div>
-    </div>
-  <div class="stage-column">
-    <span class="stage-column-title-container">
-        <h4>0</h4>
-        <h5>Phone Screen Completed</h5>
-    </span>
-    <div class="stage-column-inner well">
-    </div>
-    </div>
-  <div class="stage-column">
-    <span class="stage-column-title-container">
-        <h4>6</h4>
-        <h5>In Person Scheduled</h5>
-    </span>
-    <div class="stage-column-inner well">
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-    </div>
-</div>
-  <div class="stage-column">
-    <span class="stage-column-title-container">
-        <h4>6</h4>
-        <h5>In Person Completed</h5>
+        <h4>{{stage.applicants.length}}</h4>
+        <h5>{{stage.name}}</h5>
     </span>
     <div class="stage-column-inner well">
         <div class="applicant-card">
@@ -202,17 +67,14 @@
                     <tr>
                         <th>Name</th>
                         <th>Position</th>
-                        <th>Goalie</th>
-                        <th>Tasks</th>
-                        <th></th>
+                        <th>Last Stage</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="applicant in applicantsList | filter:applicants_filter | orderBy:'asof'" class="completed-{{applicant.completed}}">
+                    <tr ng-repeat="applicant in rejectedApplicants | filter:applicants_filter | orderBy:'asof'" class="completed-{{applicant.completed}}">
                         <td class="applicant-name"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></td>
                         <td class="applicant-position">{{applicant.position}}</td>
-                        <td class="applicant-goalie">{{interviewersMap[applicant.goalie].name}}</td>
-                        <td class="applicant-tasks-ratio">{{applicant.complete_tasks}}/{{applicant.total_tasks}}</td>
+                        <td class="last-stage">{{applicant.stage}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -233,17 +95,12 @@
                     <tr>
                         <th>Name</th>
                         <th>Position</th>
-                        <th>Goalie</th>
-                        <th>Tasks</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="applicant in applicantsList | filter:applicants_filter | orderBy:'asof'" class="completed-{{applicant.completed}}">
+                    <tr ng-repeat="applicant in stagesWithApplicants.100.applicants | filter:applicants_filter | orderBy:'asof'" class="completed-{{applicant.completed}}">
                         <td class="applicant-name"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></td>
                         <td class="applicant-position">{{applicant.position}}</td>
-                        <td class="applicant-goalie">{{interviewersMap[applicant.goalie].name}}</td>
-                        <td class="applicant-tasks-ratio">{{applicant.complete_tasks}}/{{applicant.total_tasks}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -271,7 +128,7 @@
                         <th>Name</th>
                         <th>Position</th>
                         <th>Goalie</th>
-                        <th>Tasks</th>
+                        <th>Stage</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -280,7 +137,7 @@
                         <td class="applicant-name"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></td>
                         <td class="applicant-position">{{applicant.position}}</td>
                         <td class="applicant-goalie">{{interviewersMap[applicant.goalie].name}}</td>
-                        <td class="applicant-tasks-ratio">{{applicant.complete_tasks}}/{{applicant.total_tasks}}</td>
+                        <td class="applicant-tasks-ratio">{{stagesWithApplicants[applicant.stage].name}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -296,6 +153,10 @@
           <h2 class="modal-title">New Applicant</h2>
         </div>
         <div class="modal-body">
+            <div id='new-applicant-status' >
+                <h3 class="status">Pending</h3>
+                <select class="cursor-pointer" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
+            </div>
                         <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
                         <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>
                         <span class='new-input-container'>Goalie: <select required ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
@@ -306,7 +167,7 @@
                         <span class='new-input-container'>Link to resume: <input type='text' placeholder='www.linkToSharedGoogleDrive.com' ng-model='new_applicant.resume'></span>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">CLOSE</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
           <button type="submit" class="btn btn-success">SAVE</button>
         </div>
       </form><!-- /.modal-content -->

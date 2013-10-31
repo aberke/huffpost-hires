@@ -12,6 +12,8 @@
 ; Tasks are the glue between Applicants and Interviewers.  
 ; Each task has a relation to an Interviewer and an Applicant
 
+;			 Stage
+;			   |
 ; 		  Applicant
 ; 		 /	|	\   \
 ; 	Task  Task  Task  Task
@@ -19,16 +21,49 @@
 ; 		Interviewer
 
 
+(defn make-table-stages
+	"Create the stages table -- an applicant goes through stages"
+	[]
+	(try (jdbc/with-connection db
+		(jdbc/create-table :stages
+						[:id :serial "PRIMARY KEY"]
+						[:number :numeric]
+						[:name "varchar(50)"]))
+	(catch Exception e (util/handle-exception "make-table-stages" e))))
+
+(defn init-table-stages
+	[]
+	(make-table-stages)
+	(println "Initializing Stages Table")
+		(try (jdbc/with-connection db
+			(jdbc/insert-records :stages
+				{:number 0
+					:name "Pending"
+				} {:number 1
+					:name "Homework Sent"
+				} {:number 2 
+					:name "Homework Recieved"
+				} {:number 3
+					:name "Phone Screen Scheduled"
+				} {:number 4
+					:name "Phone Screen Completed"
+				} {:number 5
+					:name "In Person Scheduled"
+				} {:number 6
+					:name "In Person Completed"
+				} {:number 100
+					:name "Hired"}))
+			(catch Exception e (util/handle-exception "init-table-stages" e))))
 
 (defn make-table-applicants
 	"Create the Applicants Table in our database."
 	[]
-	(println (str "db: " db))
 	(try (jdbc/with-connection db
-		(println "0")
 		(jdbc/create-table :applicants
 						[:id :serial "PRIMARY KEY"]
 						[:name "varchar(100)"]
+						[:stage :numeric "default 0"]
+						[:stage_last_changed "date not null default CURRENT_DATE"]
 						[:goalie :numeric] ;; id of interviewer -- relationship
 						[:email "varchar(50)"]
 						[:position "varchar(50)"]
@@ -47,7 +82,7 @@
   (make-table-applicants)
   (println "Initializing Applicants Table.")
 	(try (jdbc/with-connection db
-		(println (jdbc/insert-records :applicants
+		(jdbc/insert-records :applicants
 			{:name "Alex Berke"
 				:goalie 1
 				:phone "12223334444"
@@ -77,7 +112,7 @@
 				:referral "Alexandra Berke"
 				:resume "http://www.google.com"
 				:pass 1 ; 0/1 boolean
-				:completed 0}))) ; 0/1 boolean
+				:completed 0})) ; 0/1 boolean
 		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
 
 
@@ -199,6 +234,7 @@
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
   []
+  (init-table-stages)
   (init-table-applicants)
   (init-table-interviewers)
   (init-table-tasks))
@@ -208,6 +244,8 @@
 	[]
 	(try (jdbc/with-connection db
 		;; must drop tasks table first because it depends on other tables
+		(println "Dropping the stages table")	
+		(jdbc/drop-table :stages)
 		(println "Dropping the tasks table")	
 		(jdbc/drop-table :tasks)
 		(println "Dropping the interviewers table")	
@@ -352,6 +390,7 @@
 	(try (jdbc/with-connection db
 		(jdbc/insert-record :applicants
 			{:name (attribute-map :name)
+				:stage (attribute-map :stage)
 				:goalie (attribute-map :goalie)
 				:phone (attribute-map :phone)
 				:email (attribute-map :email)

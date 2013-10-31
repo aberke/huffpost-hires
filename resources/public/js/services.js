@@ -115,6 +115,11 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       if (!waitingOn && callback) callback();
     });
   };
+  getApplicantsForStage = function(dictionary, index) {
+      httpGET('/stage/applicants?stage=' + index + '&pass=1').then(function(data) {
+        dictionary[index]['applicants'] = data;
+      });
+  };
 
   /* functions accessible to controllers returned below */
   return {
@@ -123,6 +128,30 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       var map = {};
       $.each(list, function(i) { map[list[i].id] = list[i]; });
       return map;
+    },
+
+    getRejectedApplicants: function(callback) {
+      httpGET('/applicant/rejected').then(function(returnedData) {
+        $rootScope.rejectedApplicants = returnedData;
+        if (callback) callback();
+      });
+    },
+    getAllApplicants: function(callback) {
+      httpGET('/applicant/all').then(function(returnedData) {
+        $rootScope.applicantsList = returnedData;
+        $rootScope.applicantsMap = listToMap(returnedData);
+        if (callback) callback();
+      });
+    },
+
+    getStagesWithApplicants: function(stagesWithApplicants) {
+      httpGET('/stage/all').then(function(returnedData) {
+        $rootScope.stagesList = returnedData;
+        for (i=0; i<returnedData.length; i++) {
+          stagesWithApplicants[returnedData[i].number] = {'name' : returnedData[i].name};
+          getApplicantsForStage(stagesWithApplicants, returnedData[i].number);
+        }
+      });
     },
 
     getInterviewers: function(callback) { getInterviewers(false, callback); },
