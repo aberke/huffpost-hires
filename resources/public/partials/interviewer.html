@@ -1,0 +1,164 @@
+
+
+<a ng-class ng-click="deleteApplicant()" class="delete-link">DELETE</a>
+
+<div class='container main-container' id='interviewer-page'>
+
+    <div id="interviewer-info-well-container">
+        <div id='interviewer-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
+            <button id='updateInterviewerInfo-btn' ng-click="updateInterviewerInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
+            
+            <p><img ng-show='editInterviewerInfo==false' src="/img/brandon_diamond.png" width="40px"><input ng-show='editInterviewerInfo==true' type="file" ng-model="interviewer.pic">  <span class="interviewer-info-name" ng-show='editInterviewerInfo==false'>{{interviewer.name}}</span><input class="interviewer-info-name" ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.name'></p>
+            <p><em>Email:</em> <span ng-show='editInterviewerInfo==false'>{{interviewer.email}}</span><input ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.email'></p>
+            <p><em>Phone number:</em> <span ng-show='editInterviewerInfo==false'>{{interviewer.phone}}</span><input ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.phone'></p>
+        </div>
+    </div>
+
+    <h5 ng-show="!incompleteTasks.length" class="title-none">No Incomplete Tasks</h5>
+
+    <span id="interviewer-tasks-heading" ng-show="incompleteTasks.length">
+        <h2 id="interviewer-tasks-heading-title">{{interviewer.name}}'s Tasks</h2>
+    </span>
+    <div id="tasks-container" ng-show="incompleteTasks.length">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Task</th>
+                        <th>Date</th>
+                        <th>Feedback Due</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="task in incompleteTasks | orderBy:'date'" class="failed-{{task.pass}}">
+                        <td class="width-10">
+                            <a id="delete-task-btn" ng-click="deleteTask(task)" class="red cursor-pointer">&times;</a>
+                        </td>
+                        <td>
+                            <button id="edit-task-btn" ng-click="editTask(task)" class="btn btn-warning small-btn">edit &gt;</button>
+                        </td>
+                        <td class="task-title">
+                            <span>{{task.title}}</span>
+                        </td>
+                        <td class="task-date">
+                            <span>{{task.date | date:'MM/dd/yyyy @ h:mma'}}</span>
+                        </td>
+                        <td class="task-feedback-due">
+                            <span>{{task.feedback}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+
+
+    <span id="applicants-heading">
+            <!-- Button trigger modal -->
+            <button onclick="$('#newApplicantModal').modal('show');" class="add-btn btn btn-success">+</button>
+            <h2 id="applicants-heading-title">{{interviewer.name}}'s Applicants</h2>
+            <h5 ng-show='stagesWithApplicants.0.applicants.length' class="inline-block pending-title">Pending:</h5>
+            <span class="pending-applicant" ng-repeat="applicant in stagesWithApplicants.0.applicants"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></span>
+    </span>
+
+   <!--  if no current applicants: -->
+    <h4 class="title-none" ng-show='!(stagesWithApplicants.1.applicants.length || stagesWithApplicants.2.applicants.length || stagesWithApplicants.3.applicants.length || stagesWithApplicants.4.applicants.length || stagesWithApplicants.5.applicants.length || stagesWithApplicants.6.applicants.length)'>No Current Applicants</h4>
+
+<div id="stages-container" class="row" ng-show='stagesWithApplicants.1.applicants.length || stagesWithApplicants.2.applicants.length || stagesWithApplicants.3.applicants.length || stagesWithApplicants.4.applicants.length || stagesWithApplicants.5.applicants.length || stagesWithApplicants.6.applicants.length'>
+
+
+  <div class="stage-column" ng-repeat="stage in stagesWithApplicants" ng-show="stage.name!='Pending'&&stage.name!='Hired'">
+    <span class="stage-column-title-container">
+        <h4>{{stage.applicants.length}}</h4>
+        <h5>{{stage.name}}</h5>
+    </span>
+    <div class="stage-column-inner well">
+        <div class="applicant-card" ng-repeat="applicant in stage.applicants" ng-click="goTo('/applicant?id={{applicant.id}}')">
+            <a href="/applicant?id={{applicant.id}}">
+            <span class="applicant-card-name">{{applicant.name}}</span>
+            <span class="applicant-card-position">{{applicant.position}}</span>
+            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">{{interviewersMap[applicant.goalie].name}}</a>
+        </a>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+    <!-- EDIT Task Modal -->
+  <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="updateTask()" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title"><input ng-model="edit_task.title"></h2>
+        </div>
+        <div class="modal-body">
+            <h4 class='text-center gray'>Status: 
+                <span ng-show="edit_task.pass==0" class="red text-center">FAILED</span> 
+                <span ng-show="edit_task.pass==1 && edit_task.completed==1" class="green">PASSED</span>
+                <span ng-show="edit_task.completed==0" class="gray">INCOMPLETE</span>
+            </h3>
+            <span class='new-input-container'>Interviewer assigned: 
+                <select id='new-task-interviewer' ng-model="edit_task.interviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">-select-</option>
+                </select>
+            </span>
+            <span class='new-input-container'>Date occurring: 
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-date">
+            </span>
+            <span class='new-input-container'>Feedback due: 
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due">
+            </span>
+            <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='edit_task.description' class='task-textarea'></textarea></span>
+            <span class='new-input-container task-textarea-container'>Feedback: 
+                <textarea ng-model='edit_task.feedback' class='task-textarea'></textarea>
+            </span>
+            <span class='new-input-container'>
+                <button id='edit-task-pass-btn' ng-click="passTask()" class="btn btn-default">Pass</button>
+                <button id='edit-task-fail-btn' ng-click="failTask()" class="red btn btn-default">Fail</button>
+            </span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  <!-- New Applicant Modal -->
+  <div class="modal fade" id="newApplicantModal" ng-model="new_applicant" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addApplicant(new_applicant)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New Applicant</h2>
+        </div>
+        <div class="modal-body">
+            <div id='new-applicant-status' >
+                <h3 class="status">Pending</h3>
+                <select class="cursor-pointer" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
+            </div>
+                        <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
+                        <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>
+                        <span class='new-input-container'>Hiring Manager: <select required ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
+                            <option value="">-select-</option>
+                        </select></span>
+                        <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_applicant.phone'></span>
+                        <span class='new-input-container'>Email: <input type='email' placeholder='angie.jolie@gmail.com' ng-model="new_applicant.email"></span>
+                        <span class='new-input-container'>Link to resume: <input type='text' placeholder='www.linkToSharedGoogleDrive.com' ng-model='new_applicant.resume'></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+</div>
+    <link href="lib/date-picker/datepicker.css" rel="stylesheet">
+    <script src="lib/date-picker/bootstrap-datepicker.js"></script>

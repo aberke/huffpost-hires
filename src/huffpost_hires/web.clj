@@ -8,9 +8,11 @@
             [ring.middleware.session :as session]
             [ring.middleware.session.cookie :as cookie]
             [ring.middleware.params :as params]
+            [ring.middleware.multipart-params :as mp]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
+            ; [clojure.contrib.duck-streams :as ds]
             [environ.core :refer [env]]
 
             [huffpost-hires.api :as api]))
@@ -41,9 +43,29 @@
       :headers {}
       :body (io/file (io/resource "html/hires.html"))})
 
+;; ************* GET RID OF BELOW
+
+(defn upload-file
+  [request]
+  (println "FILE ********************")
+  (println request)
+
+  (println (request :stream)))
+
+  ; (let [multipart-params (request :multipart-params) file (multipart-params :file)]
+  ;   (println file)
+  ;   (ds/copy (file :tempfile) (ds/file-str "file.out"))
+  ;   "OK"))
+
+;; ************* GET RID OF above
+
+
 (defroutes app
   (ANY "/repl" {:as req}
        (drawbridge req))
+
+  (mp/wrap-multipart-params 
+              (POST "/file" [] upload-file)) ;{params :params} (upload-file (get params "file"))))
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
@@ -58,7 +80,7 @@
   (GET "/applicants" [] serve-hires)
   (GET "/interviewers" [] serve-hires)
   (GET "/applicant" [] serve-hires)
-  (GET "/interviewer/*" [] serve-hires)
+  (GET "/interviewer" [] serve-hires)
   (route/resources "/")
   (GET "/" [] serve-hires)
   (route/not-found (slurp (io/resource "html/404.html"))))

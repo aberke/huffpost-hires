@@ -14,6 +14,13 @@ function MainCntl($scope, $location, BasicService, APIService) {
 	$scope.tasksList;
 
 	$scope.stagesList;
+	$scope.stagesMap;
+
+
+	$scope.goTo = function(path) {
+		console.log('goTo')
+		console.log(path);
+	}
 
 	$scope.interviewerByName = function(name) {
 		$.each($scope.interviewersList, function(){
@@ -26,13 +33,37 @@ function MainCntl($scope, $location, BasicService, APIService) {
 	}
 	init();
 }
-function HomeCntl($scope){
+function HomeCntl($scope, APIService){
+
+	$scope.file;
+
+	$scope.setFile = function(fileInput){
+		console.log('setFile');
+		console.log(fileInput);
+		console.log(fileInput.value);
+
+
+		var fd = new FormData();
+		fd.append("Resume", fileInput.value);
+		console.log(fd);
+		APIService.uploadResume(fd);
+	}
+
+	$scope.uploadFile = function(file){
+		
+	}
 
 	var init = function() {
+		console.log('HomeCntl');
 	}
 	init();
 }
 function AllApplicantsCntl($scope, $location, APIService, BasicService) {
+
+	$scope.goTo = function(path) {
+		console.log('goTo');
+		console.log(path);
+	};
 
 	$scope.rejectedApplicants = [];
 
@@ -51,10 +82,6 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 		APIService.postNewApplicant(new_applicant, function() {
 			getApplicants();
 		});
-
-		// $scope.applicantsMap[new_applicant.id] = new_applicant;
-		// $scope.applicantsList.push(new_applicant);
-
 		$scope.new_applicant = null;
 	}
 
@@ -77,10 +104,6 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 
 		getApplicants();
 
-		// APIService.getApplicantsWithTaskCount(function() {
-		// 	console.log('applicants list');
-		// 	console.log($scope.applicantsList);
-		// });
 		APIService.getInterviewers(function() {
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);
@@ -198,6 +221,10 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);
 		});
+		APIService.getStages(function(){
+			console.log('stages:');
+			console.log($scope.stagesList);
+		});
 	}
 	init();
 
@@ -219,26 +246,107 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 }
 
 function AllInterviewersCntl($scope, BasicService, APIService) {
-	/* ALEX SPANGER EDITS HERE */
+	
+
+	$scope.addInterviewer = function(new_interviewer) {
+		console.log(new_interviewer)
+		$('#newInterviewerModal').modal('hide');
+
+		new_interviewer.phone = BasicService.formatPhonenumber(new_interviewer.phone);
+
+		APIService.postNewInterviewer(new_interviewer, function() {
+			getInterviewers();
+		});
+	};
+
+	var getInterviewers = function() {
+		APIService.getInterviewersWithMetadata(function() {
+			console.log($scope.interviewersList);
+			console.log($scope.interviewersMap);
+		});
+	}
 
 	var init = function() {
-		APIService.getInterviewersWithTaskCount(function() {
-			/* your optional callback here */
-		});
+		getInterviewers();
 	}
 	init();
 }
 
-function InterviewerCntl($scope, $location) {
-	/* ALEX SPANGER EDITS HERE */
+function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
+
+	$scope.interviewerID;
+
+	$scope.editInterviewerInfo = false;
 
 	$scope.completeTasks;
-	$scope.incompleTasks;
+	$scope.incompleteTasks;
 
-	var init = function() {
-		APIService.getInterviewerWithTasks($routeParams.id, function() {
-			/* optional callback here */
+
+	$scope.stagesWithApplicants = {}; //= {stage_number: {name: [applicants]}};
+
+
+	$scope.addApplicant = function(new_applicant) {
+		$('#newApplicantModal').modal('hide');
+
+		if (new_applicant.stage) { new_applicant.stage = new_applicant.stage.number; }
+		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
+		new_applicant.goalie = new_applicant.goalie.id;
+
+		console.log('new_applicant:');
+		console.log(new_applicant);
+		
+		APIService.postNewApplicant(new_applicant, getApplicants);
+		$scope.new_applicant = null;
+	}
+
+	var updateInterviewerInfoShow = function(){
+		$scope.editInterviewerInfo = true;
+		$('#updateInterviewerInfo-btn').html('<h3>Save</h3>');
+	}
+	var updateInterviewerInfoSave = function() {
+		console.log('updateInterviewerInfo:');
+		console.log($scope.interviewer);
+		APIService.updateInterviewer($scope.interviewer, function() {
+			console.log('callback');
+			$('#updateInterviewerInfo-btn').html('<h3>Edit</h3>');
+			$scope.editInterviewerInfo = false;
 		});
 	}
+
+	$scope.updateInterviewerInfo = function(){
+			$scope.editInterviewerInfo ? updateInterviewerInfoSave() : updateInterviewerInfoShow();
+	}
+	$scope.deleteInterviewer = function() {
+		APIService.deleteInterviewer($scope.interviewer.id, function() {
+			$location.path('/interviewers');
+		});
+	}	
+	var getTasks = function() {
+
+	}
+	var getApplicants = function(){
+		APIService.getStagesWithApplicants($scope.stagesWithApplicants, $scope.interviewerID);
+	}
+
+	var init = function() {
+		$scope.interviewerID = $routeParams.id;
+
+		APIService.getInterviewerWithTasks($scope.interviewerID, function() {
+			
+		});
+		APIService.getInterviewers();
+
+		getApplicants();
+	}
 	init();
+
+
+	angular.element(document).ready(function () {
+		BasicService.handleDate('edit-task-date', function(date) {
+			$scope.edit_task.date = date.toJSON();
+		});
+		BasicService.handleDate('edit-task-feedback-due', function(date) {
+			$scope.edit_task.feedback_due = date.toJSON();
+		});
+	});
 }

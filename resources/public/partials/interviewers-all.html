@@ -1,0 +1,54 @@
+
+<div class='container main-container' id='interviewers-all'>
+
+    <span id="interviewers-heading">
+            <button onclick="$('#newInterviewerModal').modal('show');" class="add-btn btn btn-success">+</button>
+            <h2 id="interviewers-heading-title">Interviewers</h2>
+    </span>
+
+
+    <div id="interviewers-container">
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Current Applicants Managing</th>
+                        <th>Current Tasks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="interviewer in interviewersList">
+                        <th><img src="/img/brandon_diamond.png" width="20px"></th>
+                        <td class="inteviewer-name"><a href="/interviewer?id={{interviewer.id}}">{{interviewer.name}}</a></td>
+                        <td class="padding-left-60">{{interviewer.current_applicants}}</td>
+                        <td class="padding-left-60">{{interviewer.incomplete_tasks}}</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+
+  <!-- New Interviewer Modal -->
+  <div class="modal fade" id="newInterviewerModal" ng-model="new_interviewer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addInterviewer(new_interviewer)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New Interviewer</h2>
+        </div>
+        <div class="modal-body">
+                        <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_interviewer.name'></span>
+                        <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_interviewer.phone'></span>
+                        <span class='new-input-container'>Email: <input required type='email' placeholder='angie.jolie@gmail.com' ng-model="new_interviewer.email"></span>
+                        <span class='new-input-container'>Pic: <input type='file' class='pic-upload' ng-model='new_interviewer.pic'></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+</div>

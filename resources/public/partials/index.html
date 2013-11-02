@@ -1,6 +1,24 @@
 
 <div class='container main-container' id='index'>
 
+
+  <form action="/file" method="post" enctype="multipart/form-data">
+    <input name="file" type="file" size="20" />
+    <input type="submit" name="submit" value="submit" />
+  </form>
+
+	<br />
+	Files {{file}}
+	Form Data: {{fd}}
+
+	<div class="row" style="border:1px solid black">
+		<input type="file" ng-model-instant id="resumeToUpload" onchange="angular.element(this).scope().setFile(this)" />
+	</div>
+
+	<br />
+
+
+
 	<div class="row">
 		<div id='applicants-div' class="index-half-left col-xs-5 col-md-5">
 			<a href='/applicants' type="button" class="index-half-btn btn btn-info">
@@ -15,4 +33,6 @@
 			<p class='index-description'>This is the interviewers <i>portal.</i>  Add interviewers.  If you are an interviewer you can access your personalized set of upcoming tasks.</p>
 		</div>
 	</div>
+
+
 </div>

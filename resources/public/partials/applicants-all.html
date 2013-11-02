@@ -5,11 +5,11 @@
         <div ng-show="!stagesWithApplicants.0.applicants.length" id="no-pending-container"></div>
         <div ng-show="stagesWithApplicants.0.applicants.length" id="pending-container">
             <h4 class="title">Pending</h4>
-            <span class="pending-applicant" ng-repeat="applicant in stagesWithApplicants.0.applicants"><a>{{applicant.name}}</a></span>
+            <span class="pending-applicant" ng-repeat="applicant in stagesWithApplicants.0.applicants"><a href="/applicant?id={{applicant.id}}">{{applicant.name}}</a></span>
         </div>
             <!-- Button trigger modal -->
             <button onclick="$('#newApplicantModal').modal('show');" class="add-btn btn btn-success">+</button>
-            <h2 id="applicants-heading-title">Applicants</h2>
+            <h2 id="applicants-heading-title">All Applicants</h2>
     </span>
 
 <div id="stages-container" class="row">
@@ -21,30 +21,12 @@
         <h5>{{stage.name}}</h5>
     </span>
     <div class="stage-column-inner well">
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
-        </div>
-        <div class="applicant-card">
-            <span class="applicant-card-name">Complete Name Here</span>
-            <span class="applicant-card-position">Position Title Here</span>
-            <a class="applicant-card-goalie" href=""><img src="/img/brandon_diamond.png" width="20px">Goalie Name Here</a>
+        <div class="applicant-card" ng-repeat="applicant in stage.applicants" ng-click="goTo('/applicant?id={{applicant.id}}')">
+            <a href="/applicant?id={{applicant.id}}">
+            <span class="applicant-card-name">{{applicant.name}}</span>
+            <span class="applicant-card-position">{{applicant.position}}</span>
+            <a class="applicant-card-goalie" href="/interviewer?id={{applicant.goalie}}"><img src="/img/brandon_diamond.png" width="20px">{{interviewersMap[applicant.goalie].name}}</a>
+        </a>
         </div>
     </div>
 </div>
@@ -111,8 +93,6 @@
 
 
 
-
-
     <div id="applicants-container" class="panel panel-primary">
         <div class="panel-heading">
             <!-- Button trigger modal -->
@@ -159,7 +139,7 @@
             </div>
                         <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
                         <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>
-                        <span class='new-input-container'>Goalie: <select required ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
+                        <span class='new-input-container'>Hiring Manager: <select required ng-model="new_applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
                             <option value="">-select-</option>
                         </select></span>
                         <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_applicant.phone'></span>

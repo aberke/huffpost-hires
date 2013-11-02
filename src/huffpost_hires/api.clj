@@ -16,28 +16,32 @@
 	[params]
 	(models/query-json ["SELECT * FROM stages ORDER BY number"]))
 
-;; GET /api/stage/applicants?stage=number&pass=0/1
+;; GET /api/stage/applicants?stage=number&pass=0/1&[goalie=inteviewerID]
 (defn get-applicants-by-stage
 	"Returns all applicants for given stage and passing status
 	Defaults to stage=0 (pending) and pass=1 (passing true)"
 	[params]
-	(models/query-json [(str "SELECT * FROM applicants 
+	(if (params :goalie) 
+		(models/query-json [(str "SELECT * FROM applicants 
 							WHERE stage=" (get params :stage 0)
-							" AND pass=" (get params :pass 1))]))
+							" AND pass=" (get params :pass 1)
+							" AND goalie=" (params :goalie))])
+		(models/query-json [(str "SELECT * FROM applicants 
+							WHERE stage=" (get params :stage 0)
+							" AND pass=" (get params :pass 1))])))
 
-;; GET /api/interviewer/all?task-count=true/false
+;; GET /api/interviewer/all?extra-data=true/false
 (defn get-interviewers-all
 	"Returns All Interviewers in Database in json 
-	and optionally adds count of complete_tasks and incomplete_tasks.
-	Dope ass SQL queries courtesy of Mike Adler"
+	joined with the number of their incomplete tasks and number of current applicants for whom they're the goalie for"
 	[params]
 	(println (str "GET api/interviewers-all with params:" params))
-	(if (= (params :task-count) "true")
+	(if (= (params :extra-data) "true")
 		(models/query-json ["SELECT i.*, 
-								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
 								SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) AS incomplete_tasks,
-								COUNT(t.completed) AS total_tasks 
+								SUM(CASE WHEN a.completed=0 THEN 1 ELSE 0 END) AS current_applicants
 								FROM interviewers i 
+								LEFT JOIN applicants a on i.id=a.goalie
 								LEFT JOIN tasks t ON i.id=t.interviewer 
 								GROUP BY i.id;"])
 		(models/query-json ["select * from interviewers order by name"])))
@@ -200,12 +204,22 @@
 		:completed (util/string->number-or-0 (get params :completed))
 		:pass (util/string->number (get params :pass 1))})
 
+(defn params->interviewers-attributeMap
+	[params]
+	(println "params->interviewers-attributeMap -- params: " params)
+	{:id (util/string->number (get params :id))
+		:name (get params :name "")
+		:phone (get params :phone "")
+		:email (get params :email "")})
+
 ;; ******************************* POST requests below ******************************
 
 ;; POST /api/interviewer
 (defn post-interviewer-new
 	[params]
-	"TODO")
+	(if (models/insert-interviewer (params->interviewers-attributeMap params))
+		"OK"
+		"ERROR"))
 
 ;; POST /api/applicant
 (defn post-applicant-new
@@ -245,7 +259,7 @@
 		(println (str "route: " route))
 		(case route
 			"applicant" (if (models/update-applicant (params->applicants-attributeMap params)) "OK" "ERROR")
-			;"interviewer" (if (models/update-interviewer id) "OK" "ERROR")
+			"interviewer" (if (models/update-interviewer (params->interviewers-attributeMap params)) "OK" "ERROR")
 			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid DELETE request")))
 

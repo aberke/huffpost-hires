@@ -3,13 +3,26 @@
 
 <div class='container main-container' id='applicant-page'>
 
-    <h2 id='failed-banner' class='red text-center' ng-show="applicant.pass==0">FAILED</h2>
+    <div id='applicant-stage-container'>
+        <div class="prev-stage-{{applicant.stage > stage.number}} current-stage-{{applicant.stage == stage.number && applicant.pass==1}} future-stage-{{applicant.stage < stage.number}} red-{{applicant.stage==stage.number && applicant.pass==0}} stage-column" ng-repeat="stage in stagesList" ng-show="stage.name!='Pending'&&stage.name!='Hired'">
+            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage == 0 &&stage.number==1' ng-click="applicant.stage=applicant.stage+1">&rArr;</span>
+            <h6>{{stage.name}}</h6>
+            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage>1 && (applicant.stage-1)==stage.number' ng-click="applicant.stage=applicant.stage-1">&lArr;</span>
+            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage == stage.number' ng-click="applicant.stage=applicant.stage+1">&rArr;</span>
+        </div>
+        <div ng-disabled="applicant.stage<6 || applicant.pass==0" class="btn btn-success btn-sm" ng-click="applicant.stage=100; applicant.completed=1;">PASS</div>
+
+    </div>
+
+    <h3 id='hired-banner' class='green text-center' ng-show="applicant.stage==100">HIRED</h3>
+
+    <h3 id='failed-banner' class='red text-center' ng-show="applicant.pass==0">FAILED</h3>
 
     <div id='applicant-info' class='row'>
         <div class="index-half-left col-xs-5 col-md-5 text-left">
             <h3><span ng-show='editApplicantInfo==false'>{{applicant.name}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.name'></h3>
             <p><em>Position:</em> <span ng-show='editApplicantInfo==false'>{{applicant.position}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.position'></p>
-            <p><em>Goalie:</em> <span ng-show='editApplicantInfo==false'>{{interviewersMap[applicant.goalie].name}}</span>
+            <p><em>Hiring Manager:</em> <a ng-href="/interviewer?id={{applicant.goalie}}" ng-show='editApplicantInfo==false'>{{interviewersMap[applicant.goalie].name}}</a>
                 <select ng-show='editApplicantInfo==true' ng-model="applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
                     <option value="applicant.goalie">-select-</option>
                 </select>
@@ -21,7 +34,7 @@
             <p><em>Resume: </em> <span ng-show='editApplicantInfo==false'><a ng-href='{{applicant.resume}}'> View</a></span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.resume'></p>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
             <button ng-show='editApplicantInfo==true && applicant.pass==1' id='failApplicantInfo-btn' ng-click="applicant.pass=0; applicant.completed=1" class="float-right btn btn-danger"><h5>FAIL</h5></button>
-            <button ng-show='editApplicantInfo==true && applicant.pass==0' id='failApplicantInfo-btn' ng-click="applicant.pass=1; applicant.completed=1" class="float-right btn btn-success"><h5>PASS</h5></button>
+            <button ng-show='editApplicantInfo==true && applicant.pass==0' id='failApplicantInfo-btn' ng-click="applicant.pass=1;" class="float-right btn btn-warning"><h5>remove fail</h5></button>
             <p><em>Phonenumber:</em> <span ng-show='editApplicantInfo==false'>{{applicant.phone}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.phone'></p>
         </div>
     </div>
@@ -42,13 +55,13 @@
                         <th></th>
                         <th>Task</th>
                         <th>Date</th>
-                        <th>Goalie</th>
+                        <th>Assigned</th>
                         <th>Feedback Due</th>
                         <th>Feedback</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="task in totalTasks | orderBy:'date'" class="failed-{{task.pass}}">
+                    <tr ng-repeat="task in totalTasks | orderBy:'date'" class="failed-{{task.pass==0}} passed-{{task.pass==1 && task.completed==1}}">
                         <td class="width-10">
                             <a id="delete-task-btn" ng-click="deleteTask(task)" class="red cursor-pointer">&times;</a>
                         </td>

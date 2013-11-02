@@ -297,7 +297,8 @@
 
   	(let [statement (str "UPDATE applicants "
                               "SET name='" (attribute-map :name) 
-                              	"', goalie=" (attribute-map :goalie) 
+                              	"', stage="(attribute-map :stage)
+                              	", goalie=" (attribute-map :goalie) 
                               	", phone='" (attribute-map :phone)
                               	"', email='" (attribute-map :email)
                               	"', position='" (attribute-map :position)
@@ -309,6 +310,16 @@
                               "WHERE id=" (attribute-map :id))]
     	(try (execute-sql statement)
 			(catch Exception e (util/handle-exception "update-applicant" e))))) ;; error -- return false
+
+(defn update-interviewer
+	[attribute-map]
+	(let [statement (str "UPDATE interviewers "
+							"SET name='" (attribute-map :name)
+							"', phone='" (attribute-map :phone)
+							"', email='" (attribute-map :email)
+						"' WHERE id=" (attribute-map :id))]
+		(try (execute-sql statement)
+			(catch Exception e (util/handle-exception "update-interviewer")))))
 
 (defn update-task
 	[attribute-map]

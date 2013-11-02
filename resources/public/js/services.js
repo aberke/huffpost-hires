@@ -54,6 +54,23 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     $.each(list, function(i) { map[list[i].id] = list[i]; });
     return map;
   };
+  httpUploadFile = function(method, url, data) {
+    var deferred = $q.defer();
+    $http({
+      method: method,
+      url: url,
+      data: $.param(data || {}),
+      headers: {'Content-Type': 'multipart/form-data'}
+    })
+    .success(function(returnedData){
+      deferred.resolve(returnedData);
+    })
+    .error(function(returnedData) {
+      console.log('API ERROR: ' + returnedData.error);
+      deferred.reject(returnedData);
+    });
+    return deferred.promise;
+  };
 
   http = function(method, url, data) {
     var deferred = $q.defer();
@@ -115,8 +132,10 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       if (!waitingOn && callback) callback();
     });
   };
-  getApplicantsForStage = function(dictionary, index) {
-      httpGET('/stage/applicants?stage=' + index + '&pass=1').then(function(data) {
+  getApplicantsForStage = function(dictionary, index, goalie) {
+    var url = '/stage/applicants?stage=' + index + '&pass=1';
+    if (goalie) { url = url + '&goalie=' + goalie; }
+      httpGET(url).then(function(data) {
         dictionary[index]['applicants'] = data;
       });
   };
@@ -129,6 +148,33 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       $.each(list, function(i) { map[list[i].id] = list[i]; });
       return map;
     },
+
+
+    uploadResume: function(fd) {
+      var xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", function(progress){ 
+        console.log('progress');
+        console.log(progress);
+      });
+      xhr.addEventListener("load", function(load){
+        console.log("Load");
+        console.log(load);
+      });
+      xhr.addEventListener("error", function(error) {
+        console.log("ERROR");
+        console.log(error);
+      });
+      xhr.addEventListener("abort", function(abort) {
+        console.log('ABORT');
+        console.log(abord);
+      });
+      xhr.open('POST', "/file");
+      xhr.send(fd);
+    },
+
+
+
+
 
     getRejectedApplicants: function(callback) {
       httpGET('/applicant/rejected').then(function(returnedData) {
@@ -144,12 +190,19 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       });
     },
 
-    getStagesWithApplicants: function(stagesWithApplicants) {
+    getStages: function(callback) {
+      httpGET('/stage/all').then(function(returnedData) {
+        $rootScope.stagesList = returnedData;
+        $rootScope.stagesMap = listToMap(returnedData);
+        if (callback) callback();
+      });
+    },
+    getStagesWithApplicants: function(stagesWithApplicants, goalieID) {
       httpGET('/stage/all').then(function(returnedData) {
         $rootScope.stagesList = returnedData;
         for (i=0; i<returnedData.length; i++) {
           stagesWithApplicants[returnedData[i].number] = {'name' : returnedData[i].name};
-          getApplicantsForStage(stagesWithApplicants, returnedData[i].number);
+          getApplicantsForStage(stagesWithApplicants, returnedData[i].number, goalieID);
         }
       });
     },
@@ -157,6 +210,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     getInterviewers: function(callback) { getInterviewers(false, callback); },
     getInterviewersWithTaskCount: function(callback) { getInterviewers(true, callback); },
 
+    getInterviewersWithMetadata: function(callback) {
+      httpGET('/interviewer/all?extra-data=true', {'extra-data': true}).then(function(returnedData) {
+        $rootScope.interviewersList = returnedData;
+        $rootScope.interviewersMap = listToMap(returnedData);
+        if (callback) callback();
+      });
+    },
 
     getInterviewerWithTasks: function(interviewerID, callback) {
       httpGET('/interviewer/?id=' + interviewerID).then(function(returnedData) {
@@ -233,6 +293,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         getApplicantTasks(new_task.applicant, callback);
       });
     },
+    postNewInterviewer: function(new_interviewer, callback) {
+      httpPOST('/interviewer', new_interviewer).then(function(returnedData) {
+        console.log('posted new interviewer:');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
 
     /* ************** DELETE REQUESTS ******************/
 
@@ -264,6 +331,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     updateApplicant: function(applicant, callback) {
       httpPUT('/applicant', applicant).then(function(returnedData) {
         console.log('updateApplicant returned data');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+    updateInterviewer: function(interviewer, callback) {
+      httpPUT('/interviewer', interviewer).then(function(returnedData) {
+        console.log('updateInterviewer returnedData:')
         console.log(returnedData);
         if (callback) callback();
       });

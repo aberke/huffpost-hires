@@ -1,10 +1,15 @@
-.red { color: red;}
+a { cursor: pointer; }
+
+
+.red, .red-true { color: red;}
 .gray {color: gray;}
 .green { color: green; }
 
 .width-10 { max-width: 10px; }
 .width-40{ max-width: 40%; }
 .width-60{ max-width: 60%; }
+
+.padding-left-60, #interviewers-container .padding-left-60{ padding-left: 60px; }
 
 .inline-block{ display: inline-block; }
 div.float-left, .float-left{ float:left; }
@@ -14,6 +19,17 @@ div.text-left, .text-left{ text-align: left; }
 div.text-right, .text-right, .text-right input{ text-align: right; }
 
 .cursor-pointer{ cursor: pointer; }
+
+/********************* nav **********************/
+.nav-left{
+	float: left;
+	padding: 15px;
+}
+.nav-left a{
+	margin: 20px;
+	text-decoration: none;
+}
+
 
 em{
 	font-style: normal;
@@ -57,6 +73,9 @@ tr.failed-0:hover{
 }
 .dropdown-item img{
 	margin-right: 10px;
+}
+tr.passed-true td{
+	background-color: rgba(0,255,0,0.15);
 }
 
 
@@ -122,13 +141,15 @@ tr.failed-0:hover{
 #newTaskModal .modal-content{
   background: url(../img/phones-pattern.jpg) repeat center center fixed; 
 }
-#editTaskModal .modal-content{
+#editTaskModal .modal-content, #newInterviewerModal .modal-content{
 	background-color: black;
 }
-#editTaskModal .close{
-	color: white;
+#editTaskModal .close, #newInterviewerModal .close{
+	color: gray;
 	background-color: black;
 	opacity: 1;
+}#editTaskModal .close:hover, #newInterviewerModal .close:hover{
+	color: white;
 }
 #newTaskModal .modal-header{
 	color: black;
@@ -184,6 +205,60 @@ tr.failed-0:hover{
 	background-color: black;
 }
 
+/********** Inteviewer **********/
+#interviewer-page .title-none{
+	color: gray;
+	margin-bottom: 50px;
+}
+
+.interviewer-info-name{
+	font-size: 20px;
+	font-weight: bold;
+	margin-left: 10px;
+}
+input.interviewer-info-name{ margin: 0;}
+#interviewer-info-well-container{
+	float: left;
+	width: 100%;
+}
+#interviewer-info-well{
+	margin: 0;
+}
+#interviewer-tasks-heading{
+	display: block;
+	border-bottom: 3px solid gray;
+	padding: 0 10px 10px 10px;
+	margin-bottom: 30px;
+}
+#interviewer-page #tasks-container {
+	border-bottom: 3px solid gray;
+	margin-bottom: 100px;
+}
+#interviewer-page .pending-title{
+	margin-left: 90px;
+	color: gray;
+}
+#interviewer-page #stages-container {
+	border-bottom: none;
+}
+#interviewer-page .stage-column {
+	height: 220px;
+}
+#interviewer-page .stage-column-inner {
+	height: 180px;
+}
+
+
+/***** Interviewers *****/
+#interviewers-container{
+	margin-bottom: 60px;
+}
+
+.pic-upload{
+	width: 190px;
+}
+
+
 /***** Applicants *****/
 
 #no-pending-container { height: 50px; }
@@ -195,7 +270,7 @@ tr.failed-0:hover{
 	text-align: right;
 	margin-right: 20px;
 }
-.pending-applicant{
+#applicants-all .pending-applicant{
 	display: block;
 	width: 100%;
 	float: right;
@@ -204,21 +279,25 @@ tr.failed-0:hover{
 .pending-applicant a{
 	background-color: yellow;
 	padding: 3px;
+	cursor: pointer;
+	margin-left: 10px;
+}
+#applicants-all .pending-applicant a{
 	text-align: right;
 	float: right;
-	cursor: pointer;
 }
 
-#applicants-heading{
+#applicants-heading, #interviewers-heading{
 	display: block;
 	border-bottom: 3px solid gray;
 	padding: 0 10px 10px 10px;
 	margin-bottom: 30px;
 }
-#applicants-heading .add-btn{
+#interviewers-heading{ margin-top: 20px; }
+#applicants-heading .add-btn, #interviewers-heading .add-btn{
 	margin-bottom: 10px;
 }
-#applicants-heading-title{
+#applicants-heading-title, #interviewers-heading-title{
 	display: inline-block;
 }
 
@@ -259,6 +338,9 @@ tr.failed-0:hover{
 .applicant-card:hover{
 	background-color: rgba(255,165,0,0.3);
 }
+.applicant-card a{
+	display: block;
+}
 .applicant-card-name, .applicant-card-position, .applicant-card-goalie{
 	display: inline-block;
 	width: 100%;
@@ -280,13 +362,54 @@ tr.failed-0:hover{
 	float: right;
 }
 
-
+#rejected-hired-container{
+	border-bottom: 3px solid gray;
+	margin-bottom: 60px;
+	padding-bottom: 30px;
+}
 
 
 
 
 
 /***** Applicant *****/
+#applicant-stage-container {
+	border-bottom: 3px solid gray;
+	margin-top: 10px;
+	margin-bottom: 50px;
+	padding-bottom: 20px;
+	float: left;
+	width: 100%;
+}
+#applicant-page .stage-column{
+	width: auto;
+	display: inline-block;
+	vertical-align: top;
+	margin-right: 10px;
+	margin-left: 10px;
+	white-space: nowrap;
+}
+#applicant-page .stage-column h6{
+	margin-left: 15px;
+}
+#applicant-page .stage-column h6{
+	padding-bottom: 20px;
+	display: inline;
+	margin-right: 10px;
+}
+#applicant-page .prev-stage-true h6{
+	color: green;
+	opacity: 0.7;
+}
+#applicant-page .future-stage-true h6{
+	color: gray;
+	font-weight: normal;
+}
+#applicant-page .current-stage-true h6{
+	color: orange;
+	font-weight: bold;
+	font-size: 13px;
+}
 #failed-banner {
 	padding: 0;
 	margin: 0 0 40px 0;
