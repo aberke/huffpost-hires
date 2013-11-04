@@ -9,13 +9,15 @@
             [ring.middleware.session.cookie :as cookie]
             [ring.middleware.params :as params]
             [ring.middleware.multipart-params :as mp]
+            [clojure.contrib.duck-streams :as ds]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
-            ; [clojure.contrib.duck-streams :as ds]
             [environ.core :refer [env]]
 
-            [huffpost-hires.api :as api]))
+            [huffpost-hires.api :as api])
+
+  (:import [java.io File]))
 
 (defn- authenticated? [user pass]
   ;; TODO: heroku config:add REPL_USER=[...] REPL_PASSWORD=[...]
@@ -47,15 +49,29 @@
 
 (defn upload-file
   [request]
-  (println "FILE ********************")
+  (println "FILE request ********************")
   (println request)
+  (println "FILE params ********************")
 
-  (println (request :stream)))
 
-  ; (let [multipart-params (request :multipart-params) file (multipart-params :file)]
-  ;   (println file)
-  ;   (ds/copy (file :tempfile) (ds/file-str "file.out"))
-  ;   "OK"))
+  (let [params (request :params) 
+        multipart-params (request :multipart-params) 
+        file (get multipart-params "file")
+        file-name (file :filename)
+        file-size (file :size)
+        actual-file (file :tempfile)]
+    (println params)
+    (println "FILE multipart-params ********************")
+    (println multipart-params)
+    (println "FILE file ********************")
+    (println file)
+    (if file
+      (do
+        (io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
+        {:status 200
+         :headers {"Content-Type" "text/html"}
+         :body (str "filename: " file-name ", size: " file-size)})
+      "NO FILE FOUND")))
 
 ;; ************* GET RID OF above
 
@@ -64,8 +80,7 @@
   (ANY "/repl" {:as req}
        (drawbridge req))
 
-  (mp/wrap-multipart-params 
-              (POST "/file" [] upload-file)) ;{params :params} (upload-file (get params "file"))))
+  (POST "/file" [] upload-file) ;{params :params} (upload-file (get params "file"))))
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
@@ -102,6 +117,7 @@
                             wrap-error-page
                             trace/wrap-stacktrace))
                          params/wrap-params
+                         mp/wrap-multipart-params
                          (site {:session {:store store}}))
                      {:port port :join? false})))
 
