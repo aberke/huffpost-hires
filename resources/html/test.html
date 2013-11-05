@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="HiresApp">
+<head>
+    <meta charset="utf-8">
+    <title>HuffPost Hires</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hiring helper app">
+    <meta name="author" content="Huffpost Labs">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <!-- stylesheets -->
+    <link href="/lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+
+
+    <!-- javascript -->
+
+    <script src="/lib/jQuery-2.0.3.min.js"></script>
+	<script src="/lib/angular-1.0.8.min.js"></script>
+    <script src="/js/app.js"></script>
+	<script src="/js/controllers.js"></script>
+    <script src="/js/services.js"></script>
+
+</head>
+<body ng-controller="MainCntl">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+    	<div class="container">
+    		<div class="navbar-header">
+    			<a class="navbar-brand" href="/">HuffPost Hires</a>
+    		</div>
+            <div class="nav-left">
+                <a href="/applicants">Applicants</a>
+                <a href="/interviewers">Interviewers</a>
+            </div>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a class="popover-hover" data-container="body" data-toggle="popover" data-placement="bottom" data-content='"Make a pull request!"' data-original-title="Alex says:" title="" href="https://github.com/huffpostlabs/huffpost-hires">Contribute</a></li>
+                <li class="dropdown">
+                    <a ng-href="{{location.path()}}" class="dropdown-toggle" data-toggle="dropdown">Feedback <i>please</i> <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <p>We would love your feedback on how to make this more usable or how to enhance this product.  We'd love to hear from <i>you.</i></p>
+                        </li>
+                        <li><p>Also feel free to just say hiiii or send affirmations.</p></li>
+                        <li><a href="mailto:labs@huffingtonpost.com?subject=[Blogcast%20Feedback]">Email Labs@huffingtonpost.com</a></li>
+                        <li><a href="mailto:alexandra.berke@huffingtonpost.com?subject=[Blogcast%20Feedback]">Email Alex at alexandra.berke@huffingtonpost.com</a></li>
+                    </ul>
+                </li>
+            </ul>
+    	</div>
+    </nav>
+    <h3 ng-show='error' id='error'>{{error}}</h3>
+
+    
+  <form action="/file" method="post" enctype="multipart/form-data">
+    <input name="file" type="file" size="20" />
+    <input type="submit" name="submit" value="submit" />
+  </form>
+
+    <br />
+    Files {{file}}
+    Form Data: {{fd}}
+
+    <div class="row" style="border:1px solid black">
+        <input type="file" ng-model-instant id="resumeToUpload" onchange="angular.element(this).scope().setFile(this)" />
+    </div>
+
+    <br />
+
+
+
+    <script src="/lib/bootstrap/bootstrap.min.js"></script>
+    <script src="/lib/bootstrap/popover.js"></script>
+</body>
+</html>

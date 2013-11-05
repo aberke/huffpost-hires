@@ -12,7 +12,8 @@
                   [environ "0.2.1"]
                   [com.cemerick/drawbridge "0.0.6"]
                   [org.clojure/java.jdbc "0.3.0-alpha5"]
-                  [postgresql "9.1-901.jdbc4"]]
+                  [postgresql "9.1-901.jdbc4"]
+                  [clj-aws-s3 "0.3.7"]]
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]

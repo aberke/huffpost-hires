@@ -9,11 +9,11 @@
             [ring.middleware.session.cookie :as cookie]
             [ring.middleware.params :as params]
             [ring.middleware.multipart-params :as mp]
-            [clojure.contrib.duck-streams :as ds]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
             [environ.core :refer [env]]
+            [aws.sdk.s3 :as s3]
 
             [huffpost-hires.api :as api])
 
@@ -47,6 +47,20 @@
 
 ;; ************* GET RID OF BELOW
 
+(def s3-credentials {:access-key (System/getenv "AWS_ACCESS_KEY_ID"), :secret-key (System/getenv "AWS_SECRET_ACCESS_KEY")})
+
+(println "access-key: " (s3-credentials :access-key) ", secret-key: " (s3-credentials :secret-key))
+
+(defn test-put-route
+  [request]
+  (println "test-route")
+  (let [answer (s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") "test-key" "test-value")]
+     (println (str "answer: " answer))
+     {:status 200
+         :headers {"Content-Type" "text/html"}
+         :body (str "answer: " answer)}))
+
+
 (defn upload-file
   [request]
   (println "FILE request ********************")
@@ -67,7 +81,9 @@
     (println file)
     (if file
       (do
+        (println "actual-file: " actual-file)
         (io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
+        (s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") file-name (slurp actual-file))
         {:status 200
          :headers {"Content-Type" "text/html"}
          :body (str "filename: " file-name ", size: " file-size)})
@@ -75,10 +91,19 @@
 
 ;; ************* GET RID OF above
 
+(defn test-route
+  [request]
+  (println "serve-test")
+  {:status 200
+  :headers {}
+  :body (io/file (io/resource "html/test.html"))})
 
 (defroutes app
   (ANY "/repl" {:as req}
        (drawbridge req))
+
+  (GET "/test-put" [] test-put-route)
+  (GET "/test" [] test-route)
 
   (POST "/file" [] upload-file) ;{params :params} (upload-file (get params "file"))))
 
@@ -122,9 +147,9 @@
                      {:port port :join? false})))
 
 
-;; For interactive development:
-(defonce server (-main))
+;; For interactive development: -- can't push to heroku with this uncommented!
+; (defonce server (-main))
 
-(defn stop [] 
-  (.stop server))
+; (defn stop [] 
+;   (.stop server))
 
