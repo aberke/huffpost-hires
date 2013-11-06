@@ -59,6 +59,7 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
   xhrRequest = function(method, url, data, callback, onProgress) {
     xhr = new XMLHttpRequest();
     xhr.open(method, '/api' + url, true);
+    //xhr.open('POST', '/api/file', true);
 
     console.log('httpPUT:');
     console.log(data);

@@ -4,10 +4,6 @@
             [compojure.handler :refer [site]]
             [compojure.route :as route]
             
-            ;; take out
-            [clojure.java.io :as io]
-            [aws.sdk.s3 :as s3]
-            ;;
             [ring.middleware.stacktrace :as trace]
             [ring.middleware.session :as session]
             [ring.middleware.session.cookie :as cookie]
@@ -19,8 +15,6 @@
             [environ.core :refer [env]]
 
             [huffpost-hires.api :as api])
-  ;; take out
-  (:import [java.io File])
   )
 
 (defn- authenticated? [user pass]
@@ -49,50 +43,6 @@
       :headers {}
       :body (io/file (io/resource "html/hires.html"))})
 
-;; ************* GET RID OF BELOW
-
-(def s3-credentials {:access-key (System/getenv "AWS_ACCESS_KEY_ID"), :secret-key (System/getenv "AWS_SECRET_ACCESS_KEY")})
-
-(defn test-put-route
-  [request]
-  (println "test-route")
-  (let [answer (s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") "test-key" "test-value")]
-     (println (str "answer: " answer))
-     {:status 200
-         :headers {"Content-Type" "text/html"}
-         :body (str "answer: " answer)}))
-
-
-(defn upload-file
-  [request]
-  (println "FILE request ********************")
-  (println request)
-  (println "FILE params ********************")
-
-
-  (let [params (request :params) 
-        multipart-params (request :multipart-params) 
-        file (get multipart-params "file")
-        file-name (file :filename)
-        file-size (file :size)
-        actual-file (file :tempfile)]
-    (println params)
-    (println "FILE multipart-params ********************")
-    (println multipart-params)
-    (println "FILE file ********************")
-    (println file)
-    (if file
-      (do
-        (println "actual-file: " actual-file)
-        (io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
-        ;(s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") file-name (slurp actual-file))
-        {:status 200
-         :headers {"Content-Type" "text/html"}
-         :body (str "filename: " file-name ", size: " file-size)})
-      "NO FILE FOUND")))
-
-;; ************* GET RID OF above
-
 (defn test-route
   [request]
   (println "serve-test")
@@ -103,9 +53,6 @@
 (defroutes app
   (ANY "/repl" {:as req}
        (drawbridge req))
-
-  (GET "/test-put" [] test-put-route)
-  (GET "/test" [] test-route)
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)

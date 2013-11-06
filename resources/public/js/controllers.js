@@ -119,6 +119,8 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 	$scope.incompleTasks;
 	$scope.totalTasks;
 
+	var spinner;
+
 	var disableFailTaskBtn = function() { $('#edit-task-fail-btn').attr("disabled", "disabled"); };
 	var enableFailTaskBtn = function() { $('#edit-task-fail-btn').removeAttr('disabled', 'disabled'); };
 	var disablePassTaskBtn = function() { $('#edit-task-pass-btn').attr("disabled", "disabled"); };
@@ -185,13 +187,13 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		$('#updateApplicantInfo-btn').html('<h3>Save</h3>');
 	}
 	var updateApplicantInfoSave = function() {
-		console.log('updateApplicantInfo:');
-		console.log($scope.applicant);
+		spinner.start();
 		APIService.updateApplicant($scope.applicant, function() {
-			console.log('callback');
-			$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
-			$scope.editApplicantInfo = false;
-			$scope.$apply();
+			APIService.getApplicantWithTasks($routeParams.id, function() {
+				spinner.hide();
+				$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
+				$scope.editApplicantInfo = false;
+			});
 		});
 	}
 
@@ -207,22 +209,6 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 	$scope.attachApplicantResume = function(fileInput) {
 		$scope.applicant.resume = fileInput.files[0];
 		console.log($scope.applicant);
-	}
-
-	$scope.uploadApplicantResume = function(fileInput){
-		console.log('setFile');
-		console.log(fileInput);
-		console.log(fileInput.files);
-
-
-		var form = new FormData();
-		form.append("file", fileInput.files[0]);
-		form.append("id", $scope.interviewer.id);
-		
-		APIService.uploadApplicantResume(form, function(data) {
-			console.log('uploadApplicantResume callback: ');
-			console.log(data);
-		});
 	}
 
 	var init = function() {
@@ -246,6 +232,7 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 			console.log('stages:');
 			console.log($scope.stagesList);
 		});
+		spinner = new Spinner($('#applicant-info-well')[0],'purple',100,100);
 	}
 	init();
 

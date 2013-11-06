@@ -262,8 +262,11 @@
 
 ;; helper to put-appliant to upload resume and then return map {'resume_url' resume_url}  **IF** the resume is in params 
 (defn upload-resume
+	"If resume was included in params, uploads resume to s3 and returns map {'resume_url' resume_url}
+	Otherwise returns empty map"
 	[params]
 	(if (get params "resume")
+		;; then: parse out file data and upload to s3
 		(let [file (params "resume")
 	        file-name (file :filename)
 	        file-size (file :size)
@@ -271,38 +274,25 @@
 	        actual-file (file :tempfile)
 	        object-key (string/replace (str "interviewer/pic/" file-name) " " "-")
 	        resume-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
-
-	        (println (str "file: " file))
-
-        	(io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
-        	(s3/put-object s3-credentials 
+	        ;; upload to our s3 bucket
+	        (s3/put-object s3-credentials 
         					(System/getenv "S3_BUCKET_NAME") 
-        					object-key (slurp actual-file)) 
-        					;{:content-type content-type})
-
-
-        	(println (str "uploaded file with url " resume-url))
-        	(println (str "returning " {"resume_url" resume-url}))
-        	{"resume_url" resume-url})
-
-		(do
-			(println "NO FILE FOUND")
-			{})))
+        					object-key 
+        					actual-file
+        					{:content-type content-type :content-length file-size})
+			{"resume_url" resume-url})
+		;; else: return empty map
+		{})) 
 
 
 ;; PUT /api/applicant
 (defn put-applicant
+	"If a resume was included in the put request, uploads the resume to s3 and 
+	merges the url for the resume in with the rest of the parameters to be included in the attribute map
+	before updating the applicant in the table"
 	[params]
-	(println "*********** put-applicant applicants-attributeMap")
-	(println (params->applicants-attributeMap params))
 	(println "*********** put-applicant")
-
-	(let [extra-params (upload-resume params)] ;full-params (merge params (upload-resume params))]
-
-		(println (str "extra-params: " extra-params))
-
-		;(println (str "full-params: " full-params))
-
+	(let [extra-params (upload-resume params) full-params (merge params extra-params)]
 		(if (models/update-applicant (params->applicants-attributeMap (merge params extra-params))) 
 			"OK" 
 			"ERROR")))
