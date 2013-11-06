@@ -8,7 +8,13 @@
         <div id='interviewer-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
             <button id='updateInterviewerInfo-btn' ng-click="updateInterviewerInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
             
-            <p><img ng-show='editInterviewerInfo==false' src="/img/brandon_diamond.png" width="40px"><input ng-show='editInterviewerInfo==true' type="file" ng-model="interviewer.pic">  <span class="interviewer-info-name" ng-show='editInterviewerInfo==false'>{{interviewer.name}}</span><input class="interviewer-info-name" ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.name'></p>
+            <p>
+                <img ng-show='editInterviewerInfo==false' ng-src={{interviewer.pic_url}} width="40px">
+                <span id='file-upload-container' ng-show='editInterviewerInfo==true'>
+                    <em>Upload pic: </em><input type="file" ng-model="interviewer.pic_url" onchange="angular.element(this).scope().uploadInterviewerPic(this)" />
+                </span> 
+
+                <span class="interviewer-info-name" ng-show='editInterviewerInfo==false'>{{interviewer.name}}</span><input class="interviewer-info-name" ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.name'></p>
             <p><em>Email:</em> <span ng-show='editInterviewerInfo==false'>{{interviewer.email}}</span><input ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.email'></p>
             <p><em>Phone number:</em> <span ng-show='editInterviewerInfo==false'>{{interviewer.phone}}</span><input ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.phone'></p>
         </div>

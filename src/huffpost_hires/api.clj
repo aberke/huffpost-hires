@@ -1,11 +1,60 @@
+;; Handles routing api requests
+
 (ns huffpost-hires.api
 	(require [huffpost-hires.models :as models]
 		[huffpost-hires.util :as util]
 
+        [aws.sdk.s3 :as s3]
+        [clojure.java.io :as io]
+        [clojure.string :as string]
+		[cheshire.core :as json])
 
-		[cheshire.core :as json]))
+	(:import [java.io File]))
 
-;; Handles routing api requests
+;; ********************* HELPERS **********************
+
+
+(def s3-credentials {:access-key (System/getenv "AWS_ACCESS_KEY_ID"), :secret-key (System/getenv "AWS_SECRET_ACCESS_KEY")})
+
+
+(defn params->applicants-attributeMap
+	[params]
+	(println "params->applicants-attributeMap -- params: " params)
+	{:id (util/string->number (get params "id"))
+		:name (util/string->sql-safe (get params "name" ""))
+		:stage (util/string->number-or-0 (get params "stage" 0))
+		:goalie (util/string->number-or-0 (get params "goalie"))
+		:phone (get params "phone" "")
+		:email (get params "email" "")
+		:position (util/string->sql-safe (get params "position" ""))
+		:notes (util/string->sql-safe (get params "notes" ""))
+		:referral (util/string->sql-safe (get params "referral" ""))
+		:resume_url (get params "resume_url" "")
+		:completed (util/string->number (get params "completed" 0))
+		:pass (util/string->number (get params "pass" 1))})
+
+(defn params->tasks-attributeMap
+	[params]
+	(println "params->tasks-attributeMap -- params: " params)
+	{:id (util/string->number (get params :id))
+		:applicant (util/string->number-or-0 (get params :applicant))
+		:interviewer (util/string->number-or-0 (get params :interviewer))
+		:title (util/string->sql-safe (get params :title ""))
+		:description (util/string->sql-safe (get params :description ""))
+		:feedback (util/string->sql-safe (get params :feedback ""))
+		:date (get params :date "")
+		:pic_url (get params :pic_url "/img/default.jpg")
+		:feedback_due (get params :feedback_due "")
+		:completed (util/string->number-or-0 (get params :completed))
+		:pass (util/string->number (get params :pass 1))})
+
+(defn params->interviewers-attributeMap
+	[params]
+	(println "params->interviewers-attributeMap -- params: " params)
+	{:id (util/string->number (get params :id))
+		:name (get params :name "")
+		:phone (get params :phone "")
+		:email (get params :email "")})
 
 
 ;; ******************************* GET requests below ******************************
@@ -160,6 +209,8 @@
 (defn handle-get-request
 	"Called by web upon GET request to url /api/*/*"
 	[request]
+	(println "***************** GET *****")
+	(println request)
 
 	(let [params (request :params) route (params :*) route-prefix (first route) route-suffix (second route)]
 		(println (str "params: " params))
@@ -171,46 +222,6 @@
 			"Invalid api request")))
 
 ;; ******************************* GET requests above ******************************
-
-;; ********************* HELPERS **********************
-
-(defn params->applicants-attributeMap
-	[params]
-	(println "params->applicants-attributeMap -- params: " params)
-	{:id (util/string->number (get params :id))
-		:name (util/string->sql-safe (get params :name ""))
-		:stage (util/string->number-or-0 (get params :stage 0))
-		:goalie (util/string->number-or-0 (get params :goalie))
-		:phone (get params :phone "")
-		:email (get params :email "")
-		:position (util/string->sql-safe (get params :position ""))
-		:notes (util/string->sql-safe (get params :notes ""))
-		:referral (util/string->sql-safe (get params :referral ""))
-		:resume (get params :resume "")
-		:completed (util/string->number (get params :completed 0))
-		:pass (util/string->number (get params :pass 1))})
-
-(defn params->tasks-attributeMap
-	[params]
-	(println "params->tasks-attributeMap -- params: " params)
-	{:id (util/string->number (get params :id))
-		:applicant (util/string->number-or-0 (get params :applicant))
-		:interviewer (util/string->number-or-0 (get params :interviewer))
-		:title (util/string->sql-safe (get params :title ""))
-		:description (util/string->sql-safe (get params :description ""))
-		:feedback (util/string->sql-safe (get params :feedback ""))
-		:date (get params :date "")
-		:feedback_due (get params :feedback_due "")
-		:completed (util/string->number-or-0 (get params :completed))
-		:pass (util/string->number (get params :pass 1))})
-
-(defn params->interviewers-attributeMap
-	[params]
-	(println "params->interviewers-attributeMap -- params: " params)
-	{:id (util/string->number (get params :id))
-		:name (get params :name "")
-		:phone (get params :phone "")
-		:email (get params :email "")})
 
 ;; ******************************* POST requests below ******************************
 
@@ -249,16 +260,65 @@
 
 ;; ******************************* PUT requests below ******************************
 
+;; helper to put-appliant to upload resume and then return map {'resume_url' resume_url}  **IF** the resume is in params 
+(defn upload-resume
+	[params]
+	(if (get params "resume")
+		(let [file (params "resume")
+	        file-name (file :filename)
+	        file-size (file :size)
+	        content-type (file :content-type)
+	        actual-file (file :tempfile)
+	        object-key (string/replace (str "interviewer/pic/" file-name) " " "-")
+	        resume-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
+
+	        (println (str "file: " file))
+
+        	(io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
+        	(s3/put-object s3-credentials 
+        					(System/getenv "S3_BUCKET_NAME") 
+        					object-key (slurp actual-file)) 
+        					;{:content-type content-type})
+
+
+        	(println (str "uploaded file with url " resume-url))
+        	(println (str "returning " {"resume_url" resume-url}))
+        	{"resume_url" resume-url})
+
+		(do
+			(println "NO FILE FOUND")
+			{})))
+
+
+;; PUT /api/applicant
+(defn put-applicant
+	[params]
+	(println "*********** put-applicant applicants-attributeMap")
+	(println (params->applicants-attributeMap params))
+	(println "*********** put-applicant")
+
+	(let [extra-params (upload-resume params)] ;full-params (merge params (upload-resume params))]
+
+		(println (str "extra-params: " extra-params))
+
+		;(println (str "full-params: " full-params))
+
+		(if (models/update-applicant (params->applicants-attributeMap (merge params extra-params))) 
+			"OK" 
+			"ERROR")))
+
+
+
 (defn handle-put-request
 	[request]
 	(println "**************** API PUT *******************")
-	(println "TODO: handle-put-request")
-	(let [params (request :params) 
-		route (params :*) id (util/string->number (params :id))]
+	(println request)
+	(let [params (request :multipart-params)
+		route ((request :route-params) :*)]
 		(println (str "params: " params))
 		(println (str "route: " route))
 		(case route
-			"applicant" (if (models/update-applicant (params->applicants-attributeMap params)) "OK" "ERROR")
+			"applicant" (put-applicant params)
 			"interviewer" (if (models/update-interviewer (params->interviewers-attributeMap params)) "OK" "ERROR")
 			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid DELETE request")))

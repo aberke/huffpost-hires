@@ -40,17 +40,15 @@ function HomeCntl($scope, APIService){
 	$scope.setFile = function(fileInput){
 		console.log('setFile');
 		console.log(fileInput);
-		console.log(fileInput.value);
+		console.log(fileInput.files);
 
 
-		var fd = new FormData();
-		fd.append("Resume", fileInput.value);
-		console.log(fd);
-		APIService.uploadResume(fd);
-	}
+		var form = new FormData();
+		form.append("file", fileInput.files[0]);
+		form.append("id", 2);
+		console.log(form);
+		APIService.uploadResume(form);
 
-	$scope.uploadFile = function(file){
-		
 	}
 
 	var init = function() {
@@ -193,6 +191,7 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 			console.log('callback');
 			$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
 			$scope.editApplicantInfo = false;
+			$scope.$apply();
 		});
 	}
 
@@ -204,6 +203,28 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 			$location.path('/applicants');
 		});
 	}	
+
+	$scope.attachApplicantResume = function(fileInput) {
+		$scope.applicant.resume = fileInput.files[0];
+		console.log($scope.applicant);
+	}
+
+	$scope.uploadApplicantResume = function(fileInput){
+		console.log('setFile');
+		console.log(fileInput);
+		console.log(fileInput.files);
+
+
+		var form = new FormData();
+		form.append("file", fileInput.files[0]);
+		form.append("id", $scope.interviewer.id);
+		
+		APIService.uploadApplicantResume(form, function(data) {
+			console.log('uploadApplicantResume callback: ');
+			console.log(data);
+		});
+	}
+
 	var init = function() {
 		APIService.getApplicantWithTasks($routeParams.id, function() {
 			console.log('applicant:');
@@ -320,7 +341,24 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 		APIService.deleteInterviewer($scope.interviewer.id, function() {
 			$location.path('/interviewers');
 		});
-	}	
+	}
+
+	$scope.uploadInterviewerPic = function(fileInput){
+		console.log('setFile');
+		console.log(fileInput);
+		console.log(fileInput.files);
+
+
+		var form = new FormData();
+		form.append("file", fileInput.files[0]);
+		form.append("id", $scope.interviewer.id);
+		
+		APIService.uploadInterviewerPic(form, function(data) {
+			console.log('uploadInterviewerPic callback: ');
+			console.log(data);
+		});
+	}
+
 	var getTasks = function() {
 
 	}

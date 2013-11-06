@@ -20,7 +20,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="interviewer in interviewersList">
-                        <th><img src="/img/brandon_diamond.png" width="20px"></th>
+                        <th><img ng-src={{interviewer.pic_url}} width="20px"></th>
                         <td class="inteviewer-name"><a href="/interviewer?id={{interviewer.id}}">{{interviewer.name}}</a></td>
                         <td class="padding-left-60">{{interviewer.current_applicants}}</td>
                         <td class="padding-left-60">{{interviewer.incomplete_tasks}}</td>

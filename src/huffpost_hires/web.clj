@@ -3,7 +3,11 @@
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [compojure.handler :refer [site]]
             [compojure.route :as route]
+            
+            ;; take out
             [clojure.java.io :as io]
+            [aws.sdk.s3 :as s3]
+            ;;
             [ring.middleware.stacktrace :as trace]
             [ring.middleware.session :as session]
             [ring.middleware.session.cookie :as cookie]
@@ -13,11 +17,11 @@
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
             [environ.core :refer [env]]
-            [aws.sdk.s3 :as s3]
 
             [huffpost-hires.api :as api])
-
-  (:import [java.io File]))
+  ;; take out
+  (:import [java.io File])
+  )
 
 (defn- authenticated? [user pass]
   ;; TODO: heroku config:add REPL_USER=[...] REPL_PASSWORD=[...]
@@ -48,8 +52,6 @@
 ;; ************* GET RID OF BELOW
 
 (def s3-credentials {:access-key (System/getenv "AWS_ACCESS_KEY_ID"), :secret-key (System/getenv "AWS_SECRET_ACCESS_KEY")})
-
-(println "access-key: " (s3-credentials :access-key) ", secret-key: " (s3-credentials :secret-key))
 
 (defn test-put-route
   [request]
@@ -83,7 +85,7 @@
       (do
         (println "actual-file: " actual-file)
         (io/copy actual-file (File. (format "./resources/uploads/%s" file-name))) ;(format "/Users/aberke13/huffpost-hires-tempfiles/%s" file-name)))
-        (s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") file-name (slurp actual-file))
+        ;(s3/put-object s3-credentials (System/getenv "S3_BUCKET_NAME") file-name (slurp actual-file))
         {:status 200
          :headers {"Content-Type" "text/html"}
          :body (str "filename: " file-name ", size: " file-size)})
@@ -104,8 +106,6 @@
 
   (GET "/test-put" [] test-put-route)
   (GET "/test" [] test-route)
-
-  (POST "/file" [] upload-file) ;{params :params} (upload-file (get params "file"))))
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
@@ -148,8 +148,8 @@
 
 
 ;; For interactive development: -- can't push to heroku with this uncommented!
-; (defonce server (-main))
+(defonce server (-main))
 
-; (defn stop [] 
-;   (.stop server))
+(defn stop [] 
+  (.stop server))
 

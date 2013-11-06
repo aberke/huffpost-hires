@@ -31,7 +31,19 @@
         </div>
         <div id='applicant-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
             <button id='updateApplicantInfo-btn' ng-click="updateApplicantInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
-            <p><em>Resume: </em> <span ng-show='editApplicantInfo==false'><a ng-href='{{applicant.resume}}'> View</a></span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.resume'></p>
+            <p>
+                <em>Resume: </em> 
+
+                <span ng-show='editApplicantInfo==false'>
+                    <a ng-show="applicant.resume_url!=''" target="_blank" ng-href='{{applicant.resume_url}}'> View</a>
+                    <span ng-show="applicant.resume_url==''">No resume uploaded</span>
+                </span>
+
+                <span id='file-upload-container' ng-show='editApplicantInfo==true'>
+                    <em>Upload pic: </em><input type="file" ng-model="applicant.resume_url" onchange="angular.element(this).scope().attachApplicantResume(this)" />
+                </span> 
+
+            </p>
             <p><em>Email:</em> <span ng-show='editApplicantInfo==false'>{{applicant.email}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.email'></p>
             <button ng-show='editApplicantInfo==true && applicant.pass==1' id='failApplicantInfo-btn' ng-click="applicant.pass=0; applicant.completed=1" class="float-right btn btn-danger"><h5>FAIL</h5></button>
             <button ng-show='editApplicantInfo==true && applicant.pass==0' id='failApplicantInfo-btn' ng-click="applicant.pass=1;" class="float-right btn btn-warning"><h5>remove fail</h5></button>

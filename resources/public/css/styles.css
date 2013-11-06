@@ -211,6 +211,14 @@ tr.passed-true td{
 	margin-bottom: 50px;
 }
 
+#file-upload-container{
+	display: block;
+	padding-bottom: 4px;
+}
+#file-upload-container input{
+	display: inline-block;
+}
+
 .interviewer-info-name{
 	font-size: 20px;
 	font-weight: bold;

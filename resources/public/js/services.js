@@ -54,24 +54,49 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     $.each(list, function(i) { map[list[i].id] = list[i]; });
     return map;
   };
-  httpUploadFile = function(method, url, data) {
-    var deferred = $q.defer();
-    $http({
-      method: method,
-      url: url,
-      data: $.param(data || {}),
-      headers: {'Content-Type': 'multipart/form-data'}
-    })
-    .success(function(returnedData){
-      deferred.resolve(returnedData);
-    })
-    .error(function(returnedData) {
-      console.log('API ERROR: ' + returnedData.error);
-      deferred.reject(returnedData);
-    });
-    return deferred.promise;
-  };
 
+
+  xhrRequest = function(method, url, data, callback, onProgress) {
+    xhr = new XMLHttpRequest();
+    xhr.open(method, '/api' + url, true);
+
+    console.log('httpPUT:');
+    console.log(data);
+
+    var form = new FormData();
+    $.each(data, function(name) { form.append(name, data[name]); });
+
+    xhr.onload = function(e) {
+      console.log('onload with status: ' + xhr.status);
+      if (xhr.status === 200) {
+        console.log(xhr);
+        console.log(xhr.response);
+        callback(xhr.response);
+      } else {
+        console.log('Upload error: ' + xhr.status);
+      }
+    };
+    xhr.onerror = function(e) {
+      console.log('XHR error.');
+    };
+    xhr.upload.onprogress = function(e) {
+      console.log('xhr.upload.onprogress:');
+      console.log(e);
+      var percentLoaded;
+      if (e.lengthComputable) {
+        percentLoaded = Math.round((e.loaded / e.total) * 100);
+        console.log('percentLoaded: ' + percentLoaded);
+        //return this_s3upload.onProgress(percentLoaded, (percentLoaded === 100 ? 'Finalizing.' : 'Uploading.'), public_url, file);
+      }
+    };
+    xhr.send(form);
+  };
+  xhrPUT = function(url, data, callback, onProgress) {
+    return this.xhrRequest('PUT', url, data, callback, onprogress);
+  };
+  xhrPOST = function(url, data, callback, onProgress) {
+    return this.xhrRequest('POST', url, data, callback, onprogress);
+  };
   http = function(method, url, data) {
     var deferred = $q.defer();
     $http({
@@ -95,9 +120,6 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
   };
   httpPOST = function(url, data) {
     return this.http('POST', url, data);
-  };
-  httpPUT = function(url, data) {
-    return this.http('PUT', url, data);
   };
   httpDELETE = function(url, data) {
     return this.http('DELETE', url, data);
@@ -149,32 +171,20 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       return map;
     },
 
-
-    uploadResume: function(fd) {
-      var xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener("progress", function(progress){ 
-        console.log('progress');
-        console.log(progress);
+    uploadInterviewerPic: function(formData, callback) {
+      httpUploadFile('PUT', '/interviewer/pic', formData, function(returnedData) {
+        console.log('returnedData: ');
+        console.log(returnedData);
+        if (callback) callback(returnedData);
       });
-      xhr.addEventListener("load", function(load){
-        console.log("Load");
-        console.log(load);
-      });
-      xhr.addEventListener("error", function(error) {
-        console.log("ERROR");
-        console.log(error);
-      });
-      xhr.addEventListener("abort", function(abort) {
-        console.log('ABORT');
-        console.log(abord);
-      });
-      xhr.open('POST', "/file");
-      xhr.send(fd);
     },
-
-
-
-
+    uploadApplicantResume: function(formData, callback) {
+      httpUploadFile('PUT', '/applicant/resume', formData, function(returnedData) {
+        console.log('returnedData: ');
+        console.log(returnedData);
+        if (callback) callback(returnedData);
+      });
+    },
 
     getRejectedApplicants: function(callback) {
       httpGET('/applicant/rejected').then(function(returnedData) {
@@ -280,7 +290,7 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     /* ************** POST REQUESTS ******************/
 
     postNewApplicant: function(new_applicant, callback) {
-      httpPOST('/applicant', new_applicant).then(function(returnedData) {
+      xhrPOST('/applicant', new_applicant, function(returnedData) {
         console.log('postNewApplicant returned:');
         console.log(returnedData);
         if (callback) callback();
@@ -329,21 +339,21 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
     /* ************** PUT REQUESTS ******************/
     updateApplicant: function(applicant, callback) {
-      httpPUT('/applicant', applicant).then(function(returnedData) {
+      xhrPUT('/applicant', applicant, function(returnedData) {
         console.log('updateApplicant returned data');
         console.log(returnedData);
         if (callback) callback();
       });
     },
     updateInterviewer: function(interviewer, callback) {
-      httpPUT('/interviewer', interviewer).then(function(returnedData) {
+      xhrPUT('/interviewer', interviewer, function(returnedData) {
         console.log('updateInterviewer returnedData:')
         console.log(returnedData);
         if (callback) callback();
       });
     },
     updateTask: function(task, callback) {
-      httpPUT('/task', task).then(function(returnedData) {
+      xhrPUT('/task', task, function(returnedData) {
         console.log('updateTask returned data:');
         console.log(returnedData);
         getApplicantTasks(task.applicant, callback);

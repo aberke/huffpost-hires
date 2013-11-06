@@ -70,7 +70,7 @@
 						[:referral "varchar(50)"]
 						[:notes :text]
 						[:phone "varchar(11)"]
-						[:resume "varchar(180)"] ;; for now it can be a hyperlink to a googledoc
+						[:resume_url "varchar(200)"] ;; link to s3 bucket object. for now it can be a hyperlink to a googledoc
 						[:asof "date not null default CURRENT_DATE"] ;; JSON date created in javascript clientside
 						[:pass :numeric] ; 0/1 boolean
 						[:completed :numeric])) ; 0/1 boolean
@@ -90,7 +90,7 @@
 				:position "Developer"
 				:referral "Alexandra Berke"
 				:notes "Recent graduate"
-				:resume "http://www.google.com"
+				:resume_url "http://www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
 			{:name "Angelina Jolie"
@@ -100,7 +100,7 @@
 				:position "Developer"
 				:notes "Junior developer -- previously worked as a designer.  She also has a busy home life."
 				:referral "Alexandra Berke"
-				:resume "http://www.google.com"
+				:resume_url "http://www.google.com"
 				:pass 1
 				:completed 0}
 			{:name "Mila Kunis"
@@ -110,7 +110,7 @@
 				:position "Developer"
 				:notes "Recent graduate"
 				:referral "Alexandra Berke"
-				:resume "http://www.google.com"
+				:resume_url "http://www.google.com"
 				:pass 1 ; 0/1 boolean
 				:completed 0})) ; 0/1 boolean
 		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
@@ -125,7 +125,8 @@
 						[:id :serial "PRIMARY KEY"]
 						[:name "varchar(80)"]
 						[:email "varchar(80)"]
-						[:phone "varchar(11)"]))
+						[:phone "varchar(11)"]
+						[:pic_url "varchar(200)"])) ;; link to s3 bucket object. 
 		(catch Exception e (util/handle-exception "make-table-interviewers" e)))) ;; error -- return false
 
 
@@ -138,13 +139,16 @@
 		(jdbc/insert-records :interviewers
 			{:name "Fred Flintstone"
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"}
-			{:name "Alice Flintstone"
+				:email "alexandra.berke@huffingtonpost.com"
+				:pic_url "/img/default_pic.jpg"
+			} {:name "Alice Flintstone"
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"}
-			{:name "Amy Flintstone"
+				:email "alexandra.berke@huffingtonpost.com"
+				:pic_url "/img/default_pic.jpg"
+			} {:name "Amy Flintstone"
 				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"}))
+				:email "alexandra.berke@huffingtonpost.com"
+				:pic_url "/img/default_pic.jpg"}))
 		(catch Exception e (util/handle-exception "init-table-interviewers" e)))) ;; error -- return false
 
 
@@ -304,7 +308,7 @@
                               	"', position='" (attribute-map :position)
                               	"', notes='" (attribute-map :notes)
                               	"', referral='" (attribute-map :referral)
-                              	"', resume='" (attribute-map :resume)
+                              	"', resume_url='" (attribute-map :resume_url)
                               	"', completed=" (attribute-map :completed)
                               	", pass=" (attribute-map :pass) " "
                               "WHERE id=" (attribute-map :id))]
@@ -317,6 +321,7 @@
 							"SET name='" (attribute-map :name)
 							"', phone='" (attribute-map :phone)
 							"', email='" (attribute-map :email)
+							"', pic_url='" (attribute-map :pic_url)
 						"' WHERE id=" (attribute-map :id))]
 		(try (execute-sql statement)
 			(catch Exception e (util/handle-exception "update-interviewer")))))
@@ -391,7 +396,8 @@
 		(jdbc/insert-record :interviewers
 			{:name (attribute-map :name)
 				:phone (attribute-map :phone)
-				:email (attribute-map :email)})
+				:email (attribute-map :email)
+				:pic_url (attribute-map :pic_url)})
 				true) ; success
 		(catch Exception e (util/handle-exception "insert-interviewer" e)))) ;; error -- return false
 
@@ -407,7 +413,7 @@
 				:email (attribute-map :email)
 				:position (attribute-map :position)
 				:notes (attribute-map :notes)
-				:resume (attribute-map :resume)
+				:resume_url (attribute-map :resume_url)
 				:pass 1 ; 0/1 boolean
 				:completed 0}) ; 0/1 boolean)
 				true) ; success
