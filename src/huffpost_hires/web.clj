@@ -13,6 +13,7 @@
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
             [environ.core :refer [env]]
+            [clojure.java.io :as io]
 
             [huffpost-hires.api :as api])
   )

@@ -51,10 +51,11 @@
 (defn params->interviewers-attributeMap
 	[params]
 	(println "params->interviewers-attributeMap -- params: " params)
-	{:id (util/string->number (get params :id))
-		:name (get params :name "")
-		:phone (get params :phone "")
-		:email (get params :email "")})
+	{:id (util/string->number (get params "id"))
+		:name (get params "name" "")
+		:phone (get params "phone" "")
+		:email (get params "email" "")
+		:pic_url (get params "pic_url" "")})
 
 
 ;; ******************************* GET requests below ******************************
@@ -209,9 +210,6 @@
 (defn handle-get-request
 	"Called by web upon GET request to url /api/*/*"
 	[request]
-	(println "***************** GET *****")
-	(println request)
-
 	(let [params (request :params) route (params :*) route-prefix (first route) route-suffix (second route)]
 		(println (str "params: " params))
 		(println (str "route:" route))
@@ -260,30 +258,43 @@
 
 ;; ******************************* PUT requests below ******************************
 
+
+(defn upload-to-s3
+	"Helper to upload-resume and upload-pic.  Uploads files to amazon s3 bucket
+	Takes file object to upload, taken out of multipart-params of http request, and prefix for object name
+	Returns url to uploaded file"
+	[file object-key-prefix]
+	;; parse out file data
+	(let [file-name (file :filename)
+		file-size (file :size)
+		content-type (file :content-type)
+		actual-file (file :tempfile)
+		object-key (string/replace (str object-key-prefix file-name) " " "-")
+		object-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
+		;; upload to our s3 bucket
+        (s3/put-object s3-credentials 
+    					(System/getenv "S3_BUCKET_NAME") 
+    					object-key 
+    					actual-file
+    					{:content-type content-type :content-length file-size})
+		object-url))
+
 ;; helper to put-appliant to upload resume and then return map {'resume_url' resume_url}  **IF** the resume is in params 
 (defn upload-resume
 	"If resume was included in params, uploads resume to s3 and returns map {'resume_url' resume_url}
 	Otherwise returns empty map"
 	[params]
 	(if (get params "resume")
-		;; then: parse out file data and upload to s3
-		(let [file (params "resume")
-	        file-name (file :filename)
-	        file-size (file :size)
-	        content-type (file :content-type)
-	        actual-file (file :tempfile)
-	        object-key (string/replace (str "interviewer/pic/" file-name) " " "-")
-	        resume-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
-	        ;; upload to our s3 bucket
-	        (s3/put-object s3-credentials 
-        					(System/getenv "S3_BUCKET_NAME") 
-        					object-key 
-        					actual-file
-        					{:content-type content-type :content-length file-size})
-			{"resume_url" resume-url})
-		;; else: return empty map
+		{"resume_url" (upload-to-s3 (params "resume") "applicant/resume")}
 		{})) 
-
+;; helper to put-interviewer to upload pic and then return map {'pic_url' pic_url} **IF** the pic is in the params
+(defn upload-pic
+	"If pic was included in params, uploads pic to s3 and returns map {'pic_url' pic_url}
+	Otherwise returns empty map"
+	[params]
+	(if (get params "pic")
+		{"pic_url" (upload-to-s3 (params "pic") "interviewer/pic")}
+		{}))
 
 ;; PUT /api/applicant
 (defn put-applicant
@@ -291,13 +302,21 @@
 	merges the url for the resume in with the rest of the parameters to be included in the attribute map
 	before updating the applicant in the table"
 	[params]
-	(println "*********** put-applicant")
 	(let [extra-params (upload-resume params) full-params (merge params extra-params)]
-		(if (models/update-applicant (params->applicants-attributeMap (merge params extra-params))) 
+		(if (models/update-applicant (params->applicants-attributeMap full-params)) 
 			"OK" 
 			"ERROR")))
 
-
+;; PUT /api/interviewer
+(defn put-interviewer
+	"If a pic was included in the PUT request, uploads the pi to s3 and
+	merges the url for the pic in with the rest of the parameters to be included in the attribute map
+	before updating the interviewer in the table"
+	[params]
+	(let [extra-params (upload-pic params) full-params (merge params extra-params)]
+		(if (models/update-interviewer (params->interviewers-attributeMap full-params))
+			"OK"
+			"ERROR")))
 
 (defn handle-put-request
 	[request]
@@ -309,7 +328,7 @@
 		(println (str "route: " route))
 		(case route
 			"applicant" (put-applicant params)
-			"interviewer" (if (models/update-interviewer (params->interviewers-attributeMap params)) "OK" "ERROR")
+			"interviewer" (put-interviewer params)
 			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid DELETE request")))
 

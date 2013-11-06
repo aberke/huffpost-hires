@@ -282,6 +282,8 @@ function AllInterviewersCntl($scope, BasicService, APIService) {
 
 function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 
+	var spinner;
+
 	$scope.interviewerID;
 
 	$scope.editInterviewerInfo = false;
@@ -312,15 +314,15 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 		$('#updateInterviewerInfo-btn').html('<h3>Save</h3>');
 	}
 	var updateInterviewerInfoSave = function() {
-		console.log('updateInterviewerInfo:');
-		console.log($scope.interviewer);
+		spinner.start();
 		APIService.updateInterviewer($scope.interviewer, function() {
-			console.log('callback');
-			$('#updateInterviewerInfo-btn').html('<h3>Edit</h3>');
-			$scope.editInterviewerInfo = false;
+			APIService.getInterviewerWithTasks($scope.interviewerID, function() {
+				$('#updateInterviewerInfo-btn').html('<h3>Edit</h3>');
+				$scope.editInterviewerInfo = false;
+				spinner.hide();
+			});
 		});
 	}
-
 	$scope.updateInterviewerInfo = function(){
 			$scope.editInterviewerInfo ? updateInterviewerInfoSave() : updateInterviewerInfoShow();
 	}
@@ -329,21 +331,8 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 			$location.path('/interviewers');
 		});
 	}
-
-	$scope.uploadInterviewerPic = function(fileInput){
-		console.log('setFile');
-		console.log(fileInput);
-		console.log(fileInput.files);
-
-
-		var form = new FormData();
-		form.append("file", fileInput.files[0]);
-		form.append("id", $scope.interviewer.id);
-		
-		APIService.uploadInterviewerPic(form, function(data) {
-			console.log('uploadInterviewerPic callback: ');
-			console.log(data);
-		});
+	$scope.attachInterviewerPic = function(fileInput) {
+		$scope.interviewer.pic = fileInput.files[0];
 	}
 
 	var getTasks = function() {
@@ -362,6 +351,8 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 		APIService.getInterviewers();
 
 		getApplicants();
+
+		spinner = new Spinner($('#interviewer-info-well')[0],'purple',100,100);
 	}
 	init();
 

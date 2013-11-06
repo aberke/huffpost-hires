@@ -11,7 +11,7 @@
             <p>
                 <img ng-show='editInterviewerInfo==false' ng-src={{interviewer.pic_url}} width="40px">
                 <span id='file-upload-container' ng-show='editInterviewerInfo==true'>
-                    <em>Upload pic: </em><input type="file" ng-model="interviewer.pic_url" onchange="angular.element(this).scope().uploadInterviewerPic(this)" />
+                    <em>Upload pic: </em><input type="file" ng-model="interviewer.pic_url" onchange="angular.element(this).scope().attachInterviewerPic(this)" />
                 </span> 
 
                 <span class="interviewer-info-name" ng-show='editInterviewerInfo==false'>{{interviewer.name}}</span><input class="interviewer-info-name" ng-show='editInterviewerInfo==true' type='text' ng-model='interviewer.name'></p>
@@ -168,3 +168,7 @@
 </div>
     <link href="lib/date-picker/datepicker.css" rel="stylesheet">
     <script src="lib/date-picker/bootstrap-datepicker.js"></script>
+
+    <!-- spinner to show when waiting for uploads -->
+    <link rel="stylesheet" href="/lib/spinner-master/spinner.css" type="text/css">
+    <script type="text/javascript" src="/lib/spinner-master/spinner.js"></script>
