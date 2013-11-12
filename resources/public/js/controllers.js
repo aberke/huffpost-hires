@@ -35,21 +35,6 @@ function MainCntl($scope, $location, BasicService, APIService) {
 }
 function HomeCntl($scope, APIService){
 
-	$scope.file;
-
-	$scope.setFile = function(fileInput){
-		console.log('setFile');
-		console.log(fileInput);
-		console.log(fileInput.files);
-
-
-		var form = new FormData();
-		form.append("file", fileInput.files[0]);
-		form.append("id", 2);
-		console.log(form);
-		APIService.uploadResume(form);
-
-	}
 
 	var init = function() {
 		console.log('HomeCntl');
@@ -73,6 +58,9 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 		if (new_applicant.stage) { new_applicant.stage = new_applicant.stage.number; }
 		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
 		new_applicant.goalie = new_applicant.goalie.id;
+
+		var files = $('#new-applicant-resume')[0].files;
+		if (files && files.length) { new_applicant.resume =  files[0]; }
 
 		console.log('new_applicant:');
 		console.log(new_applicant);
@@ -109,11 +97,15 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 	}
 	init();
 }
-function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService) {
+function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService, TaskService) {
 
 	$scope.editApplicantInfo = false;
 	$scope.new_task = {};
 	$scope.edit_task;
+
+	$scope.homework;
+
+	$scope.showStage;
 
 	$scope.completeTasks;
 	$scope.incompleTasks;
@@ -121,57 +113,62 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 
 	var spinner;
 
-	var disableFailTaskBtn = function() { $('#edit-task-fail-btn').attr("disabled", "disabled"); };
-	var enableFailTaskBtn = function() { $('#edit-task-fail-btn').removeAttr('disabled', 'disabled'); };
-	var disablePassTaskBtn = function() { $('#edit-task-pass-btn').attr("disabled", "disabled"); };
-	var enablePassTaskBtn = function() { $('#edit-task-pass-btn').removeAttr('disabled', 'disabled'); };
+	$scope.editTask = function(task) { TaskService.editTask(task); }
+	$scope.failTask = function() { TaskService.failTask(); }
+	$scope.passTask = function() { TaskService.passTask(); }
 
-	$scope.editTask = function(task) {
-		console.log('editTask:');
-		console.log(task);
-		$scope.edit_task = task;
-		$('#editTaskModal').modal('show');
 
-		if (task.completed==1 && task.pass == 0) disableFailTaskBtn();
-		if (task.completed == 1 && task.pass == 1) disablePassTaskBtn();
-	}
-	$scope.failTask = function() {
-		console.log('failTask')
-		$scope.edit_task.pass = 0;
-		$scope.edit_task.completed = 1;
-		enablePassTaskBtn();
-		disableFailTaskBtn();
-	}
-	$scope.passTask = function() {
-		console.log('passTask')
-		$scope.edit_task.pass = 1;
-		$scope.edit_task.completed = 1;
-		enableFailTaskBtn();
-		disablePassTaskBtn();
-	}
+	var updateHomework = function() {
+		if ($scope.homework.reviewer && (typeof $scope.homework.reviewer != 'number')) {
+			$scope.homework.reviewer = $scope.homework.reviewer.id;
+		};
+		APIService.updateHomework($scope.homework, function() {
+			APIService.getApplicantHomework($scope.applicant.id);
+		});
+	};
+	var addHomework = function(new_homework) {
+		if (!new_homework) return false;
+		new_homework.applicant = $scope.applicant.id;
+
+		if (new_homework.reviewer) new_homework.reviewer = new_homework.reviewer.id;
+		var files = $('#new-homework-attachment')[0].files;
+		if (files && files.length) { new_homework.attachment =  files[0]; }
+
+		console.log('adding Homework: ')
+		console.log(new_homework)
+		APIService.postNewHomework(new_homework, function() {
+			APIService.getApplicantHomework($scope.applicant.id);
+		});	
+	};
+	$scope.saveHomework = function() { $scope.homework ? updateHomework() : addHomework($scope.new_homework); }
+
+	$scope.deleteHomework = function() {
+		APIService.deleteHomework($scope.homework.id);
+		$scope.homework = null;
+	};
+	
 	$scope.updateTask = function() {
-		console.log('updateTask: ');
-		console.log($scope.edit_task);
-
 		if ($scope.edit_task.interviewer && (typeof $scope.edit_task.interviewer != 'number')) {
 			$scope.edit_task.interviewer = $scope.edit_task.interviewer.id;
 		}
 		APIService.updateTask($scope.edit_task, function() {
 			$('#editTaskModal').modal('hide');
 			$('.popover-hover').popover({trigger: 'hover'});
+			APIService.getApplicantWithTasks($routeParams.id, function() {
+				$('.popover-hover').popover({trigger: 'hover'});
+			});
 		});
 	};
 	$scope.deleteTask = function(task) {
 		APIService.deleteTask(task.id, function() {
-			console.log('deleteTask callback')
+			APIService.getApplicantWithTasks($routeParams.id);
 		});
 	}
 	$scope.addTask = function(new_task) {
 		if( BasicService.checkInputEmpty([
 			'new-task-title', 
 			'new-task-interviewer',
-			'new-task-date',
-			'new-task-feedback-due'
+			'new-task-date'
 		])) { return false; }
 
 		$('#newTaskModal').modal('hide');
@@ -193,8 +190,26 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 				spinner.hide();
 				$('#updateApplicantInfo-btn').html('<h3>Edit</h3>');
 				$scope.editApplicantInfo = false;
+				console.log('updated applicant:')
+				console.log($scope.applicant)
 			});
 		});
+	}
+	$scope.setShowStage = function(stage) { $scope.showStage = stage; }
+	$scope.decrStage = function() {
+		$scope.applicant.stage = $scope.applicant.stage - 1;
+		$scope.showStage = $scope.applicant.stage;
+		updateApplicantInfoSave();
+	}
+	$scope.incrStage = function() {
+		$scope.applicant.stage = $scope.applicant.stage + 1;
+		$scope.showStage = $scope.applicant.stage;
+		updateApplicantInfoSave();
+	}
+	$scope.passApplicant = function() {
+		$scope.applicant.stage = 100;
+		$scope.applicant.completed = 1;
+		updateApplicantInfoSave();
 	}
 
 	$scope.updateApplicantInfo = function(){
@@ -206,33 +221,26 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 		});
 	}	
 
-	$scope.attachApplicantResume = function(fileInput) {
-		$scope.applicant.resume = fileInput.files[0];
-		console.log($scope.applicant);
-	}
+	$scope.attachApplicantResume = function(fileInput) { $scope.applicant.resume = fileInput.files[0]; }
 
 	var init = function() {
 		APIService.getApplicantWithTasks($routeParams.id, function() {
 			console.log('applicant:');
 			console.log($scope.applicant);
-			console.log('tasks');
-			console.log($scope.totalTasks);
-			console.log($scope.completeTasks);
-			console.log($scope.incompleteTasks);
-			
+			$scope.showStage = $scope.applicant.stage;
 			$('.popover-hover').popover({trigger: 'hover'});
 		});
 		APIService.getInterviewers(function() {
-			console.log('Interviewers List:');
-			console.log($scope.interviewersList);
 			console.log('interviewersMap');
 			console.log($scope.interviewersMap);
 		});
-		APIService.getStages(function(){
-			console.log('stages:');
-			console.log($scope.stagesList);
-		});
+		APIService.getStages();
 		spinner = new Spinner($('#applicant-info-well')[0],'purple',100,100);
+
+		APIService.getApplicantHomework($routeParams.id, function() {
+			console.log('got applicant homework');
+			console.log($scope.homework)
+		});
 	}
 	init();
 
@@ -260,6 +268,11 @@ function AllInterviewersCntl($scope, BasicService, APIService) {
 		console.log(new_interviewer)
 		$('#newInterviewerModal').modal('hide');
 
+
+		var files = $('#new-interviewer-pic')[0].files;
+		if (files && files.length) { new_interviewer.pic =  files[0]; }
+
+
 		new_interviewer.phone = BasicService.formatPhonenumber(new_interviewer.phone);
 
 		APIService.postNewInterviewer(new_interviewer, function() {
@@ -280,13 +293,14 @@ function AllInterviewersCntl($scope, BasicService, APIService) {
 	init();
 }
 
-function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
+function InterviewerCntl($scope, $timeout, $routeParams, $location, BasicService, APIService, TaskService) {
 
 	var spinner;
 
 	$scope.interviewerID;
 
 	$scope.editInterviewerInfo = false;
+	$scope.editTask = false;
 
 	$scope.completeTasks;
 	$scope.incompleteTasks;
@@ -301,9 +315,6 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 		if (new_applicant.stage) { new_applicant.stage = new_applicant.stage.number; }
 		new_applicant.phone = BasicService.formatPhonenumber(new_applicant.phone);
 		new_applicant.goalie = new_applicant.goalie.id;
-
-		console.log('new_applicant:');
-		console.log(new_applicant);
 		
 		APIService.postNewApplicant(new_applicant, getApplicants);
 		$scope.new_applicant = null;
@@ -331,22 +342,39 @@ function InterviewerCntl($scope, $routeParams, BasicService, APIService) {
 			$location.path('/interviewers');
 		});
 	}
-	$scope.attachInterviewerPic = function(fileInput) {
-		$scope.interviewer.pic = fileInput.files[0];
+	$scope.attachInterviewerPic = function(fileInput) { $scope.interviewer.pic = fileInput.files[0]; }
+	
+	$scope.editTask = function(task) { TaskService.editTask(task); }
+	$scope.failTask = function() { TaskService.failTask(); }
+	$scope.passTask = function() { TaskService.passTask(); }
+	$scope.updateTask = function() {
+		if ($scope.edit_task.interviewer && (typeof $scope.edit_task.interviewer != 'number')) {
+			$scope.edit_task.interviewer = $scope.edit_task.interviewer.id;
+		}
+		APIService.updateTask($scope.edit_task, function() {
+			$('#editTaskModal').modal('hide');
+			$('.popover-hover').popover({trigger: 'hover'});
+			APIService.getInterviewerWithTasks($scope.interviewerID);
+		});
+	};
+	$scope.deleteTask = function(task) {
+		APIService.deleteTask(task.id, function() {
+			APIService.getInterviewerWithTasks($scope.interviewerID);
+		});
 	}
 
-	var getTasks = function() {
-
-	}
 	var getApplicants = function(){
 		APIService.getStagesWithApplicants($scope.stagesWithApplicants, $scope.interviewerID);
+		APIService.getAllApplicants();
 	}
 
 	var init = function() {
 		$scope.interviewerID = $routeParams.id;
 
-		APIService.getInterviewerWithTasks($scope.interviewerID, function() {
-			
+		APIService.getInterviewerWithTasks($scope.interviewerID, function(){
+			$timeout(function() { 
+				$('.popover-hover').popover({trigger: 'hover'}); 
+			}, 1000);
 		});
 		APIService.getInterviewers();
 

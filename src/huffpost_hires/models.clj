@@ -14,11 +14,43 @@
 
 ;			 Stage
 ;			   |
-; 		  Applicant
+; 		  Applicant ------------ Homework
 ; 		 /	|	\   \
 ; 	Task  Task  Task  Task
 ; 		\   |	 |	/
 ; 		Interviewer
+
+; Stage:
+; 	id
+; 	number
+; 	name
+
+; Homework:
+; 	id
+; 	applicant (refers to applicant id)
+; 	prompt (text)
+; 	text_answer
+; 	attachment_url
+; 	feedback
+; 	asof
+
+; Applicant
+; 	id
+; 	name
+; 	stage
+; 	stage_last_changed (date)
+; 	goalie (refers to interviewer id)
+; 	position
+; 	email
+; 	referral
+; 	notes
+; 	phone
+; 	resume_url
+; 	asof
+; 	pass
+; 	completed
+
+
 
 
 (defn make-table-stages
@@ -55,6 +87,26 @@
 					:name "Hired"}))
 			(catch Exception e (util/handle-exception "init-table-stages" e))))
 
+(defn make-table-homeworks
+	"Create the Homeworks Table in database"
+	[]
+	(try (jdbc/with-connection db
+		(jdbc/create-table :homeworks
+			[:id :serial "PRIMARY KEY"]
+			[:applicant :serial "references applicants (id)"]
+			[:prompt :text]
+			[:text_answer :text]
+			[:attachment_url "VARCHAR(200)"]
+			[:reviewer :numeric] ;; references interviewer (can't do serial because then can't be null)
+			[:feedback :text]
+			[:asof "date not null default CURRENT_DATE"]))
+	(catch Exception e (util/handle-exception "make-table-homeworks" e))))
+
+(defn init-table-homeworks
+	[]
+	(make-table-homeworks)
+	(println "Initializing Homeworks Table -- BUT its empty"))
+
 (defn make-table-applicants
 	"Create the Applicants Table in our database."
 	[]
@@ -90,7 +142,7 @@
 				:position "Developer"
 				:referral "Alexandra Berke"
 				:notes "Recent graduate"
-				:resume_url "http://www.google.com"
+				:resume_url ""
 				:pass 1 ; 0/1 boolean
 				:completed 0} ; 0/1 boolean
 			{:name "Angelina Jolie"
@@ -100,7 +152,8 @@
 				:position "Developer"
 				:notes "Junior developer -- previously worked as a designer.  She also has a busy home life."
 				:referral "Alexandra Berke"
-				:resume_url "http://www.google.com"
+				:resume_url ""
+				:stage 4
 				:pass 1
 				:completed 0}
 			{:name "Mila Kunis"
@@ -110,7 +163,7 @@
 				:position "Developer"
 				:notes "Recent graduate"
 				:referral "Alexandra Berke"
-				:resume_url "http://www.google.com"
+				:resume_url ""
 				:pass 1 ; 0/1 boolean
 				:completed 0})) ; 0/1 boolean
 		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
@@ -137,16 +190,16 @@
 	(println "Initializing Interviewers table")
 	(try (jdbc/with-connection db
 		(jdbc/insert-records :interviewers
-			{:name "Fred Flintstone"
-				:phone "12223334444"
+			{:name "Manachem"
+				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"
-			} {:name "Alice Flintstone"
-				:phone "12223334444"
+			} {:name "John Siragussa"
+				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"
 			} {:name "Amy Flintstone"
-				:phone "12223334444"
+				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"}))
 		(catch Exception e (util/handle-exception "init-table-interviewers" e)))) ;; error -- return false
@@ -241,7 +294,8 @@
   (init-table-stages)
   (init-table-applicants)
   (init-table-interviewers)
-  (init-table-tasks))
+  (init-table-tasks)
+  (init-table-homeworks))
 
 (defn drop-tables
 	"Drop ALL of the tables"
@@ -250,6 +304,8 @@
 		;; must drop tasks table first because it depends on other tables
 		(println "Dropping the stages table")	
 		(jdbc/drop-table :stages)
+		(println "Dropping the homeworks table")
+		(jdbc/drop-table :homeworks)
 		(println "Dropping the tasks table")	
 		(jdbc/drop-table :tasks)
 		(println "Dropping the interviewers table")	
@@ -298,7 +354,6 @@
 
 (defn update-applicant
 	[attribute-map]
-
   	(let [statement (str "UPDATE applicants "
                               "SET name='" (attribute-map :name) 
                               	"', stage="(attribute-map :stage)
@@ -314,6 +369,18 @@
                               "WHERE id=" (attribute-map :id))]
     	(try (execute-sql statement)
 			(catch Exception e (util/handle-exception "update-applicant" e))))) ;; error -- return false
+
+(defn update-homework
+	[attribute-map]
+	(let [statement (str "UPDATE homeworks "
+		"SET applicant=" (attribute-map :applicant)
+		", prompt='" (attribute-map :prompt)
+		"', text_answer='" (attribute-map :text_answer)
+		"', attachment_url='" (attribute-map :attachment_url)
+		"', feedback='" (attribute-map :feedback)
+		"', reviewer=" (attribute-map :reviewer))]
+		(try (execute-sql statement)
+			(catch Exception e (util/handle-exception "update-homework" e)))))
 
 (defn update-interviewer
 	[attribute-map]
@@ -344,6 +411,14 @@
 			(catch Exception e (util/handle-exception "update-task" e))))) ;; error -- return false
 
 ; **************** DELETE BELOW *********************************
+
+(defn delete-homework
+	"Deletes homework with given id"
+	[homework-id]
+	(try (jdbc/with-connection db
+		(jdbc/delete-rows :homeworks ["id=?" homework-id])
+		true) ; success
+	(catch Exception e (util/handle-exception "delete-homework" e))))
 
 (defn delete-task
 	"Deletes and task given id"
@@ -382,6 +457,7 @@
 			{:applicant (attribute-map :applicant)
 				:interviewer (attribute-map :interviewer)
 				:title (attribute-map :title)
+				:description (attribute-map :description)
 				:date (attribute-map :date)
 				:feedback (attribute-map :feedback)
 				:feedback_due (attribute-map :feedback_due)
@@ -389,6 +465,19 @@
 				:pass 1})
 		true)
 	(catch Exception e (util/handle-exception "insert-task" e))))
+
+(defn insert-homework
+	[attribute-map]
+	(try (jdbc/with-connection db
+		(jdbc/insert-record :homeworks
+			{:applicant (attribute-map :applicant)
+				:prompt (attribute-map :prompt)
+				:text_answer (attribute-map :text_answer)
+				:attachment_url (attribute-map :attachment_url)
+				:reviewer (attribute-map :reviewer)
+				:feedback (attribute-map :feedback)})
+		true)
+	(catch Exception e (util/handle-exception "insert-homework" e))))
 
 (defn insert-interviewer
 	[attribute-map]

@@ -1,5 +1,8 @@
 a { cursor: pointer; }
 
+input[type='file'] {
+	max-width: 200px;
+}
 
 .red, .red-true { color: red;}
 .gray {color: gray;}
@@ -75,7 +78,10 @@ tr.failed-0:hover{
 	margin-right: 10px;
 }
 tr.passed-true td{
-	background-color: rgba(0,255,0,0.15);
+	background-color: rgba(0,255,0,0.1);
+}
+tr.failed-true td{
+	background-color: rgba(255,0,0,0.1);
 }
 
 
@@ -97,6 +103,9 @@ tr.passed-true td{
 	padding: 50px;
 	width: 70%;
 	margin: auto;
+}
+.btn h3, .btn h5 {
+	margin: 0;
 }
 .small-btn {
 	padding: 4px;
@@ -180,6 +189,9 @@ tr.passed-true td{
 .new-input-container input, .new-input-container select, .new-input-container textarea{
 	float: right;
 }
+.new-input-container input[type='file'] {
+	max-width: 190px;
+}
 .datepicker{z-index: 1051;} /* more than the modal */
 .new-input-container input.error, .new-input-container select.error{
 	border: 1px solid red;
@@ -198,11 +210,14 @@ tr.passed-true td{
 	display: inline-block;
 	color: orange;
 }
-#new-applicant-status select{
+select.small {
 	width: 15px;
-	color: orange;
 	border: none;
 	background-color: black;
+	color: white;
+}
+#new-applicant-status select{
+	color: orange;
 }
 
 /********** Inteviewer **********/
@@ -426,6 +441,19 @@ input.interviewer-info-name{ margin: 0;}
 .task-feedback-due{
 	max-width: 300px;
 }
+
+
+.asset-container {
+	margin-top: 45px;
+}
+/********* Homework ****************/
+#homework-container form label, #homework-container form textarea,#homework-container form select,  #homework-container form input {
+	float: left;
+	clear: both;
+}
+ #homework-container form textarea {
+ 	width: 90%;
+ }
 
 
 

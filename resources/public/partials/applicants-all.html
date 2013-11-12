@@ -134,7 +134,7 @@
         </div>
         <div class="modal-body">
             <div id='new-applicant-status' >
-                <h3 class="status">Pending</h3>
+                <h3 class="status">{{new_applicant['stage'].name || 'Pending'}}</h3>
                 <select class="cursor-pointer" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
             </div>
                         <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
@@ -144,7 +144,9 @@
                         </select></span>
                         <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_applicant.phone'></span>
                         <span class='new-input-container'>Email: <input type='email' placeholder='angie.jolie@gmail.com' ng-model="new_applicant.email"></span>
-                        <span class='new-input-container'>Link to resume: <input type='text' placeholder='www.linkToSharedGoogleDrive.com' ng-model='new_applicant.resume'></span>
+                        <span class='new-input-container'>Resume: 
+                            <input type="file" id='new-applicant-resume'/>
+                        </span>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>

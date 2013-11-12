@@ -1,6 +1,6 @@
 
 
-<a ng-class ng-click="deleteApplicant()" class="delete-link">DELETE</a>
+<a ng-class ng-click="deleteInterviewer()" class="delete-link">DELETE</a>
 
 <div class='container main-container' id='interviewer-page'>
 
@@ -31,20 +31,22 @@
                     <tr>
                         <th></th>
                         <th></th>
+                        <th>Applicant</th>
                         <th>Task</th>
                         <th>Date</th>
-                        <th>Feedback Due</th>
                         <th>Feedback</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="task in incompleteTasks | orderBy:'date'" class="failed-{{task.pass}}">
+                    <tr ng-repeat="task in incompleteTasks | orderBy:'date'" class="failed-{{task.pass}} popover-hover" data-container="body" data-toggle="popover" data-placement="top" data-content={{task.description}} data-original-title="Task Description:" title="">
                         <td class="width-10">
                             <a id="delete-task-btn" ng-click="deleteTask(task)" class="red cursor-pointer">&times;</a>
                         </td>
                         <td>
                             <button id="edit-task-btn" ng-click="editTask(task)" class="btn btn-warning small-btn">edit &gt;</button>
                         </td>
+                        <th class='task-applicant'>
+                            <a href="/applicant?id={{task.applicant}}">{{applicantsMap[task.applicant].name}}</a>
                         <td class="task-title">
                             <span>{{task.title}}</span>
                         </td>
@@ -108,15 +110,12 @@
                 <span ng-show="edit_task.completed==0" class="gray">INCOMPLETE</span>
             </h3>
             <span class='new-input-container'>Interviewer assigned: 
-                <select id='new-task-interviewer' ng-model="edit_task.interviewer" ng-options="interviewer.name for interviewer in interviewersList">
-                    <option value="">-select-</option>
+                <select class='cursor-pointer' id='edit-task-interviewer' ng-model="edit_task.interviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">{{interviewer.name}}</option>
                 </select>
             </span>
             <span class='new-input-container'>Date occurring: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-date">
-            </span>
-            <span class='new-input-container'>Feedback due: 
-                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due">
             </span>
             <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='edit_task.description' class='task-textarea'></textarea></span>
             <span class='new-input-container task-textarea-container'>Feedback: 
@@ -145,8 +144,8 @@
         </div>
         <div class="modal-body">
             <div id='new-applicant-status' >
-                <h3 class="status">Pending</h3>
-                <select class="cursor-pointer" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
+                <h3 class="status">{{new_applicant['stage'].name || 'Pending'}}</h3>
+                <select class="cursor-pointer small" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
             </div>
                         <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
                         <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>

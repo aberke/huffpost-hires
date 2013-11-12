@@ -16,6 +16,7 @@
                         <th>Name</th>
                         <th>Current Applicants Managing</th>
                         <th>Current Tasks</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,6 +25,7 @@
                         <td class="inteviewer-name"><a href="/interviewer?id={{interviewer.id}}">{{interviewer.name}}</a></td>
                         <td class="padding-left-60">{{interviewer.current_applicants}}</td>
                         <td class="padding-left-60">{{interviewer.incomplete_tasks}}</td>
+                        <td class="interviewer-notes">{{interviewer.notes}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -41,7 +43,7 @@
                         <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_interviewer.name'></span>
                         <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_interviewer.phone'></span>
                         <span class='new-input-container'>Email: <input required type='email' placeholder='angie.jolie@gmail.com' ng-model="new_interviewer.email"></span>
-                        <span class='new-input-container'>Pic: <input type='file' class='pic-upload' ng-model='new_interviewer.pic'></span>
+                        <span class='new-input-container'>Pic: <input id='new-interviewer-pic' type='file' class='pic-upload'/></span>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>

@@ -10,7 +10,6 @@ HiresApp.factory('BasicService', function($rootScope) {
       var error = false;
       for(var i=0; i < elementIDsList.length; i++) {
         var elt = $('#' + elementIDsList[i]);
-        console.log(elt.val());
         if(!elt.val()) {
           elt.addClass('error');
           error = true;
@@ -21,7 +20,6 @@ HiresApp.factory('BasicService', function($rootScope) {
 
     /* handles setting up date picker for given element */
     handleDate: function(elementID, onChangeDate) {
-      console.log(elementID)
       var nowTemp = new Date();
       var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
 
@@ -45,6 +43,44 @@ HiresApp.factory('BasicService', function($rootScope) {
       return phonenumber;
     },
   }
+});
+HiresApp.factory('TaskService', function($rootScope, $http, $q) {
+
+
+  var disableFailTaskBtn = function() { $('#edit-task-fail-btn').attr("disabled", "disabled"); };
+  var enableFailTaskBtn = function() { $('#edit-task-fail-btn').removeAttr('disabled', 'disabled'); };
+  var disablePassTaskBtn = function() { $('#edit-task-pass-btn').attr("disabled", "disabled"); };
+  var enablePassTaskBtn = function() { $('#edit-task-pass-btn').removeAttr('disabled', 'disabled'); };
+
+  return {
+
+
+    editTask: function(task) {
+      console.log('editTask:');
+      console.log(task);
+      $rootScope.edit_task = task;
+      $('#editTaskModal').modal('show');
+
+      if (task.completed==1 && task.pass == 0) disableFailTaskBtn();
+      if (task.completed == 1 && task.pass == 1) disablePassTaskBtn();
+    },
+    failTask: function() {
+      console.log('failTask')
+      $rootScope.edit_task.pass = 0;
+      $rootScope.edit_task.completed = 1;
+      enablePassTaskBtn();
+      disableFailTaskBtn();
+    },
+    passTask: function() {
+      console.log('passTask')
+      $rootScope.edit_task.pass = 1;
+      $rootScope.edit_task.completed = 1;
+      enableFailTaskBtn();
+      disablePassTaskBtn();
+    },
+
+  }
+
 });
 
 HiresApp.factory('APIService', function($rootScope, $http, $q){
@@ -287,6 +323,12 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         getApplicantTasks(applicantID, callback);
       });
     },
+    getApplicantHomework: function( applicantID, callback) {
+      httpGET('/applicant/homework?id=' + applicantID, applicantID).then(function(returnedData) {
+        $rootScope.homework = returnedData[0];
+        if (callback) callback();
+      });
+    },
 
     /* ************** POST REQUESTS ******************/
 
@@ -298,15 +340,22 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       });
     },
     postNewTask: function(new_task, callback) {
-      httpPOST('/task', new_task).then(function(returnedData) {
+      xhrPOST('/task', new_task, function(returnedData) {
         console.log('postNewTask');
         console.log(returnedData);
         getApplicantTasks(new_task.applicant, callback);
       });
     },
     postNewInterviewer: function(new_interviewer, callback) {
-      httpPOST('/interviewer', new_interviewer).then(function(returnedData) {
+      xhrPOST('/interviewer', new_interviewer, function(returnedData) {
         console.log('posted new interviewer:');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+    postNewHomework: function(new_homework, callback) {
+      xhrPOST('/homework', new_homework, function(returnedData) {
+        console.log('posted new homework: ');
         console.log(returnedData);
         if (callback) callback();
       });
@@ -314,6 +363,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
     /* ************** DELETE REQUESTS ******************/
 
+    deleteHomework: function(homeworkID, callback) {
+      httpDELETE('/homework', {'id':homeworkID}).then(function(returnedData) {
+        console.log('deleteHomework returned data:');
+        console.log(returnedData)
+        if (callback && (returnedData != 'ERROR')) callback();
+      });
+    },
     deleteApplicant: function(applicantID, callback) {
       httpDELETE('/applicant', {'id': applicantID}).then(function(returnedData) {
         console.log('deleteApplicant with ID ' + applicantID);
@@ -357,7 +413,14 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       xhrPUT('/task', task, function(returnedData) {
         console.log('updateTask returned data:');
         console.log(returnedData);
-        getApplicantTasks(task.applicant, callback);
+        if (callback) callback();
+      });
+    },
+    updateHomework: function(homework, callback) {
+      xhrPUT('/homework', homework, function(returnedData) {
+        console.log('updateHomework returned data:')
+        console.log(returnedData)
+        if (callback) callback();
       });
     },
 

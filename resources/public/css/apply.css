@@ -1,0 +1,86 @@
+/* styling sheet for apply */
+
+
+
+a { cursor: pointer; }
+
+input[type='file'] {
+	max-width: 200px;
+}
+
+.red, .red-true { color: red;}
+.white { color: white; }
+.gray {color: gray;}
+.green { color: green; }
+
+.bold {font-weight: bold; }
+
+.width-10 { max-width: 10px; }
+.width-40{ max-width: 40%; }
+.width-60{ max-width: 60%; }
+
+.padding-left-60, #interviewers-container .padding-left-60{ padding-left: 60px; }
+
+.inline-block{ display: inline-block; }
+div.float-left, .float-left{ float:left; }
+.text-center { text-align: center; }
+div.text-left, .text-left{ text-align: left; }
+.float-right{ float: right; }
+div.text-right, .text-right, .text-right input{ text-align: right; }
+
+.cursor-pointer{ cursor: pointer; }
+
+/********************* nav **********************/
+body {
+	background-color: black;
+}
+
+.navbar {
+	background-color: #3C3838;
+	border: black;
+}
+.navbar .navbar-brand {
+	font-family: 'Helvetica Neue', Helvetica, sans-serif;
+	padding: 0;
+	padding-top: 5px;
+	text-transform: uppercase;
+}
+.navbar .navbar-brand {
+	font-family: 'Helvetica Neue', Helvetica, sans-serif;
+}
+.apply-step {
+	border: 6px solid green;
+	border-radius: 15px;
+	max-width: 800px;
+	margin: auto;
+	padding: 20px;
+	color: white;
+}
+.json{
+	display: block;
+	margin-bottom: 10px;
+	font-size: 15px;
+}
+.json.inline-block { display: inline-block; }
+.json em {
+	font-style: normal;
+	font-weight: bold;
+	font-size: 13px;
+	color: gray;
+}
+.indent-1 {
+	margin-left: 20px;
+}
+.indent-2 {
+	margin-left: 40px;
+}
+#output {
+	width: 80%;
+	margin: 0 0 2% 10%;
+}
+#upload-answer .btn {
+	margin-left: 10%;
+}
+
+
+

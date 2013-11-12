@@ -15,7 +15,8 @@
             [environ.core :refer [env]]
             [clojure.java.io :as io]
 
-            [huffpost-hires.api :as api])
+            [huffpost-hires.api :as api]
+            [huffpost-hires.apply :as apply])
   )
 
 (defn- authenticated? [user pass]
@@ -31,29 +32,24 @@
   "Handles serving the partial html files"
   [request]
   (println (request :uri))
-      {:status 200
-      :headers {}
-      :body (io/file (io/resource (str "public" (request :uri))))})
+      {:status 200 :headers {} :body (io/file (io/resource (str "public" (request :uri))))})
 
 (defn serve-hires
   "Serves the hires.html template"
   [request]
-  (println "serve-hires")
-  (println ((request :params) :id))
-      {:status 200
-      :headers {}
-      :body (io/file (io/resource "html/hires.html"))})
+  {:status 200 :headers {} :body (io/file (io/resource "html/hires.html"))})
 
 (defn test-route
   [request]
-  (println "serve-test")
-  {:status 200
-  :headers {}
-  :body (io/file (io/resource "html/test.html"))})
+  {:status 200 :headers {} :body (io/file (io/resource "html/test.html"))})
 
 (defroutes app
   (ANY "/repl" {:as req}
        (drawbridge req))
+
+  (ANY "/test" [] test-route)
+
+  (ANY "/apply/*" [] apply/request-handler)
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)

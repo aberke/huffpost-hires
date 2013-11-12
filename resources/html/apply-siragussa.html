@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="HiresApp">
+<head>
+    <meta charset="utf-8">
+    <title>Apply | The Huffington Post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hiring helper app">
+    <meta name="author" content="Huffpost Labs">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <!-- stylesheets -->
+    <link href="/lib/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/apply.css" rel="stylesheet">
+
+
+    <!-- javascript -->
+
+    <script src="/lib/jQuery-2.0.3.min.js"></script>
+	<script src="/lib/angular-1.0.8.min.js"></script>
+    <script src="/js/app.js"></script>
+	<script src="/js/applyControllers.js"></script>
+    <script src="/js/services.js"></script>
+
+</head>
+<body ng-controller="ApplyCntl">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+    	<div class="container">
+    		<div class="navbar-header">
+    			<h4 class="navbar-brand"><span class='red'>HuffPost</span> <span class='white'>Live</span></h4>
+    		</div>
+    	</div>
+    </nav>
+
+<div class='container'>
+    <div ng-show='applyStep==0' class='apply-step' id='job-description'>
+        <span class='json indent-0'>{</span>
+            <span class='json indent-1'><em>"Job Description"</em> : "Huffpost Live is looking for a blah-glah-blah engineer to work on blah blah blah blah John Sigarussa fill in here",</span>
+
+            <span class='json indent-1'><em>"Desired skillset"</em> : [</span>
+                <span class='json indent-2'>"John fill in 1",</span>
+                <span class='json indent-2'>"John fill in 2",</span>
+                <span class='json indent-2'>"John fill in 3",</span>
+                <span class='json indent-2'>"John fill in 4",</span>
+            <span class='json indent-1'>],</span>
+
+            <span class='json indent-1'><em>"To apply"</em> : {</span>
+                <span class='json indent-2'><em>"Instructions"</em> : "Write a script adhering to the prompt and test your script with the sample input.  Submit the output from feeding the sample input to your script in order to upload your script and resume for consideration.",</span>
+
+                <span class='json indent-2 inline-block'><em>"Apply"</em>: </span>
+        <button ng-click='applyStep=1' class='btn btn-default btn-sm bold'>Begin</button>
+            <span class='json indent-1'>}</span>
+        <span class='json indent-0'>}</span>
+    </div>
+
+    <div ng-show='applyStep==1' class='apply-step' id='upload-answer'>
+        <span class='json indent-0'>{</span>
+                <span class='json indent-1'><em>"Prompt"</em> : "In the programming language of your choie, write a script that takes as input a list of arbitrary length.  The members of the list are integers between 0 and 100. .... John will send his favorite sample homework questions so that I can finish this .......",</span>
+                <span class='json indent-1'><em>"Sample input"</em> : [1, 56 ,23, 5, 6, 3, 4, 6, 8, 43, 54, 67, 45, 23, 26, 13, 76, 87, 1, 56 ,23, 5, 6, 3, 4, 6, 8, 43, 54, 67, 45, 23, 26, 13, 76, 87, 1, 56 ,23, 5, 6, 3, 4, 6, 8, 43, 54, 67, 45, 23, 26, 13, 76, 87, 1, 56 ,23, 5, 6, 3, 4, 6, 8, 43, 54, 67, 45, 23, 26, 13, 76, 87]</span>
+
+                <span class='json indent-1 inline-block'><em>"Output"</em> : </span>
+                <textarea id='output' ng-model='output'></textarea>
+                <button ng-click='submitOutput(output)' class='btn btn-default btn-sm bold'>Submit</button>
+
+        <span class='json indent-0'>}</span>
+    </div>
+
+    <div ng-show='applyStep==2' class='apply-step' id='upload-code'>
+        <span class='json indent-0'>{</span>
+                <span class='json indent-1'><em>"Submit your code"</em> : {</span>
+                    <span class='json indent-2'><em>"Instructions"</em> : "Either upload a file or copy and paste your code into the textarea below.",</span>
+
+                    <span class='json indent-2'><em>"Upload file"</em> : </span>
+                    <input type='file' id='upload-code' />
+
+                    <span class='json indent-2'><em>"Copy and past code"</em> : </span>
+                    <textarea ng-model='text_answer' id='text-answer'></textarea>
+
+
+
+                <button ng-click='submitCode()' class='btn btn-default btn-sm bold'>Submit</button>
+
+        <span class='json indent-0'>}</span>
+    </div>
+
+
+</div>
+
+    <script src="/lib/bootstrap/bootstrap.min.js"></script>
+    <script src="/lib/bootstrap/popover.js"></script>
+</body>
+</html>

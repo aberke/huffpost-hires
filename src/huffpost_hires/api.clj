@@ -17,6 +17,63 @@
 (def s3-credentials {:access-key (System/getenv "AWS_ACCESS_KEY_ID"), :secret-key (System/getenv "AWS_SECRET_ACCESS_KEY")})
 
 
+(defn upload-to-s3
+	"Helper to upload-homework, upload-resume and upload-pic.  Uploads files to amazon s3 bucket
+	Takes file object to upload, taken out of multipart-params of http request, and prefix for object name
+	Returns url to uploaded file"
+	[file object-key]
+	;; parse out file data
+	(let [file-name (file :filename)
+		file-size (file :size)
+		content-type (file :content-type)
+		actual-file (file :tempfile)
+		object-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
+		;; upload to our s3 bucket
+        (s3/put-object s3-credentials 
+    					(System/getenv "S3_BUCKET_NAME") 
+    					object-key 
+    					actual-file
+    					{:content-type content-type :content-length file-size})
+		object-url))
+
+;; helper to put/post-homework to upload attachment and return map {'attachment_url' attachment_url} **IF** the attachment is in params
+(defn upload-homework-attachment
+	"helper to put/post-homework to upload attachment
+	Returns map {'attachment_url' attachment_url} **IF** the attachment is in params
+	Otherwise returns empty map"
+	[params]
+	(if (get params "attachment")
+		{"attachment_url" (upload-to-s3 (params "attachment") (str "applicant/homework/" (params "applicant")))}
+		{}))
+
+;; helper to put/post-appliant to upload resume and then return map {'resume_url' resume_url}  **IF** the resume is in params 
+(defn upload-resume
+	"If resume was included in params, uploads resume to s3 and returns map {'resume_url' resume_url}
+	Otherwise returns empty map"
+	[params]
+	(if (get params "resume")
+		{"resume_url" (upload-to-s3 (params "resume") (str "applicant/resume/" (params "id")))}
+		{})) 
+;; helper to put/post-interviewer to upload pic and then return map {'pic_url' pic_url} **IF** the pic is in the params
+(defn upload-pic
+	"If pic was included in params, uploads pic to s3 and returns map {'pic_url' pic_url}
+	Otherwise returns empty map"
+	[params]
+	(if (get params "pic")
+		{"pic_url" (upload-to-s3 (params "pic") (str "interviewer/pic" (params "id")))}
+		{}))
+
+(defn params->homeworks-attributeMap
+	[params]
+	(println "params->homeworks-attributeMap -- params: " params)
+	{:id (util/string->number (get params "id"))
+		:applicant (util/string->number (get params "applicant"))
+		:prompt (get params "prompt" "")
+		:text_answer (get params "text_answer" "")
+		:attachment_url (get params "attachment_url" "")
+		:reviewer (util/string->number (get params "reviewer"))
+		:feedback (get params "feedback" "")})
+
 (defn params->applicants-attributeMap
 	[params]
 	(println "params->applicants-attributeMap -- params: " params)
@@ -36,17 +93,17 @@
 (defn params->tasks-attributeMap
 	[params]
 	(println "params->tasks-attributeMap -- params: " params)
-	{:id (util/string->number (get params :id))
-		:applicant (util/string->number-or-0 (get params :applicant))
-		:interviewer (util/string->number-or-0 (get params :interviewer))
-		:title (util/string->sql-safe (get params :title ""))
-		:description (util/string->sql-safe (get params :description ""))
-		:feedback (util/string->sql-safe (get params :feedback ""))
-		:date (get params :date "")
-		:pic_url (get params :pic_url "/img/default.jpg")
-		:feedback_due (get params :feedback_due "")
-		:completed (util/string->number-or-0 (get params :completed))
-		:pass (util/string->number (get params :pass 1))})
+	{:id (util/string->number (get params "id"))
+		:applicant (util/string->number-or-0 (get params "applicant"))
+		:interviewer (util/string->number-or-0 (get params "interviewer"))
+		:title (util/string->sql-safe (get params "title" ""))
+		:description (util/string->sql-safe (get params "description" ""))
+		:feedback (util/string->sql-safe (get params "feedback" ""))
+		:date (get params "date" "")
+		:pic_url (get params "pic_url" "/img/default.jpg")
+		:feedback_due (get params "feedback_due" "")
+		:completed (util/string->number-or-0 (get params "completed"))
+		:pass (util/string->number (get params "pass" 1))})
 
 (defn params->interviewers-attributeMap
 	[params]
@@ -87,13 +144,13 @@
 	[params]
 	(println (str "GET api/interviewers-all with params:" params))
 	(if (= (params :extra-data) "true")
-		(models/query-json ["SELECT i.*, 
-								SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) AS incomplete_tasks,
-								SUM(CASE WHEN a.completed=0 THEN 1 ELSE 0 END) AS current_applicants
-								FROM interviewers i 
-								LEFT JOIN applicants a on i.id=a.goalie
-								LEFT JOIN tasks t ON i.id=t.interviewer 
-								GROUP BY i.id;"])
+		(models/query-json ["SELECT i.*,
+							(SELECT SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) FROM tasks t WHERE t.interviewer=i.id) AS incomplete_tasks,
+							(SELECT SUM(CASE WHEN a.completed=0 THEN 1 ELSE 0 END) FROM applicants a WHERE a.goalie=i.id) AS current_applicants
+							FROM interviewers i
+							INNER JOIN applicants a ON i.id=a.goalie
+							INNER JOIN tasks t ON i.id=t.interviewer
+							GROUP BY i.id;"])
 		(models/query-json ["select * from interviewers order by name"])))
 
 
@@ -119,6 +176,13 @@
 								LEFT JOIN tasks t ON a.id=t.applicant 
 								GROUP BY a.id;"])
 		(models/query-json ["select * from applicants order by asof"])))
+
+;; GET /api/applicant/homework?id='applicantID'
+(defn get-applicant-homework
+	"Returns homework where homework.applicant = 'applicantID'"
+	[params]
+	(println (str "api/applicant/homework where applicantID=" (params :id)))
+	(models/query-json [(str "SELECT * FROM homeworks WHERE applicant=" (params :id))]))
 
 
 ;; GET /api/applicant/?id='applicantID'
@@ -190,6 +254,7 @@
 		"tasks" (tasks-by-applicant params)
 		"complete-tasks" (complete-tasks-by-applicant params)
 		"incomplete-tasks" (incomplete-tasks-by-applicant params)
+		"homework" (get-applicant-homework params)
 		(str "Invalid api request to /api/applicant/" route)))
 
 
@@ -226,17 +291,24 @@
 ;; POST /api/interviewer
 (defn post-interviewer-new
 	[params]
-	(if (models/insert-interviewer (params->interviewers-attributeMap params))
-		"OK"
-		"ERROR"))
-
+	(let [extra-params (upload-pic params) full-params (merge params extra-params)]
+		(if (models/insert-interviewer (params->interviewers-attributeMap full-params))
+			"OK"
+			"ERROR")))
+;; POST /api/homework
+(defn post-homework-new
+	[params]
+	(let [extra-params (upload-homework-attachment params) full-params (merge params extra-params)]
+		(if (models/insert-homework (params->homeworks-attributeMap full-params))
+			"OK"
+			"ERROR")))
 ;; POST /api/applicant
 (defn post-applicant-new
 	[params]
-	(if (models/insert-applicant (params->applicants-attributeMap params))
-		"OK"
-		"ERROR"))
-
+	(let [extra-params (upload-resume params) full-params (merge params extra-params)]
+		(if (models/insert-applicant (params->applicants-attributeMap full-params))
+			"OK"
+			"ERROR")))
 ;; POST /api/task
 (defn post-task-new
 	[params]
@@ -247,54 +319,27 @@
 (defn handle-post-request
 	[request]
 	(println "**************** API POST *******************")
-	(let [params (request :params) route (params :*)]
+	(let [params (request :multipart-params) route ((request :route-params) :*)]
 		(println (str "params: " params))
-		(println (str "route: " route))
 		(case route
 			"applicant" (post-applicant-new params)
 			"interviewer" (post-interviewer-new params)
 			"task" (post-task-new params)
+			"homework" (post-homework-new params)
 			"Invalid POST request")))
 
 ;; ******************************* PUT requests below ******************************
 
-
-(defn upload-to-s3
-	"Helper to upload-resume and upload-pic.  Uploads files to amazon s3 bucket
-	Takes file object to upload, taken out of multipart-params of http request, and prefix for object name
-	Returns url to uploaded file"
-	[file object-key-prefix]
-	;; parse out file data
-	(let [file-name (file :filename)
-		file-size (file :size)
-		content-type (file :content-type)
-		actual-file (file :tempfile)
-		object-key (string/replace (str object-key-prefix file-name) " " "-")
-		object-url (str "https://s3.amazonaws.com/" (System/getenv "S3_BUCKET_NAME") "/" object-key)]
-		;; upload to our s3 bucket
-        (s3/put-object s3-credentials 
-    					(System/getenv "S3_BUCKET_NAME") 
-    					object-key 
-    					actual-file
-    					{:content-type content-type :content-length file-size})
-		object-url))
-
-;; helper to put-appliant to upload resume and then return map {'resume_url' resume_url}  **IF** the resume is in params 
-(defn upload-resume
-	"If resume was included in params, uploads resume to s3 and returns map {'resume_url' resume_url}
-	Otherwise returns empty map"
+;; PUT /api/homework
+(defn put-homework
+	"If an attachment was included in the put request, uploads the attachment to s3 and 
+	merges the url for the attachment in with the rest of the parameters to be included in the attribute map
+	before updating the applicant in the table"
 	[params]
-	(if (get params "resume")
-		{"resume_url" (upload-to-s3 (params "resume") "applicant/resume")}
-		{})) 
-;; helper to put-interviewer to upload pic and then return map {'pic_url' pic_url} **IF** the pic is in the params
-(defn upload-pic
-	"If pic was included in params, uploads pic to s3 and returns map {'pic_url' pic_url}
-	Otherwise returns empty map"
-	[params]
-	(if (get params "pic")
-		{"pic_url" (upload-to-s3 (params "pic") "interviewer/pic")}
-		{}))
+	(let [extra-params (upload-homework-attachment params) full-params (merge params extra-params)]
+		(if models/update-homework (params->homeworks-attributeMap full-params))
+		"OK"
+		"ERROR"))
 
 ;; PUT /api/applicant
 (defn put-applicant
@@ -322,16 +367,15 @@
 	[request]
 	(println "**************** API PUT *******************")
 	(println request)
-	(let [params (request :multipart-params)
-		route ((request :route-params) :*)]
-		(println (str "params: " params))
-		(println (str "route: " route))
+	(let [params (request :multipart-params) route ((request :route-params) :*)]
 		(case route
 			"applicant" (put-applicant params)
+			"homework" (put-homework params)
 			"interviewer" (put-interviewer params)
 			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
 			"Invalid DELETE request")))
 
+;; ******************************* DELETE requests below ******************************
 (defn handle-delete-request
 	[request]
 	(println "**************** API DELETE *******************")
@@ -342,6 +386,7 @@
 			"applicant" (if (models/delete-applicant id) "OK" "ERROR")
 			"interviewer" (if (models/delete-interviewer id) "OK" "ERROR")
 			"task" (if (models/delete-task id) "OK" "ERROR")
+			"homework" (if (models/delete-homework id) "OK" "ERROR")
 			"Invalid DELETE request")))
 
 

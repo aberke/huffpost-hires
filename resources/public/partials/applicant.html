@@ -5,12 +5,12 @@
 
     <div id='applicant-stage-container'>
         <div class="prev-stage-{{applicant.stage > stage.number}} current-stage-{{applicant.stage == stage.number && applicant.pass==1}} future-stage-{{applicant.stage < stage.number}} red-{{applicant.stage==stage.number && applicant.pass==0}} stage-column" ng-repeat="stage in stagesList" ng-show="stage.name!='Pending'&&stage.name!='Hired'">
-            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage == 0 &&stage.number==1' ng-click="applicant.stage=applicant.stage+1">&rArr;</span>
-            <h6>{{stage.name}}</h6>
-            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage>1 && (applicant.stage-1)==stage.number' ng-click="applicant.stage=applicant.stage-1">&lArr;</span>
-            <span class="btn btn-xs btn-default" ng-show='editApplicantInfo==true && applicant.stage == stage.number' ng-click="applicant.stage=applicant.stage+1">&rArr;</span>
+            <span class="btn btn-xs btn-default" ng-show='applicant.stage == 0 && stage.number==1' ng-click="incrStage()">&rArr;</span>
+            <h6 class='cursor-pointer' ng-click="setShowStage(stage.number)">{{stage.name}}</h6>
+            <span class="btn btn-xs btn-default" ng-show='applicant.stage>1 && (applicant.stage-1)==stage.number' ng-click="decrStage()">&lArr;</span>
+            <span class="btn btn-xs btn-default" ng-show='applicant.stage == stage.number' ng-click="incrStage()">&rArr;</span>
         </div>
-        <div ng-disabled="applicant.stage<6 || applicant.pass==0" class="btn btn-success btn-sm" ng-click="applicant.stage=100; applicant.completed=1;">PASS</div>
+        <div ng-disabled="applicant.stage<6 || applicant.pass==0" class="btn btn-success btn-sm" ng-click="passApplicant()">PASS</div>
 
     </div>
 
@@ -24,7 +24,7 @@
             <p><em>Position:</em> <span ng-show='editApplicantInfo==false'>{{applicant.position}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.position'></p>
             <p><em>Hiring Manager:</em> <a ng-href="/interviewer?id={{applicant.goalie}}" ng-show='editApplicantInfo==false'>{{interviewersMap[applicant.goalie].name}}</a>
                 <select ng-show='editApplicantInfo==true' ng-model="applicant.goalie" ng-options="interviewer.name for interviewer in interviewersList">
-                    <option value="applicant.goalie">-select-</option>
+                    <option value="">{{interviewersMap[applicant.goalie].name}}</option>
                 </select>
             </p>
             <p><em>Referral:</em> <span ng-show='editApplicantInfo==false'>{{applicant.referral}}</span><input ng-show='editApplicantInfo==true' type='text' ng-model='applicant.referral'></p>
@@ -40,7 +40,7 @@
                 </span>
 
                 <span id='file-upload-container' ng-show='editApplicantInfo==true'>
-                    <em>Upload pic: </em><input type="file" ng-model="applicant.resume_url" onchange="angular.element(this).scope().attachApplicantResume(this)" />
+                    <input type="file" ng-model="applicant.resume_url" onchange="angular.element(this).scope().attachApplicantResume(this)" />
                 </span> 
 
             </p>
@@ -51,6 +51,65 @@
         </div>
     </div>
 
+    <div id='homework-container' class='panel panel-default asset-container' ng-model='new_homework' ng-show="showStage==1||showStage==2">
+        <div class='panel-heading'>
+            <span ng-show='homework'>Homework</span>
+            <span ng-show='!homework'><em>No Homework Attached:</em> upload new</span>
+            <button ng-disabled='!homework && !new_homework' class='btn btn-default float-right' ng-click='saveHomework()'>Save</button>
+            <button ng-click='deleteHomework()' ng-show='homework' ng-click='deleteHomework' class='btn btn-default float-right red'>&times;</button>
+        </div>
+        <div class='panel-body'>
+            <div ng-show="!homework" id='no-homework-attached-container'>
+                {{new_homework}}
+                
+                <form>
+                    <label>Homework Prompt</label><textarea ng-model='new_homework.prompt'></textarea>
+                    <label>Applicant's Answer</label>
+                    <input id='new-homework-attachment' type='file' ng-model='new_homework.attachment' />
+                    <textarea ng-model='new_homework.text_answer'></textarea>
+                    <label>Reviewer</label>
+                    <select ng-model="new_homework.reviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                        <option value="">-select-</option>
+                    </select>
+                    <label>Feedback</label>
+                    <textarea ng-model='new_homework.feedback'></textarea>
+                </form>
+            </div>
+            <div ng-show='homework'>
+                {{homework}}
+                <p><em>Prompt:</em></p>
+                <p>{{homework.prompt}}</p>
+                <p><em>Answer submitted:</em></p>
+                <a ng-show='homework.attachment_url' ng-href={{homework.attachment_url}}>Attachment</a>
+                <p ng-show="homework.text_answer">{{homework.text_answer}}</p>
+                <span><em>Reviewer</em></span>
+                    <select ng-model="homework.reviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                        <option value="">{{homework.reviewer}}</option>
+                    </select>
+                <p><em>Feedback:</em></p>
+                <textarea ng-model='homework.feedback'></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id='phonescreen-container' ng-show="showStage==3||showStage==4" class='panel panel-default asset-container' ng-model='new_phonescreen'>
+        <div class='panel-heading'>
+            <span>Phone Screen</span>
+            <button  class='btn btn-default float-right red'>&times;</button>
+        </div>
+        <div class='panel-body'>
+            Phone screen info here
+        </div>
+    </div>
+    <div id='phonescreen-container' ng-show="showStage==5||showStage==6" class='panel panel-default asset-container' ng-model='new_phonescreen'>
+        <div class='panel-heading'>
+            <span>In Person Interviews</span>
+            <button  class='btn btn-default float-right red'>&times;</button>
+        </div>
+        <div class='panel-body'>
+            In Person Interview information goes here.
+        </div>
+    </div>
 
     <div id="tasks-container" class="panel panel-primary">
         <div class="panel-heading">
@@ -68,12 +127,12 @@
                         <th>Task</th>
                         <th>Date</th>
                         <th>Assigned</th>
-                        <th>Feedback Due</th>
+                        <!-- <th>Feedback Due</th> -->
                         <th>Feedback</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="task in totalTasks | orderBy:'date'" class="failed-{{task.pass==0}} passed-{{task.pass==1 && task.completed==1}}">
+                    <tr ng-repeat="task in totalTasks | orderBy:'date'" class="failed-{{task.pass==0}} passed-{{task.pass==1 && task.completed==1}} popover-hover" data-container="body" data-toggle="popover" data-placement="top" data-content={{task.description}} data-original-title="Task Description:" title="">
                         <td class="width-10">
                             <a id="delete-task-btn" ng-click="deleteTask(task)" class="red cursor-pointer">&times;</a>
                         </td>
@@ -89,9 +148,9 @@
                         <td class="task-assignee">
                             <a ng-href="/interviewer?id={{task.interviewer}}">{{interviewersMap[task.interviewer].name}}</span>
                         </td>
-                        <td class="task-feedback-due">
+                       <!--  <td class="task-feedback-due">
                             <span>{{task.feedback_due | date:'MM/dd/yyyy'}}</span>
-                        </td>
+                        </td> -->
                         <td class="task-feedback-due">
                             <span>{{task.feedback}}</span>
                         </td>
@@ -119,9 +178,9 @@
             <span class='new-input-container'>Date occurring: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-date">
             </span>
-            <span class='new-input-container'>Feedback due: 
+            <!-- <span class='new-input-container'>Feedback due: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-feedback-due">
-            </span>
+            </span> -->
             <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='task.description' class='task-textarea'></textarea></span>
         </div>
         <div class="modal-footer">
@@ -155,8 +214,8 @@
             <span class='new-input-container'>Date occurring: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-date">
             </span>
-            <span class='new-input-container'>Feedback due: 
-                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due">
+            <!-- <span class='new-input-container'>Feedback due: 
+                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due"> -->
             </span>
             <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='edit_task.description' class='task-textarea'></textarea></span>
             <span class='new-input-container task-textarea-container'>Feedback: 
