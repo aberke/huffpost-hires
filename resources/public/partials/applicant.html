@@ -60,8 +60,6 @@
         </div>
         <div class='panel-body'>
             <div ng-show="!homework" id='no-homework-attached-container'>
-                {{new_homework}}
-                
                 <form>
                     <label>Homework Prompt</label><textarea ng-model='new_homework.prompt'></textarea>
                     <label>Applicant's Answer</label>
@@ -75,16 +73,16 @@
                     <textarea ng-model='new_homework.feedback'></textarea>
                 </form>
             </div>
+
             <div ng-show='homework'>
-                {{homework}}
                 <p><em>Prompt:</em></p>
                 <p>{{homework.prompt}}</p>
                 <p><em>Answer submitted:</em></p>
-                <a ng-show='homework.attachment_url' ng-href={{homework.attachment_url}}>Attachment</a>
+                <a target="_blank" ng-show='homework.attachment_url' ng-href={{homework.attachment_url}}>Attachment</a>
                 <p ng-show="homework.text_answer">{{homework.text_answer}}</p>
                 <span><em>Reviewer</em></span>
                     <select ng-model="homework.reviewer" ng-options="interviewer.name for interviewer in interviewersList">
-                        <option value="">{{homework.reviewer}}</option>
+                        <option value="">{{interviewersMap[homework.reviewer].name}}</option>
                     </select>
                 <p><em>Feedback:</em></p>
                 <textarea ng-model='homework.feedback'></textarea>
@@ -94,14 +92,43 @@
 
     <div id='phonescreen-container' ng-show="showStage==3||showStage==4" class='panel panel-default asset-container' ng-model='new_phonescreen'>
         <div class='panel-heading'>
-            <span>Phone Screen</span>
+            <span>Schedule a Phone Screen</span>
+            <button ng-disabled='!phonescreen && !new_phonescreen' class='btn btn-default float-right' ng-click='savePhonescreen()'>Save</button>
             <button  class='btn btn-default float-right red'>&times;</button>
         </div>
         <div class='panel-body'>
-            Phone screen info here
+            <div ng-show="!phonescreen">
+                <form>
+                    <label>Date</label>
+                    <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-phonescreen-date" />
+                    
+                    <label>Assigned</label>
+                    <select ng-model="new_phonescreen.reviewer" ng-options="interviewer.name for interviewer in interviewersList">
+                        <option value="">-select-</option>
+                    </select>
+
+                    <label>Feedback</label>
+                    <textarea ng-model='new_phonescreen.feedback'></textarea>
+                </form>
+            </div>
+
+            <div ng-show='phonescreen'>
+                <p><em>Prompt:</em></p>
+                <p>{{homework.prompt}}</p>
+                <p><em>Answer submitted:</em></p>
+                <a target="_blank" ng-show='homework.attachment_url' ng-href={{homework.attachment_url}}>Attachment</a>
+                <p ng-show="homework.text_answer">{{homework.text_answer}}</p>
+                <span><em>Reviewer</em></span>
+                    <select ng-model="phonescreen.assigned" ng-options="interviewer.name for interviewer in interviewersList">
+                        <option value="">{{interviewersMap[homework.reviewer].name}}</option>
+                    </select>
+                <p><em>Feedback:</em></p>
+                <textarea ng-model='phonescreen.feedback'></textarea>
+            </div>
         </div>
     </div>
-    <div id='phonescreen-container' ng-show="showStage==5||showStage==6" class='panel panel-default asset-container' ng-model='new_phonescreen'>
+
+    <div id='inperson-container' ng-show="showStage==5||showStage==6" class='panel panel-default asset-container' ng-model='new_inperson'>
         <div class='panel-heading'>
             <span>In Person Interviews</span>
             <button  class='btn btn-default float-right red'>&times;</button>

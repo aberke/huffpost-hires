@@ -4,9 +4,6 @@
 
 a { cursor: pointer; }
 
-input[type='file'] {
-	max-width: 200px;
-}
 
 .red, .red-true { color: red;}
 .white { color: white; }
@@ -21,7 +18,8 @@ input[type='file'] {
 
 .padding-left-60, #interviewers-container .padding-left-60{ padding-left: 60px; }
 
-.inline-block{ display: inline-block; }
+.block { display: block; }
+.inline-block, input[type='file'].inline-block { display: inline-block; }
 div.float-left, .float-left{ float:left; }
 .text-center { text-align: center; }
 div.text-left, .text-left{ text-align: left; }
@@ -74,9 +72,16 @@ body {
 .indent-2 {
 	margin-left: 40px;
 }
-#output {
+.apply-step input[type='text'] {
+	width: 350px;
+}
+#output, #text-answer {
 	width: 80%;
 	margin: 0 0 2% 10%;
+}
+.apply-step .submit-btn{
+	display: block;
+	margin-left: 10%;
 }
 #upload-answer .btn {
 	margin-left: 10%;

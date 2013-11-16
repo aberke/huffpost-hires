@@ -1,13 +1,20 @@
 ;; Many thanks to https://github.com/diamondap/ring-sample
 (ns huffpost-hires.models
-  	(:require [cheshire.core :as json]
-            [clojure.java.jdbc :as jdbc]
+  	(:require [clojure.java.jdbc :as jdbc]
 
+            [huffpost-hires.database :as database]
             [huffpost-hires.util :as util]))
 
-(def db (if (System/getenv "DEVELOPMENT")
-			(System/getenv "DATABASE_URL")
-			(System/getenv "HEROKU_POSTGRESQL_MAROON_URL")))
+		; responsibility	responsibility responsibility
+		; 			\			|		/
+		; 					listing
+		; 				/		|	  \
+		; 			requirement	   requirement		requirement
+
+
+
+
+
 
 ; Tasks are the glue between Applicants and Interviewers.  
 ; Each task has a relation to an Interviewer and an Applicant
@@ -51,12 +58,42 @@
 ; 	completed
 
 
+(defn make-table-listings
+	"Create the listings table -- to appear on jobs page"
+	[]
+	(try (jdbc/with-connection database/db
+		(jdbc/create-table :listings
+						[:id :serial "PRIMARY KEY"]
+						[:hiring_manager :numeric]
+						[:title "varchar(200)"]
+						[:description :text]
+						[:homework_required :numeric] ; 0/1 boolean
+						[:homework_question :text]))
+	(catch Exception e (util/handle-exception "make-table-listings" e))))
+(defn make-table-requirements
+	"Create the requirements table -- each requirement belongs to a listing"
+	[]
+	(try (jdbc/with-connection database/db
+		(jdbc/create-table :requirements
+						[:id :serial "PRIMARY KEY"]
+						[:listing :serial "references listings (id)"]
+						[:title :text]))
+	(catch Exception e (util/handle-exception "make-table-requirements" e))))
+(defn make-table-resposibilities
+	"Create the responsibilities table -- each requirement belongs to a listing"
+	[]
+	(try (jdbc/with-connection database/db
+		(jdbc/create-table :responsibilities
+						[:id :serial "PRIMARY KEY"]
+						[:listing :serial "references listings (id)"]
+						[:title :text]))
+	(catch Exception e (util/handle-exception "make-table-resposibilities" e))))
 
 
 (defn make-table-stages
 	"Create the stages table -- an applicant goes through stages"
 	[]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/create-table :stages
 						[:id :serial "PRIMARY KEY"]
 						[:number :numeric]
@@ -67,7 +104,7 @@
 	[]
 	(make-table-stages)
 	(println "Initializing Stages Table")
-		(try (jdbc/with-connection db
+		(try (jdbc/with-connection database/db
 			(jdbc/insert-records :stages
 				{:number 0
 					:name "Pending"
@@ -90,7 +127,7 @@
 (defn make-table-homeworks
 	"Create the Homeworks Table in database"
 	[]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/create-table :homeworks
 			[:id :serial "PRIMARY KEY"]
 			[:applicant :serial "references applicants (id)"]
@@ -110,7 +147,7 @@
 (defn make-table-applicants
 	"Create the Applicants Table in our database."
 	[]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/create-table :applicants
 						[:id :serial "PRIMARY KEY"]
 						[:name "varchar(100)"]
@@ -133,7 +170,7 @@
   []
   (make-table-applicants)
   (println "Initializing Applicants Table.")
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-records :applicants
 			{:name "Alex Berke"
 				:goalie 1
@@ -173,7 +210,7 @@
 	"Creating the Interviewers Table in our database."
 	[]
 	(println "Making the Interviewers Table in database.")
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/create-table :interviewers
 						[:id :serial "PRIMARY KEY"]
 						[:name "varchar(80)"]
@@ -188,17 +225,17 @@
 	[]
 	(make-table-interviewers)
 	(println "Initializing Interviewers table")
-	(try (jdbc/with-connection db
-		(jdbc/insert-records :interviewers
-			{:name "Manachem"
+	(try (jdbc/with-connection database/db
+		(jdbc/insert-records :interviewers 
+			{:name "John Siragussa"
 				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"
-			} {:name "John Siragussa"
+			} {:name "Manachem"
 				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"
-			} {:name "Amy Flintstone"
+			}{:name "Amy Flintstone"
 				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"}))
@@ -209,7 +246,7 @@
 	"Create the Tasks Table in our databse"
 	[]
 	(println "Making Tasks Table in database.")
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/create-table :tasks
 				[:id :serial "PRIMARY KEY"]
 				[:applicant :serial "references applicants (id)"] ; id of applicant -- relationship
@@ -229,7 +266,7 @@
 	[]
 	(make-table-tasks)
 	(println "Initializing Tasks table")
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-records :tasks
 			{:applicant 1
 				:interviewer 1
@@ -291,6 +328,10 @@
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."
   []
+  (make-table-listings)
+  (make-table-resposibilities)
+  (make-table-requirements)
+
   (init-table-stages)
   (init-table-applicants)
   (init-table-interviewers)
@@ -300,7 +341,15 @@
 (defn drop-tables
 	"Drop ALL of the tables"
 	[]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
+
+		(println "Dropping responsibilities table")
+		(jdbc/drop-table :responsibilities)
+		(println "Dropping requirements table")
+		(jdbc/drop-table :requirements)
+		(println "Dropping Listings table")
+		(jdbc/drop-table :listings)
+
 		;; must drop tasks table first because it depends on other tables
 		(println "Dropping the stages table")	
 		(jdbc/drop-table :stages)
@@ -317,38 +366,6 @@
 
 
 ;; ***************** config above ***************************************
-
-;; ***************************************************************
-
-(defn execute-sql
-  "Executes a sql statement. Param statement is a sql string and the following args
-   are seqs of parameters to be bound to the sql statement."
-  [statement & params]
-  (try
-    (jdbc/with-connection db
-      (jdbc/do-prepared statement params))
-    (catch Throwable t (prn statement) (throw t))))
-
-(defn query
-	"Executes a query. Returns a vector of results. Each item in the vector
-	is a hash, keyed by column name. Param sql must be a vector. To execute
-	a simple SQL string, pass in a vector containing only the string. To
-	execute a query or statement with params, the sql string should come first,
-	followed by the params to be bound."
-	[sql]
-	(println (str "Executing sql query: " sql))
-	(try
-		(jdbc/with-connection db
-			(jdbc/with-query-results rs sql
-				(into [] rs)))
-		(catch Throwable t (prn sql) (throw t))))
-
-
-(defn query-json
-	"Executes a query and returns the result as json. Param sql should be a
-	vector with [sql-string params...] or just [sql-string]."
-	[statement]
-		(json/generate-string (query statement)))
 
 ; **************** UPDATE BELOW *********************************
 
@@ -367,7 +384,7 @@
                               	"', completed=" (attribute-map :completed)
                               	", pass=" (attribute-map :pass) " "
                               "WHERE id=" (attribute-map :id))]
-    	(try (execute-sql statement)
+    	(try (database/execute-sql statement)
 			(catch Exception e (util/handle-exception "update-applicant" e))))) ;; error -- return false
 
 (defn update-homework
@@ -379,7 +396,7 @@
 		"', attachment_url='" (attribute-map :attachment_url)
 		"', feedback='" (attribute-map :feedback)
 		"', reviewer=" (attribute-map :reviewer))]
-		(try (execute-sql statement)
+		(try (database/execute-sql statement)
 			(catch Exception e (util/handle-exception "update-homework" e)))))
 
 (defn update-interviewer
@@ -390,7 +407,7 @@
 							"', email='" (attribute-map :email)
 							"', pic_url='" (attribute-map :pic_url)
 						"' WHERE id=" (attribute-map :id))]
-		(try (execute-sql statement)
+		(try (database/execute-sql statement)
 			(catch Exception e (util/handle-exception "update-interviewer")))))
 
 (defn update-task
@@ -407,7 +424,7 @@
                               	"', completed=" (attribute-map :completed)
                               	", pass=" (attribute-map :pass) " "
                               "WHERE id=" (attribute-map :id))]
-    	(try (execute-sql statement)
+    	(try (database/execute-sql statement)
 			(catch Exception e (util/handle-exception "update-task" e))))) ;; error -- return false
 
 ; **************** DELETE BELOW *********************************
@@ -415,7 +432,7 @@
 (defn delete-homework
 	"Deletes homework with given id"
 	[homework-id]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/delete-rows :homeworks ["id=?" homework-id])
 		true) ; success
 	(catch Exception e (util/handle-exception "delete-homework" e))))
@@ -423,7 +440,7 @@
 (defn delete-task
 	"Deletes and task given id"
 	[task-id]
-  	(try (jdbc/with-connection db
+  	(try (jdbc/with-connection database/db
     	(jdbc/delete-rows :tasks ["id=?" task-id])
     		true) ; success
 		(catch Exception e (util/handle-exception "delete-task" e))))
@@ -432,7 +449,7 @@
 	"Deletes interviewer with given id
 	Must first delete all their tasks"
 	[interviewer-id]
-  	(try (jdbc/with-connection db
+  	(try (jdbc/with-connection database/db
     	(jdbc/delete-rows :tasks ["interviewer=?" interviewer-id])
     	(jdbc/delete-rows :interviewers ["id=?" interviewer-id])
     		true) ; success
@@ -442,17 +459,72 @@
 	"Deletes and applicant given id
 	Must first delete all their tasks since tasks reference applicant"
 	[applicant-id]
-  	(try (jdbc/with-connection db
+  	(try (jdbc/with-connection database/db
     	(jdbc/delete-rows :tasks ["applicant=?" applicant-id])
     	(jdbc/delete-rows :applicants ["id=?" applicant-id])
     		true) ; success
 		(catch Exception e (util/handle-exception "delete-applicant" e)))) ;; error -- return false
 
+(defn delete-listing
+	"Deletes listing given id
+	Must first delete all related responsibilities and requirements
+	Returns true on success, false on error"
+	[listing-id]
+	(try (jdbc/with-connection database/db
+		(jdbc/delete-rows :responsibilities ["listing=?" listing-id])
+		(jdbc/delete-rows :requirements ["listing=?" listing-id])
+		(jdbc/delete-rows :listings ["id=?" listing-id])
+		true)
+	(catch Exception e (util/handle-exception "delete-listing" e))))
+(defn delete-responsibility
+	"Deletes responsibility given id.  Returns true on success, false on error"
+	[responsibility-id]
+  	(try (jdbc/with-connection database/db
+    	(jdbc/delete-rows :responsibilities ["id=?" responsibility-id])
+    		true) ; success
+		(catch Exception e (util/handle-exception "delete-responsibility" e))))
+(defn delete-requirement
+	"Deletes requirement given id.  Returns true on success, false on error"
+	[requirement-id]
+  	(try (jdbc/with-connection database/db
+    	(jdbc/delete-rows :requirements ["id=?" requirement-id])
+    		true) ; success
+		(catch Exception e (util/handle-exception "delete-requirement" e))))
+
 ; **************** INSERT BELOW *********************************
 
-(defn insert-task
+(defn insert-listing
+	"Returns false on error"
 	[attribute-map]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
+		(jdbc/insert-record :listings
+			{:hiring_manager (attribute-map :hiring_manager)
+				:title (attribute-map :title)
+				:description (attribute-map :description)
+				:homework_required (attribute-map :homework_required)
+				:homework_question (attribute-map :homework_question)}))
+	(catch Exception e (util/handle-exception "isnert-listing" e))))
+(defn insert-requirement
+	"Returns false on error"
+	[attribute-map]
+	(try (jdbc/with-connection database/db
+		(jdbc/insert-record :requirements
+			{:listing (attribute-map :listing)
+				:title (attribute-map :title)}))
+	(catch Exception e (util/handle-exception "insert-requirement" e))))
+(defn insert-responsibility
+	"Returns false on error"
+	[attribute-map]
+	(try (jdbc/with-connection database/db
+		(jdbc/insert-record :responsibilities
+			{:listing (attribute-map :listing)
+				:title (attribute-map :title)}))
+	(catch Exception e (util/handle-exception "insert-responsibility" e))))
+
+(defn insert-task
+	"Returns false on error"
+	[attribute-map]
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-record :tasks
 			{:applicant (attribute-map :applicant)
 				:interviewer (attribute-map :interviewer)
@@ -462,38 +534,38 @@
 				:feedback (attribute-map :feedback)
 				:feedback_due (attribute-map :feedback_due)
 				:completed 0
-				:pass 1})
-		true)
+				:pass 1}))
 	(catch Exception e (util/handle-exception "insert-task" e))))
 
 (defn insert-homework
+	"Returns false on error"
 	[attribute-map]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-record :homeworks
 			{:applicant (attribute-map :applicant)
 				:prompt (attribute-map :prompt)
 				:text_answer (attribute-map :text_answer)
 				:attachment_url (attribute-map :attachment_url)
 				:reviewer (attribute-map :reviewer)
-				:feedback (attribute-map :feedback)})
-		true)
+				:feedback (attribute-map :feedback)}))
 	(catch Exception e (util/handle-exception "insert-homework" e))))
 
 (defn insert-interviewer
+	"Returns false on error"
 	[attribute-map]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-record :interviewers
 			{:name (attribute-map :name)
 				:phone (attribute-map :phone)
 				:email (attribute-map :email)
-				:pic_url (attribute-map :pic_url)})
-				true) ; success
+				:pic_url (attribute-map :pic_url)})) ; success
 		(catch Exception e (util/handle-exception "insert-interviewer" e)))) ;; error -- return false
 
 
 (defn insert-applicant
+	"Returns false on error"
 	[attribute-map]
-	(try (jdbc/with-connection db
+	(try (jdbc/with-connection database/db
 		(jdbc/insert-record :applicants
 			{:name (attribute-map :name)
 				:stage (attribute-map :stage)
@@ -504,6 +576,5 @@
 				:notes (attribute-map :notes)
 				:resume_url (attribute-map :resume_url)
 				:pass 1 ; 0/1 boolean
-				:completed 0}) ; 0/1 boolean)
-				true) ; success
+				:completed 0})) ; success
 		(catch Exception e (util/handle-exception "insert-applicant" e)))) ;; error -- return false

@@ -1,0 +1,76 @@
+
+<div class='container main-container' id='listings-all'>
+
+    <span id="listings-heading">
+            <button onclick="$('#newListingModal').modal('show');" class="add-btn btn btn-success">+</button>
+            <h2 id="listings-heading-title">Listings</h2>
+    </span>
+
+    <div id="listings-container">
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Title</th>
+                        <th>Hiring Manager</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="listing in listingsList">
+                        <th><img ng-src={{interviewersMap[listing.hiring_manager].pic_url}} width="20px"></th>
+                        <td class="inteviewer-name"><a href="/listing?id={{listing.id}}">{{listing.title}}</a></td>
+                        <td class="padding-left-60">{{interviewersMap[listing.hiring_manager].name}}</td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+
+  <!-- New listing Modal -->
+  <div class="modal fade" id="newListingModal" ng-model="new_listing" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addListing(new_listing)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New listing</h2>
+        </div>
+        <div class="modal-body">
+                        <span class='new-input-container'>Title: <input id='new-listing-title' type='text' required placeholder='eg, Front End Developer' ng-model='new_listing.title'></span>
+                        <span class='new-input-container'>Hiring Manager: <select required ng-model="new_listing.hiring_manager" ng-options="interviewer.name for interviewer in interviewersList">
+                            <option value="">-select-</option>
+                        </select></span>
+                        <span class='new-input-block'>Description: 
+                            <textarea id='new-listing-description' ng-model='new_listing.description' />
+                        </span>
+
+                        <span id='new-listing-responsibilities' class='new-input-block'>Responsibilities:                             
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                        </span>
+                        <span id='new-listing-requirements' class='new-input-block'>Requirements:                            
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                            <input type='text' />
+                        </span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+</div>
+
+
+
+
+
+
+

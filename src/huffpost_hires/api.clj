@@ -3,6 +3,7 @@
 (ns huffpost-hires.api
 	(require [huffpost-hires.models :as models]
 		[huffpost-hires.util :as util]
+		[huffpost-hires.database :as database]
 
         [aws.sdk.s3 :as s3]
         [clojure.java.io :as io]
@@ -63,16 +64,35 @@
 		{"pic_url" (upload-to-s3 (params "pic") (str "interviewer/pic" (params "id")))}
 		{}))
 
+(defn params->listings-attributeMap
+	[params]
+	(println "params->listings-attributeMap -- params: " params)
+	{:id (util/string->number (get params "id"))
+		:hiring_manager (util/string->number (get params "hiring_manager"))
+		:title (util/string->sql-safe (get params "title"))
+		:description (util/string->sql-safe (get params "description" ""))
+		:homework_required (util/string->number-or-0 (get params "homework_required" 0))
+		:homework_question (util/string->sql-safe (get params "homework_question" ""))})
+(defn params->requirements-attributeMap
+	[params]
+	(println "params->requirements-attributeMap -- params: " params)
+	{:id (util/string->number (get params "id"))
+		:listing (util/string->number (get params "listing"))
+		:title (util/string->sql-safe (get params "title"))})
+(defn params->responsibilities-attributeMap
+	[params]
+	(params->requirements-attributeMap params))
+
 (defn params->homeworks-attributeMap
 	[params]
 	(println "params->homeworks-attributeMap -- params: " params)
 	{:id (util/string->number (get params "id"))
 		:applicant (util/string->number (get params "applicant"))
-		:prompt (get params "prompt" "")
-		:text_answer (get params "text_answer" "")
+		:prompt (util/string->sql-safe (get params "prompt" ""))
+		:text_answer (util/string->sql-safe (get params "text_answer" ""))
 		:attachment_url (get params "attachment_url" "")
 		:reviewer (util/string->number (get params "reviewer"))
-		:feedback (get params "feedback" "")})
+		:feedback (util/string->sql-safe (get params "feedback" ""))})
 
 (defn params->applicants-attributeMap
 	[params]
@@ -109,7 +129,7 @@
 	[params]
 	(println "params->interviewers-attributeMap -- params: " params)
 	{:id (util/string->number (get params "id"))
-		:name (get params "name" "")
+		:name (util/string->sql-safe (get params "name" ""))
 		:phone (get params "phone" "")
 		:email (get params "email" "")
 		:pic_url (get params "pic_url" "")})
@@ -117,11 +137,35 @@
 
 ;; ******************************* GET requests below ******************************
 
+
+;; GET /api/listing/?id='listingID'
+(defn get-listing
+	"Returns specified listing"
+	[request]
+	(println (str "api/listing with request:" request))
+	(database/query-json [(str "SELECT * FROM listings WHERE id=" (request :id))]))
+
+;; GET /api/listing/all
+(defn get-listings-all
+	"Returns all listings"
+	[params]
+	(database/query-json ["SELECT * FROM listings"]))
+;; GET /api/listing/requirements?id=listingID
+(defn get-listing-requirements
+	"Returns all requirements for given listing"
+	[params]
+	(database/query-json [(str "SELECT * FROM requirements WHERE listing=" (get params :id))]))
+;; GET /api/listing/responsibilities?id=listingID
+(defn get-listing-responsibilities
+	"Returns all responsibilities for given listing"
+	[params]
+	(database/query-json [(str "SELECT * FROM responsibilities WHERE listing=" (get params :id))]))
+
 ;; GET /api/stage/all
 (defn get-stages-all
 	"Returns all stages"
 	[params]
-	(models/query-json ["SELECT * FROM stages ORDER BY number"]))
+	(database/query-json ["SELECT * FROM stages ORDER BY number"]))
 
 ;; GET /api/stage/applicants?stage=number&pass=0/1&[goalie=inteviewerID]
 (defn get-applicants-by-stage
@@ -129,11 +173,11 @@
 	Defaults to stage=0 (pending) and pass=1 (passing true)"
 	[params]
 	(if (params :goalie) 
-		(models/query-json [(str "SELECT * FROM applicants 
+		(database/query-json [(str "SELECT * FROM applicants 
 							WHERE stage=" (get params :stage 0)
 							" AND pass=" (get params :pass 1)
 							" AND goalie=" (params :goalie))])
-		(models/query-json [(str "SELECT * FROM applicants 
+		(database/query-json [(str "SELECT * FROM applicants 
 							WHERE stage=" (get params :stage 0)
 							" AND pass=" (get params :pass 1))])))
 
@@ -144,21 +188,21 @@
 	[params]
 	(println (str "GET api/interviewers-all with params:" params))
 	(if (= (params :extra-data) "true")
-		(models/query-json ["SELECT i.*,
+		(database/query-json ["SELECT i.*,
 							(SELECT SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) FROM tasks t WHERE t.interviewer=i.id) AS incomplete_tasks,
 							(SELECT SUM(CASE WHEN a.completed=0 THEN 1 ELSE 0 END) FROM applicants a WHERE a.goalie=i.id) AS current_applicants
 							FROM interviewers i
 							INNER JOIN applicants a ON i.id=a.goalie
 							INNER JOIN tasks t ON i.id=t.interviewer
 							GROUP BY i.id;"])
-		(models/query-json ["select * from interviewers order by name"])))
+		(database/query-json ["select * from interviewers order by name"])))
 
 
 ;; GET /api/applicant/rejected
 (defn get-applicants-rejected
 	"Returns all rejected applicants, ordered by asof date"
 	[params]
-	(models/query-json ["SELECT * FROM applicants WHERE pass=0 ORDER BY asof"]))
+	(database/query-json ["SELECT * FROM applicants WHERE pass=0 ORDER BY asof"]))
 
 ;; GET /api/applicant/all?task-count=true/false
 (defn get-applicants-all
@@ -168,21 +212,21 @@
 	[params]
 
 	(if (= (params :task-count) "true")
-		(models/query-json ["SELECT a.*, 
+		(database/query-json ["SELECT a.*, 
 								SUM(CASE WHEN t.completed=1 THEN 1 ELSE 0 END) AS complete_tasks, 
 								SUM(CASE WHEN t.completed=0 THEN 1 ELSE 0 END) AS incomplete_tasks,
 								COUNT(t.completed) AS total_tasks 
 								FROM applicants a 
 								LEFT JOIN tasks t ON a.id=t.applicant 
 								GROUP BY a.id;"])
-		(models/query-json ["select * from applicants order by asof"])))
+		(database/query-json ["select * from applicants order by asof"])))
 
 ;; GET /api/applicant/homework?id='applicantID'
 (defn get-applicant-homework
 	"Returns homework where homework.applicant = 'applicantID'"
 	[params]
 	(println (str "api/applicant/homework where applicantID=" (params :id)))
-	(models/query-json [(str "SELECT * FROM homeworks WHERE applicant=" (params :id))]))
+	(database/query-json [(str "SELECT * FROM homeworks WHERE applicant=" (params :id))]))
 
 
 ;; GET /api/applicant/?id='applicantID'
@@ -190,47 +234,47 @@
 	"Returns specified applicant"
 	[request]
 	(println (str "api/appicant with request:" request))
-	(models/query-json [(str "SELECT * FROM applicants WHERE id=" (request :id))]))
+	(database/query-json [(str "SELECT * FROM applicants WHERE id=" (request :id))]))
 
 ;; GET /api/interviewer/?id='interviewerID'
 (defn get-interviewer
 	"Returns specified interviewer"
 	[params]
 	(println (str "api/interviewer with params:" params))
-	(models/query-json [(str "SELECT * FROM interviewers WHERE id=" (params :id))]))
+	(database/query-json [(str "SELECT * FROM interviewers WHERE id=" (params :id))]))
 
 ;; /api/applicant/tasks?id='applicantID'
 (defn tasks-by-applicant
 	"Returns all tasks for applicant"
 	[params]
-	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id))]))
+	(database/query-json [(str "select * from tasks WHERE applicant=" (params :id))]))
 
 ;; /api/applicant/complete-tasks?id='applicantID'
 (defn complete-tasks-by-applicant
 	"Returns all completed tasks for applicant"
 	[params]
-	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=1")]))
+	(database/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=1")]))
 
 ;; /api/interviewer/incomplete-tasks?id='applicantID'
 (defn incomplete-tasks-by-applicant
 	[params]
-	(models/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=0")]))
+	(database/query-json [(str "select * from tasks WHERE applicant=" (params :id) " AND completed=0")]))
 
 ;; /api/interviewer/tasks?id='applicantID'
 (defn tasks-by-interviewer
 	[params]
-	(models/query-json [(str "select * from tasks WHERE interviewer=" (params :id))]))
+	(database/query-json [(str "select * from tasks WHERE interviewer=" (params :id))]))
 
 ;; /api/interviewer/complete-tasks?id='interviewID'
 (defn complete-tasks-by-interviewer
 	[params]
-	(models/query-json [(str "select * from tasks where interviewer=" (params :id) " AND completed=1")]))
+	(database/query-json [(str "select * from tasks where interviewer=" (params :id) " AND completed=1")]))
 
 ;; /api/interviewer/incomplete-tasks?id='interviewID'
 (defn incomplete-tasks-by-interviewer
 	"Returns all completed tasks for interviewer"
 	[params]
-	(models/query-json [(str "select * from tasks where interviewer=" (params :id) " AND completed=0")]))
+	(database/query-json [(str "select * from tasks where interviewer=" (params :id) " AND completed=0")]))
 
 (defn handle-get-request-stage
 	"Routing helper for handle-get-request:
@@ -271,15 +315,29 @@
 		"incomplete-tasks" (incomplete-tasks-by-interviewer params)
 		(str "Invalid api request to /api/interviewer/" route)))
 
+(defn handle-get-request-listing
+	"routing helper for handle-get-request:
+	Called upon GET request to url /api/listing/*"
+	[route params] ; route == * in the GET request
+
+	(case route
+		"" (get-listing params)
+		"all" (get-listings-all params)
+		"responsibilities" (get-listing-responsibilities params)
+		"requirements" (get-listing-requirements params)
+		(str "Invalid api request to /api/listing/" route)))
 
 (defn handle-get-request
 	"Called by web upon GET request to url /api/*/*"
 	[request]
+	(println "********************** GET ************************")
+	(println request)
 	(let [params (request :params) route (params :*) route-prefix (first route) route-suffix (second route)]
 		(println (str "params: " params))
 		(println (str "route:" route))
 		(case route-prefix
 			"stage" (handle-get-request-stage route-suffix params)
+			"listing" (handle-get-request-listing route-suffix params)
 			"applicant" (handle-get-request-applicant route-suffix params)
 			"interviewer" (handle-get-request-interviewer route-suffix params)
 			"Invalid api request")))
@@ -295,6 +353,7 @@
 		(if (models/insert-interviewer (params->interviewers-attributeMap full-params))
 			"OK"
 			"ERROR")))
+
 ;; POST /api/homework
 (defn post-homework-new
 	[params]
@@ -316,12 +375,37 @@
 		"OK"
 		"ERROR"))
 
+
+;; POST /api/listing
+(defn post-listing-new
+	"Returns JSON string of new listing"
+	[params]
+	(if-let [result (models/insert-listing (params->listings-attributeMap params))]
+		(json/generate-string result)
+		"ERROR"))
+;; POST /api/requirement
+(defn post-listing-requirement
+	[params]
+	(if (models/insert-requirement (params->requirements-attributeMap params))
+		"OK"
+		"ERROR"))
+;; POST /api/responsibility
+(defn post-listing-responsibility
+	[params]
+	(if (models/insert-responsibility (params->responsibilities-attributeMap params))
+		"OK"
+		"ERROR"))
+
 (defn handle-post-request
 	[request]
 	(println "**************** API POST *******************")
 	(let [params (request :multipart-params) route ((request :route-params) :*)]
 		(println (str "params: " params))
 		(case route
+			"listing" (post-listing-new params)
+			"requirement" (post-listing-requirement params)
+			"responsibility" (post-listing-responsibility params)
+
 			"applicant" (post-applicant-new params)
 			"interviewer" (post-interviewer-new params)
 			"task" (post-task-new params)
@@ -373,7 +457,7 @@
 			"homework" (put-homework params)
 			"interviewer" (put-interviewer params)
 			"task" (if (models/update-task (params->tasks-attributeMap params)) "OK" "ERROR")
-			"Invalid DELETE request")))
+			"Invalid PUT request")))
 
 ;; ******************************* DELETE requests below ******************************
 (defn handle-delete-request
@@ -383,6 +467,10 @@
 		(println (str "params: " params))
 		(println (str "route: " route))
 		(case route
+			"listing" (if (models/delete-listing id) "OK" "ERROR")
+			"responsibility" (if (models/delete-responsibility id) "OK" "ERROR")
+			"requirement" (if (models/delete-requirement id) "OK" "ERROR")
+
 			"applicant" (if (models/delete-applicant id) "OK" "ERROR")
 			"interviewer" (if (models/delete-interviewer id) "OK" "ERROR")
 			"task" (if (models/delete-task id) "OK" "ERROR")

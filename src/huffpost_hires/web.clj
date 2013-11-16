@@ -9,6 +9,7 @@
             [ring.middleware.session.cookie :as cookie]
             [ring.middleware.params :as params]
             [ring.middleware.multipart-params :as mp]
+            [ring.middleware.jsonp :as jsonp]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
@@ -61,8 +62,10 @@
         :body (pr-str ["Hello" :from 'api])})
 
   (GET "/partials/*" [] serve-partial)
+  (GET "/listings" [] serve-hires)
   (GET "/applicants" [] serve-hires)
   (GET "/interviewers" [] serve-hires)
+  (GET "/listing" [] serve-hires)
   (GET "/applicant" [] serve-hires)
   (GET "/interviewer" [] serve-hires)
   (route/resources "/")
@@ -87,6 +90,7 @@
                             trace/wrap-stacktrace))
                          params/wrap-params
                          mp/wrap-multipart-params
+                         (jsonp/wrap-json-with-padding)
                          (site {:session {:store store}}))
                      {:port port :join? false})))
 

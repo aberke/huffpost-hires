@@ -1,0 +1,108 @@
+
+
+<a ng-class ng-click="deleteListing()" class="delete-link">DELETE</a>
+
+<div class='container main-container' id='listing-page'>
+
+    <div id="listing-info-well-container">
+        <div class='float-left'>
+            <h3 class="listing-info-title" ng-show='editListingInfo==false'>{{listing.title}}</h3><input class="listing-info-title" ng-show='editListingInfo==true' type='text' ng-model='listing.title'>
+            <p id='listing-description' class='float-left'>{{listing.description}}</p>
+        </div>
+
+        <div id='listing-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
+            <button id='updatelistingInfo-btn' ng-click="updateListingInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
+            
+            <p><em>Hiring Manager:</em> <span ng-show='editListingInfo==false'>{{interviewersList[listing.hiring_manager].name}}</span><input ng-show='editlistingInfo==true' type='text' ng-model='listing.email'></p>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-6">
+        <span id="responsibilities-heading">
+                <button ng-click="new_responsibility={}" class="add-btn btn btn-success">+</button>
+            <h2 id="responsibilities-heading-title">Responsibilities</h2>
+        </span>
+        <div id="responsibilities-container">
+            <table class="table table-hover">
+                <tbody>
+                    <tr ng-show="new_responsibility">
+                        <td><button ng-click="new_responsibility=null" class='small-btn btn-danger'>&times;</button></td>
+                        <td><input ng-model="new_responsibility.title" type="text" /></td>
+                        <td><button ng-click="saveNewResponsibility(new_responsibility)" class='small-btn btn-success'>SAVE</button></td>
+                    </tr>
+                    <tr ng-repeat="responsibility in responsibilitiesList">
+                        <td><button ng-click="deleteResponsibility(responsibility.id)" class='small-btn btn-danger'>&times;</button></td>
+                        <td>
+                            <span>{{responsibility.title}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+        <span id="roles-heading">
+                <button ng-click="new_requirement={}" class="add-btn btn btn-success">+</button>
+            <h2 id="roles-heading-title">Requirements</h2>
+        </span>
+        <div id="roles-container">
+            <table class="table table-hover">
+                <tbody>
+                    <tr ng-show="new_requirement">
+                        <td><button ng-click="new_requirement=null" class='small-btn btn-danger'>&times;</button></td>
+                        <td><input ng-model="new_requirement.title" type="text" /></td>
+                        <td><button ng-click="saveNewRequirement(new_requirement)" class='small-btn btn-success'>SAVE</button></td>
+                    </tr>
+                    <tr ng-repeat="requirement in requirementsList">
+                        <td><button ng-click="deleteRequirement(requirement.id)" class='small-btn btn-danger'>&times;</button></td>
+                        <td>
+                            <span>{{requirement.title}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+  <!-- New Applicant Modal -->
+  <div class="modal fade" id="newApplicantModal" ng-model="new_applicant" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form ng-submit="addApplicant(new_applicant)" class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h2 class="modal-title">New Applicant</h2>
+        </div>
+        <div class="modal-body">
+            <div id='new-applicant-status' >
+                <h3 class="status">{{new_applicant['stage'].name || 'Pending'}}</h3>
+                <select class="cursor-pointer small" ng-model="new_applicant.stage" ng-options="stage.name for stage in stagesList"> <option value="">-</option></select>
+            </div>
+                        <span class='new-input-container'>Name: <input type='text' required placeholder='Angelina Jolie' ng-model='new_applicant.name'></span>
+                        <span required class='new-input-container'>Position: <input type='text' placeholder='Developer' ng-model='new_applicant.position'></span>
+                        <span class='new-input-container'>Hiring Manager: <select required ng-model="new_applicant.goalie" ng-options="listing.name for listing in listingsList">
+                            <option value="">-select-</option>
+                        </select></span>
+                        <span class='new-input-container'>Phone number: <input type='text' placeholder='222-333-4444' ng-model='new_applicant.phone'></span>
+                        <span class='new-input-container'>Email: <input type='email' placeholder='angie.jolie@gmail.com' ng-model="new_applicant.email"></span>
+                        <span class='new-input-container'>Link to resume: <input type='text' placeholder='www.linkToSharedGoogleDrive.com' ng-model='new_applicant.resume'></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>
+          <button type="submit" class="btn btn-success">SAVE</button>
+        </div>
+      </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+</div>
+    <link href="lib/date-picker/datepicker.css" rel="stylesheet">
+    <script src="lib/date-picker/bootstrap-datepicker.js"></script>
+
+    <!-- spinner to show when waiting for uploads -->
+    <link rel="stylesheet" href="/lib/spinner-master/spinner.css" type="text/css">
+    <script type="text/javascript" src="/lib/spinner-master/spinner.js"></script>

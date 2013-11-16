@@ -94,20 +94,16 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
   xhrRequest = function(method, url, data, callback, onProgress) {
     xhr = new XMLHttpRequest();
-    xhr.open(method, '/api' + url, true);
-    //xhr.open('POST', '/api/file', true);
+    xhr.open(method, url, true);
 
-    console.log('httpPUT:');
+    console.log('xhrRequest ' + method + ' with data:');
     console.log(data);
 
     var form = new FormData();
     $.each(data, function(name) { form.append(name, data[name]); });
 
     xhr.onload = function(e) {
-      console.log('onload with status: ' + xhr.status);
       if (xhr.status === 200) {
-        console.log(xhr);
-        console.log(xhr.response);
         callback(xhr.response);
       } else {
         console.log('Upload error: ' + xhr.status);
@@ -123,22 +119,21 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       if (e.lengthComputable) {
         percentLoaded = Math.round((e.loaded / e.total) * 100);
         console.log('percentLoaded: ' + percentLoaded);
-        //return this_s3upload.onProgress(percentLoaded, (percentLoaded === 100 ? 'Finalizing.' : 'Uploading.'), public_url, file);
       }
     };
     xhr.send(form);
   };
   xhrPUT = function(url, data, callback, onProgress) {
-    return this.xhrRequest('PUT', url, data, callback, onprogress);
+    return this.xhrRequest('PUT', '/api' + url, data, callback, onprogress);
   };
   xhrPOST = function(url, data, callback, onProgress) {
-    return this.xhrRequest('POST', url, data, callback, onprogress);
+    return this.xhrRequest('POST', '/api' + url, data, callback, onprogress);
   };
   http = function(method, url, data) {
     var deferred = $q.defer();
     $http({
       method: method,
-      url: '/api' + url,
+      url: url,
       data: $.param(data || {}),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     })
@@ -153,13 +148,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
   };
 
   httpGET = function(url) {
-    return this.http('GET', url, null);
+    return this.http('GET', '/api' + url, null);
   };
   httpPOST = function(url, data) {
-    return this.http('POST', url, data);
+    return this.http('POST', '/api' + url, data);
   };
   httpDELETE = function(url, data) {
-    return this.http('DELETE', url, data);
+    return this.http('DELETE', '/api' + url, data);
   };
 
   getInterviewers = function(withTaskCount, callback) {
@@ -233,6 +228,31 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       httpGET('/applicant/all').then(function(returnedData) {
         $rootScope.applicantsList = returnedData;
         $rootScope.applicantsMap = listToMap(returnedData);
+        if (callback) callback();
+      });
+    },
+    getAllListings: function(callback) {
+      httpGET('/listing/all').then(function(returnedData) {
+        $rootScope.listingsList = returnedData;
+        if (callback) callback();
+      });
+    },
+    getListing: function(listingID, callback) {
+      httpGET('/listing/?id=' + listingID).then(function(returnedData) {
+        $rootScope.listing = returnedData[0];
+        if (callback) callback();
+      });
+    },
+    getResponsibilities: function(listingID, callback) {
+      httpGET('/listing/responsibilities?id=' + listingID).then(function(returnedData) {
+        $rootScope.responsibilitiesList = returnedData;
+        if (callback) callback();
+      });
+    },
+    getRequirements: function(listingID, callback) {
+      httpGET('/listing/requirements?id=' + listingID).then(function(returnedData) {
+        $rootScope.requirementsList = returnedData;
+        console.log(returnedData)
         if (callback) callback();
       });
     },
@@ -332,6 +352,26 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
     /* ************** POST REQUESTS ******************/
 
+    postNewListing: function(new_listing, callback) {
+      xhrPOST('/listing', new_listing, function(returnedData) {
+        console.log('postNewListing returned: ')
+        console.log(returnedData)
+        if (callback) callback(returnedData);
+      });
+    },
+    postNewResponsibility: function(new_responsibility, callback) {
+      xhrPOST('/responsibility', new_responsibility, function(returnedData) {
+        console.log(returnedData);
+        if (callback) callback(returnedData);
+      });
+    },
+    postNewRequirement: function(new_requirement, callback) {
+      xhrPOST('/requirement', new_requirement, function(returnedData) {
+        console.log(returnedData);
+        if (callback) callback(returnedData);
+      });
+    },
+
     postNewApplicant: function(new_applicant, callback) {
       xhrPOST('/applicant', new_applicant, function(returnedData) {
         console.log('postNewApplicant returned:');
@@ -357,6 +397,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       xhrPOST('/homework', new_homework, function(returnedData) {
         console.log('posted new homework: ');
         console.log(returnedData);
+        if (callback) callback();
+      });
+    },
+    submitApplication: function(url, application, callback) {
+      return xhrRequest('POST', '/apply' + url, application, function(returnedData) {
+        console.log('submitApplication returnedData: ')
+        console.log(returnedData)
         if (callback) callback();
       });
     },
@@ -388,6 +435,28 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       httpDELETE('/task', {'id': taskID}).then(function(returnedData) {
         console.log('deletetask with ID ' + taskID);
         console.log(returnedData);
+        if (callback && (returnedData != "ERROR")) callback();
+      });
+    },
+
+    deleteResponsibility: function(responsibilityID, callback) {
+      httpDELETE('/responsibility', {'id': responsibilityID}).then(function(returnedData){
+        console.log('deleted responsibility returned data:')
+        console.log(returnedData)
+        if (callback && (returnedData != "ERROR")) callback();
+      });
+    },
+    deleteRequirement: function(requirementID, callback) {
+      httpDELETE('/requirement', {'id': requirementID}).then(function(returnedData){
+        console.log('deleted requirement returned data:')
+        console.log(returnedData)
+        if (callback && (returnedData != "ERROR")) callback();
+      });
+    },
+    deleteListing: function(listingID, callback) {
+      httpDELETE('/listing', {'id': listingID}).then(function(returnedData){
+        console.log('delete listing returned data:')
+        console.log(returnedData)
         if (callback && (returnedData != "ERROR")) callback();
       });
     },

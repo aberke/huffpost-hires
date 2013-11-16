@@ -42,19 +42,31 @@
              (get-in exception-info [:object :body]))))
              (vector :status :message :code))))))
 
-(defn send-email-notification
+(defn send-notification
   "Send an email message Notification"
-  [to content]
-  (let [msg {:from from-address 
+  [to subject content]
+  (let [msg {
+      :from from-address 
 			:to to 
-			:subject "[Huffpost Hires] Notification"
+			:subject subject
 			:text content}]
+    (post-request msg)))
+
+(defn send-with-attachment
+  "Send an email Notification with attachment"
+  [to subject content attachment]
+  (let [msg {
+      :from from-address 
+      :to to 
+      :subject subject
+      :text content
+      :attachment attachment}]
     (post-request msg)))
 
 
 (defn test-mail 
 	[]
-	(send-email-notification "alexandra.berke@huffingtonpost.com" "test email"))
+	(send-notification "alexandra.berke@huffingtonpost.com" "test subject" "test email"))
 
 
 

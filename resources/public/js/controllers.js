@@ -48,7 +48,7 @@ function AllApplicantsCntl($scope, $location, APIService, BasicService) {
 		console.log(path);
 	};
 
-	$scope.rejectedApplicants = [];
+	$scope.rejectedApplicants;
 
 	$scope.stagesWithApplicants = {}; //= {stage_number: {name: [applicants]}};
 
@@ -246,6 +246,9 @@ function ApplicantCntl($scope, $routeParams, $location, APIService, BasicService
 
 
 	angular.element(document).ready(function () {
+		BasicService.handleDate('new-phonescreen-date', function(date) {
+			$scope.new_task.date = date.toJSON();
+		});
 		BasicService.handleDate('new-task-date', function(date) {
 			$scope.new_task.date = date.toJSON();
 		});
@@ -394,3 +397,98 @@ function InterviewerCntl($scope, $timeout, $routeParams, $location, BasicService
 		});
 	});
 }
+
+function AllListingsCntl($scope, APIService, BasicService) {
+
+	$scope.listingsList;
+
+	$scope.addListing = function(new_listing) {
+		$('#newListingModal').modal('hide');
+
+		new_listing.hiring_manager  = new_listing.hiring_manager.id;
+
+		new_listing.responsibilities = [];
+		$.each($('#new-listing-responsibilities input'), function(i, object) {
+			var val = object.value;
+			if (val && val != undefined && val != '') { new_listing.responsibilities.push(val); }
+		});
+		new_listing.requirements = [];
+		$.each($('#new-listing-requirements input'), function(i, object) {
+			var val = object.value;
+			if (val && val != undefined && val != '') { new_listing.requirements.push(val); }
+		});
+
+		APIService.postNewListing(new_listing, function(returnedData) {
+			var listing = eval("(" + returnedData + ")");
+			$scope.listingsList.push(listing);
+			$scope.$apply();
+
+			var listing_id = listing.id;
+
+			for (var i=0; i<new_listing.responsibilities.length; i++) {
+				APIService.postNewResponsibility({'listing': listing_id, 'title': new_listing.responsibilities[i]});
+			};
+			for (var i=0; i<new_listing.requirements.length; i++) {
+				APIService.postNewRequirement({'listing': listing_id, 'title': new_listing.requirements[i]});
+			};
+
+		});
+	}
+	var init = function() {
+		APIService.getAllListings();
+		APIService.getInterviewers();
+	};
+	init();
+};
+function ListingCntl($scope, $location, $routeParams, APIService) {
+	$scope.listing;
+	$scope.responsibilitiesList;
+	$scope.requirementsList;
+
+	$scope.editListingInfo = false;
+
+	$scope.saveNewRequirement = function(new_requirement) {
+		new_requirement.listing = $scope.listing.id;
+		APIService.postNewRequirement(new_requirement, function() {
+			APIService.getRequirements($scope.listing.id);
+		});
+		$scope.new_requirement = null;
+	}
+	$scope.saveNewResponsibility = function(new_responsibility) {
+		new_responsibility.listing = $scope.listing.id;
+		APIService.postNewResponsibility(new_responsibility, function() {
+			APIService.getResponsibilities($scope.listing.id);
+		});
+		$scope.new_responsibility = null;
+	}
+	$scope.deleteResponsibility = function(responsibilityID) {
+		APIService.deleteResponsibility(responsibilityID, function() {
+			APIService.getResponsibilities($scope.listing.id);
+		});
+	};
+	$scope.deleteRequirement = function(requirementID) {
+		APIService.deleteRequirement(requirementID, function() {
+			APIService.getRequirements($scope.listing.id);
+		});
+	};
+	$scope.deleteListing = function() {
+		APIService.deleteListing($scope.listing.id, function() {
+			$location.path('/listings');
+		});
+	}	
+
+
+	var init = function() {
+
+		APIService.getListing($routeParams.id, function() {
+			console.log('listing:')
+			console.log($scope.listing)
+		});
+		APIService.getResponsibilities($routeParams.id);
+		APIService.getRequirements($routeParams.id);
+
+	};
+	init();
+}
+
+

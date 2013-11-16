@@ -1,7 +1,7 @@
-function ApplyCntl($scope, $location, BasicService, APIService) {
+function ApplyCntl($scope, $location, APIService) {
 	$scope.domain = window.location.origin;
 
-	$scope.applicant;
+	$scope.application;
 	$scope.applyStep;
 
 
@@ -14,6 +14,25 @@ function ApplyCntl($scope, $location, BasicService, APIService) {
 	$scope.submitOutput = function(output) {
 		console.log('TODO: submit output');
 		$scope.applyStep = 2;
+	};
+	$scope.submitCode = function() {
+
+		var files = $('#upload-code')[0].files;
+		if (files && files.length) { $scope.application.attachment =  files[0]; }
+
+		console.log($scope.application)
+		$scope.applyStep = 3;
+	}
+	$scope.submitPersonalInfo = function(url) {
+
+		var files = $('#upload-resume')[0].files;
+		if (files && files.length) { $scope.application.resume =  files[0]; }
+
+		console.log($scope.application)
+		$scope.applyStep = 4;
+		APIService.submitApplication(url, $scope.application, function(){
+			console.log('submitApplication callback')
+		});
 	};
 
 

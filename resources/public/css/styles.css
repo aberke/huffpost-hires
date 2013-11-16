@@ -83,8 +83,10 @@ tr.passed-true td{
 tr.failed-true td{
 	background-color: rgba(255,0,0,0.1);
 }
-
-
+/************ index page *******/
+#listings-div {
+	text-align: center;
+}
 .index-half-left, .index-half-right {
 	text-align: center;	
 }
@@ -107,9 +109,10 @@ tr.failed-true td{
 .btn h3, .btn h5 {
 	margin: 0;
 }
-.small-btn {
-	padding: 4px;
+button.small-btn,.small-btn {
+	padding: 2px 4px;
 	font-size: 11px;
+	border-radius: 3px;
 }
 .delete-link{
 	float: right;
@@ -178,7 +181,17 @@ tr.failed-true td{
 .modal-footer{
 	margin: 0;
 }
-.new-input-container{
+.new-input-block input{
+	display: block;
+	margin: 5px auto;
+	width: 90%;
+}
+.new-input-block textarea{
+	display: block;
+	margin: 5px auto;
+	width: 90%;
+}
+.new-input-container,.new-input-block{
 	margin: auto;
 	width: 90%;
 	display: block;
@@ -240,11 +253,11 @@ select.small {
 	margin-left: 10px;
 }
 input.interviewer-info-name{ margin: 0;}
-#interviewer-info-well-container{
+#listing-info-well-container, #interviewer-info-well-container{
 	float: left;
 	width: 100%;
 }
-#interviewer-info-well{
+#listing-info-well,#interviewer-info-well{
 	margin: 0;
 }
 #interviewer-tasks-heading{
@@ -310,17 +323,19 @@ input.interviewer-info-name{ margin: 0;}
 	float: right;
 }
 
-#applicants-heading, #interviewers-heading{
+#applicants-heading, #responsibilities-heading, #roles-heading, #interviewers-heading, #listings-heading{
 	display: block;
 	border-bottom: 3px solid gray;
 	padding: 0 10px 10px 10px;
 	margin-bottom: 30px;
+}#roles-heading, #responsibilities-heading{
+	margin: 0;
 }
 #interviewers-heading{ margin-top: 20px; }
 #applicants-heading .add-btn, #interviewers-heading .add-btn{
 	margin-bottom: 10px;
 }
-#applicants-heading-title, #interviewers-heading-title{
+#responsibilities-heading-title,#roles-heading-title,#listings-heading-title,#applicants-heading-title, #interviewers-heading-title{
 	display: inline-block;
 }
 

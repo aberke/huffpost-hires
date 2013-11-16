@@ -9,6 +9,8 @@
                   [ring/ring-jetty-adapter "1.1.0"]
                   [ring/ring-devel "1.1.0"]
                   [ring-basic-authentication "1.0.1"]
+                  [ring.middleware.jsonp "0.1.3"]
+
                   [environ "0.2.1"]
                   [com.cemerick/drawbridge "0.0.6"]
                   [org.clojure/java.jdbc "0.3.0-alpha5"]
