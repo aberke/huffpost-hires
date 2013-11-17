@@ -9,7 +9,7 @@
             [ring.middleware.session.cookie :as cookie]
             [ring.middleware.params :as params]
             [ring.middleware.multipart-params :as mp]
-            [ring.middleware.jsonp :as jsonp]
+            [ring.middleware.cors :as cors]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
             [cemerick.drawbridge :as drawbridge]
@@ -17,6 +17,7 @@
             [clojure.java.io :as io]
 
             [huffpost-hires.api :as api]
+            [huffpost-hires.jobs :as jobs]
             [huffpost-hires.apply :as apply])
   )
 
@@ -50,9 +51,14 @@
 
   (ANY "/test" [] test-route)
 
+
+  ;; jobs serve as a shield for the API
+  (ANY "/jobs/*/*" [] jobs/handler)
+
+
   (ANY "/apply/*" [] apply/request-handler)
 
-  (GET "/api/*/*" [] api/handle-get-request)
+  (GET "/api/*/*" [] (fn[request] (println request) api/handle-get-request request))
   (POST "/api/*" [] api/handle-post-request)
   (PUT "/api/*" [] api/handle-put-request)
   (DELETE "/api/*" [] api/handle-delete-request)
@@ -85,12 +91,15 @@
         ;; TODO: heroku config:add SESSION_SECRET=$RANDOM_16_CHARS
         store (cookie/cookie-store {:key (env :session-secret)})]
     (jetty/run-jetty (-> #'app
+                         (cors/wrap-cors
+                          :access-control-allow-origin #"http://127.0.0.1:3000"
+                          :access-control-allow-headers ["Origin" "X-Requested-With"
+                                                          "Content-Type" "Accept"])
                          ((if (env :production)
                             wrap-error-page
                             trace/wrap-stacktrace))
                          params/wrap-params
                          mp/wrap-multipart-params
-                         (jsonp/wrap-json-with-padding)
                          (site {:session {:store store}}))
                      {:port port :join? false})))
 
