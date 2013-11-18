@@ -143,7 +143,7 @@
 	"Returns specified listing"
 	[request]
 	(println (str "api/listing with request:" request))
-	(database/query-json [(str "SELECT * FROM listings WHERE id=" (request :id))]))
+	(database/query-json [(str "SELECT * FROM listings WHERE id=" (util/string->number (request :id)))]))
 
 ;; GET /api/listing/all
 (defn get-listings-all
@@ -154,7 +154,7 @@
 (defn get-listing-requirements
 	"Returns all requirements for given listing"
 	[params]
-	(database/query-json [(str "SELECT * FROM requirements WHERE listing=" (get params :id))]))
+	(database/query-json [(str "SELECT * FROM requirements WHERE listing=" (util/string->number (get params :id)))]))
 ;; GET /api/listing/responsibilities?id=listingID
 (defn get-listing-responsibilities
 	"Returns all responsibilities for given listing"

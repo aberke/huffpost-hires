@@ -10,12 +10,27 @@
             [huffpost-hires.models :as models]
             [huffpost-hires.mailgun :as mailgun]))
 
-(defn handler
+
+;; ******************** GET HANDLERS **************
+
+(defn get-handler
 	[request]
-	(let [route-params (request :route-params)
+	(let [params (request :params)
+			route-params (params :*)
 			route-prefix (first route-params)
-			route-suffix (second route-params)
-			method ((request :headers) "access-control-request-method")]
-		(println "route-prefix: " route-prefix)
-		(println "route-suffix: " route-suffix)
-		(println "method: " method)))
+			route-suffix (second route-params)]
+
+		(case route-prefix
+			"listing" (api/handle-get-request-listing route-suffix params)
+			(str "unknown request endpoint: /jobs/" route-prefix "/" route-suffix))))
+
+;; ******************** POST HANDLERS **************
+
+(defn post-handler
+	[request]
+	"TODO: POST HANDLER")
+
+
+
+
+

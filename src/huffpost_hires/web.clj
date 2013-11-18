@@ -16,8 +16,8 @@
             [environ.core :refer [env]]
             [clojure.java.io :as io]
 
-            [huffpost-hires.api :as api]
             [huffpost-hires.jobs :as jobs]
+            [huffpost-hires.api :as api]
             [huffpost-hires.apply :as apply])
   )
 
@@ -51,14 +51,12 @@
 
   (ANY "/test" [] test-route)
 
-
-  ;; jobs serve as a shield for the API
-  (ANY "/jobs/*/*" [] jobs/handler)
-
+  (GET "/jobs/*/*" [] jobs/get-handler)
+  (POST "/jobs/*/*" [] jobs/post-handler)
 
   (ANY "/apply/*" [] apply/request-handler)
 
-  (GET "/api/*/*" [] (fn[request] (println request) api/handle-get-request request))
+  (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
   (PUT "/api/*" [] api/handle-put-request)
   (DELETE "/api/*" [] api/handle-delete-request)
@@ -74,7 +72,7 @@
   (GET "/listing" [] serve-hires)
   (GET "/applicant" [] serve-hires)
   (GET "/interviewer" [] serve-hires)
-  (route/resources "/")
+  (route/resources "/") ;; serves static files
   (GET "/" [] serve-hires)
   (route/not-found (slurp (io/resource "html/404.html"))))
 
@@ -91,11 +89,11 @@
         ;; TODO: heroku config:add SESSION_SECRET=$RANDOM_16_CHARS
         store (cookie/cookie-store {:key (env :session-secret)})]
     (jetty/run-jetty (-> #'app
-                         (cors/wrap-cors
-                          :access-control-allow-origin #"http://127.0.0.1:3000"
-                          :access-control-allow-headers ["Origin" "X-Requested-With"
+                          (cors/wrap-cors
+                            :access-control-allow-origin #"http://127.0.0.1:3000"
+                            :access-control-allow-headers ["Origin" "X-Requested-With" "x-requested-with"
                                                           "Content-Type" "Accept"])
-                         ((if (env :production)
+                          ((if (env :production)
                             wrap-error-page
                             trace/wrap-stacktrace))
                          params/wrap-params
