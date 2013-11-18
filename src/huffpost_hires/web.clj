@@ -17,8 +17,7 @@
             [clojure.java.io :as io]
 
             [huffpost-hires.jobs :as jobs]
-            [huffpost-hires.api :as api]
-            [huffpost-hires.apply :as apply])
+            [huffpost-hires.api :as api])
   )
 
 (defn- authenticated? [user pass]
@@ -52,9 +51,10 @@
   (ANY "/test" [] test-route)
 
   (GET "/jobs/*/*" [] jobs/get-handler)
-  (POST "/jobs/*/*" [] jobs/post-handler)
+  (POST "/jobs/*" [] jobs/post-handler)
+  ;; need endpoint for OPTIONS to reply to CORS request saying code.huffingtonpost.com is ok domain for accessing
+  (ANY "/jobs/*" [] "OK")
 
-  (ANY "/apply/*" [] apply/request-handler)
 
   (GET "/api/*/*" [] api/handle-get-request)
   (POST "/api/*" [] api/handle-post-request)
