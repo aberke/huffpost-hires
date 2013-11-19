@@ -441,11 +441,10 @@ function AllListingsCntl($scope, APIService, BasicService) {
 	init();
 };
 function ListingCntl($scope, $location, $routeParams, APIService) {
+	var spinner;
 	$scope.listing;
 	$scope.responsibilitiesList;
 	$scope.requirementsList;
-
-	$scope.editListingInfo = false;
 
 	$scope.saveNewRequirement = function(new_requirement) {
 		new_requirement.listing = $scope.listing.id;
@@ -476,6 +475,14 @@ function ListingCntl($scope, $location, $routeParams, APIService) {
 			$location.path('/listings');
 		});
 	}	
+	$scope.updateInfo = function() {
+		spinner.start();
+		if ($scope.listing.hiring_manager.id) $scope.listing.hiring_manager = $scope.listing.hiring_manager.id;
+		
+		APIService.updateListing($scope.listing, function() {
+			spinner.hide();
+		});
+	}
 
 
 	var init = function() {
@@ -486,7 +493,10 @@ function ListingCntl($scope, $location, $routeParams, APIService) {
 		});
 		APIService.getResponsibilities($routeParams.id);
 		APIService.getRequirements($routeParams.id);
-
+		APIService.getInterviewers(function() {
+			console.log($scope.interviewersMap)
+		});
+		spinner = new Spinner($('#info-well')[0],'purple',100,100);
 	};
 	init();
 }

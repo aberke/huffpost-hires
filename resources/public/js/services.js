@@ -252,7 +252,6 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     getRequirements: function(listingID, callback) {
       httpGET('/listing/requirements?id=' + listingID).then(function(returnedData) {
         $rootScope.requirementsList = returnedData;
-        console.log(returnedData)
         if (callback) callback();
       });
     },
@@ -492,7 +491,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
         if (callback) callback();
       });
     },
-
+    updateListing: function(listing, callback) {
+      xhrPUT('/listing', listing, function(returnedData) {
+        console.log('updateListing returned:');
+        console.log(returnedData);
+        if (callback) callback();
+      });
+    },
 
 
 

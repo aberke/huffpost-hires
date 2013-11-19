@@ -4,16 +4,22 @@
 
 <div class='container main-container' id='listing-page'>
 
-    <div id="listing-info-well-container">
-        <div class='float-left'>
-            <h3 class="listing-info-title" ng-show='editListingInfo==false'>{{listing.title}}</h3><input class="listing-info-title" ng-show='editListingInfo==true' type='text' ng-model='listing.title'>
-            <p id='listing-description' class='float-left'>{{listing.description}}</p>
+    <div id="info-well-container">
+        <div class='float-left width-40'>
+            <h3 class="listing-info-title">
+                <input class="listing-info-title width-100" type='text' ng-model='listing.title'>
+            </h3>
+            <textarea id='listing-description' class='float-left width-100' ng-model="listing.description" />
         </div>
 
-        <div id='listing-info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
-            <button id='updatelistingInfo-btn' ng-click="updateListingInfo()" class="float-right btn btn-default"><h3>Edit</h3></button>
+        <div id='info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
+            <button id='updateInfo-btn' ng-click="updateInfo()" class="float-right btn btn-default"><h3>Save</h3></button>
             
-            <p><em>Hiring Manager:</em> <span ng-show='editListingInfo==false'>{{interviewersList[listing.hiring_manager].name}}</span><input ng-show='editlistingInfo==true' type='text' ng-model='listing.email'></p>
+            <p><em>Hiring Manager:</em> 
+                <select ng-model="listing.hiring_manager" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">{{interviewersList[listing.hiring_manager].name}}</option>
+                </select>
+            </p>
         </div>
     </div>
 

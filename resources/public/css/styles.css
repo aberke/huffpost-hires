@@ -9,8 +9,9 @@ input[type='file'] {
 .green { color: green; }
 
 .width-10 { max-width: 10px; }
-.width-40{ max-width: 40%; }
+.width-40{ width: 40%; }
 .width-60{ max-width: 60%; }
+.width-100{ width: 100%; }
 
 .padding-left-60, #interviewers-container .padding-left-60{ padding-left: 60px; }
 
@@ -166,6 +167,9 @@ button.small-btn,.small-btn {
 #newTaskModal .modal-header{
 	color: black;
 }
+#newListingModal .modal-header {
+	color: purple;
+}
 .modal-header input{
 	color: white;
 	background-color: transparent;
@@ -253,12 +257,18 @@ select.small {
 	margin-left: 10px;
 }
 input.interviewer-info-name{ margin: 0;}
-#listing-info-well-container, #interviewer-info-well-container{
+#info-well-container, #interviewer-info-well-container{
 	float: left;
 	width: 100%;
 }
+#info-well-container h3{
+	margin-top: 0;
+}
 #listing-info-well,#interviewer-info-well{
 	margin: 0;
+}
+#listing-description{
+	border-color: rgba(0,0,200,0.1);
 }
 #interviewer-tasks-heading{
 	display: block;

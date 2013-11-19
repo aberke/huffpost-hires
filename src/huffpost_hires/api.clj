@@ -447,12 +447,20 @@
 			"OK"
 			"ERROR")))
 
+;; PUT /api/listing
+(defn put-listing
+	[params]
+	(if (models/update-listing (params->listings-attributeMap params))
+		"OK"
+		"ERROR"))
+
 (defn handle-put-request
 	[request]
 	(println "**************** API PUT *******************")
 	(println request)
 	(let [params (request :multipart-params) route ((request :route-params) :*)]
 		(case route
+			"listing" (put-listing params)
 			"applicant" (put-applicant params)
 			"homework" (put-homework params)
 			"interviewer" (put-interviewer params)

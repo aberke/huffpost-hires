@@ -369,6 +369,18 @@
 
 ; **************** UPDATE BELOW *********************************
 
+(defn update-listing
+	[attribute-map]
+	(let [statement (str "UPDATE listings "
+							"SET hiring_manager=" (attribute-map :hiring_manager)
+								", title='" (attribute-map :title)
+								"', description='" (attribute-map :description)
+								"', homework_required=" (attribute-map :homework_required)
+								", homework_question='" (attribute-map :homework_question) "' "
+							"WHERE id=" (attribute-map :id))]
+		(try (database/execute-sql statement)
+			(catch Exception e (util/handle-exception "update-listing" e)))))
+
 (defn update-applicant
 	[attribute-map]
   	(let [statement (str "UPDATE applicants "
