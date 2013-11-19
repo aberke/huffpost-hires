@@ -29,8 +29,6 @@
 
 (defn apply-handler
 	[params]
-    (println "**********application-submission with params: ")
-    (println params)
 
     (let [applicant-attribute-map {
                     :name (util/string->sql-safe (get params "name" ""))
@@ -58,11 +56,17 @@
 
                 ;; send email to interviewer/interested parties -- TODO: FIX THIS
                 (mailgun/send-notification
-                    (System/getenv "RECRUITER_EMAIL")
+                    (list (System/getenv "RECRUITER_EMAIL") "alexandra.berke@huffingtonpost.com")
                     "[Huffpost Hires] New applicant submission"
                     (str "Hello,\n\n" 
-                        "A new applicant named " (new-applicant :name) " has applied via the code.huffingtonpost.com/jobs page.\n"
-                        "To view the applicant's information and resume, visit: " 
+                        "A new applicant has applied via the code.huffingtonpost.com/jobs page.\n\n"
+                        
+                        "Applicant Infomation:\n"
+                        "\t\tName: " (new-applicant :name) "\n"
+                        "\t\tEmail: " (new-applicant :email) "\n"
+                        "\t\tResume: " (new-applicant :resume_url) "\n\n"
+                        
+                        "To view the applicant's information in the huffpost-hires portal, visit: " 
                         "http://0.0.0.0:5000/applicant?id=" (new-applicant :id) ".\n\n"
                         "- Huffpost Hires"
                         ))
@@ -71,10 +75,6 @@
 
 (defn post-handler
 	[request]
-	(println "**************POST HANDLER")
-	(println request)
-	(println "**************POST HANDLER pprint")
-	(pprint/pprint request)
     (let [route ((request :route-params) :*) 
             params (request :params) 
             multipart-params (request :multipart-params)]
@@ -82,11 +82,6 @@
             	"apply" (apply-handler multipart-params)
             	(str "Invalid request to /jobs" route))))
 
-(defn any
-	[request]
-	(println "**************ANY HANDLER pprint")
-	(pprint/pprint request)
-	"ANY")
 
 
 

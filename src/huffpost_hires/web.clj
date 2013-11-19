@@ -17,7 +17,8 @@
             [clojure.java.io :as io]
 
             [huffpost-hires.jobs :as jobs]
-            [huffpost-hires.api :as api])
+            [huffpost-hires.api :as api]
+            [huffpost-hires.mailgun :as mailgun])
   )
 
 (defn- authenticated? [user pass]
@@ -42,6 +43,7 @@
 
 (defn test-route
   [request]
+  (mailgun/test-mail)
   {:status 200 :headers {} :body (io/file (io/resource "html/test.html"))})
 
 (defroutes app

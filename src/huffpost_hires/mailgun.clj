@@ -4,7 +4,9 @@
   (refer-clojure :exclude [send])
   (import [java.net URLEncoder])
   (:require [clj-http.client :as client]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+
+            [clojure.java.io :as io]))
 
 (def base-url "https://api.mailgun.net/v2")
 (def domain "huffpostlabs.mailgun.org")
@@ -25,22 +27,34 @@
   Returns true if successful, otherwise returns false"
   [data]
   (try
-    (let [url (make-request-url) result (client/post url {:accept :json
-			:form-params data
-			:basic-auth ["api" api-key]})]
+    (let [url (make-request-url) 
+        result (client/post url {:accept :json
+			     :form-params data
+			     :basic-auth ["api" api-key]})]
 			(println "****** result of post request to mailgun*******")
 			(println result)
 				(if (= (result :status 200)) 
 					true 
 					false))
-  (catch Exception e
-  	(println "****************Exception " e)
-     (let [exception-info (.getData e)]
-     (select-keys
-       (into {} (map (fn [[k v]] [(keyword k) v])
-         (json/parse-string
-             (get-in exception-info [:object :body]))))
-             (vector :status :message :code))))))
+  (catch Exception e (println "****************Exception " e))))
+
+(defn post-multipart-request
+  "Make a HTTP POST request to mailgun with mailgun credentials in basic-auth
+  Returns true if successful, otherwise returns false"
+  [multipart-params]
+  (try
+    (println "********** post-multipart-request with multipart-params: *********")
+    (println multipart-params)
+    (let [url (make-request-url) 
+        result (client/post url {:accept :json
+           :multipart multipart-params
+           :basic-auth ["api" api-key]})]
+      (println "****** result of post request to mailgun*******")
+      (println result)
+        (if (= (result :status 200)) 
+          true 
+          false))
+  (catch Exception e (println "****************Exception " e))))
 
 (defn send-notification
   "Send an email message Notification"
@@ -54,19 +68,19 @@
 
 (defn send-with-attachment
   "Send an email Notification with attachment"
-  [to subject content attachment]
-  (let [msg {
-      :from from-address 
-      :to to 
-      :subject subject
-      :text content
-      :attachment attachment}]
-    (post-request msg)))
+  [to subject content file]
+  (client/post (make-request-url) {:accept :json 
+                      :multipart {:from from-address 
+                                                :to "alexandra.berke@huffingtonpost.com" 
+                                                :subject "test with attachment" 
+                                                :text "sent with attachment?" 
+                                                :attachment file} 
+                      :basic-auth ["api" api-key]}))
 
 
 (defn test-mail 
 	[]
-	(send-notification "alexandra.berke@huffingtonpost.com" "test subject" "test email"))
+	(send-notification (list "alexandra.berke@huffingtonpost.com" "berke.alexandra@gmail.com") "test subject" "test email"))
 
 
 
