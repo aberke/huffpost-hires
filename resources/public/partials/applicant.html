@@ -154,7 +154,6 @@
                         <th>Task</th>
                         <th>Date</th>
                         <th>Assigned</th>
-                        <!-- <th>Feedback Due</th> -->
                         <th>Feedback</th>
                     </tr>
                 </thead>
@@ -175,9 +174,6 @@
                         <td class="task-assignee">
                             <a ng-href="/interviewer?id={{task.interviewer}}">{{interviewersMap[task.interviewer].name}}</span>
                         </td>
-                       <!--  <td class="task-feedback-due">
-                            <span>{{task.feedback_due | date:'MM/dd/yyyy'}}</span>
-                        </td> -->
                         <td class="task-feedback-due">
                             <span>{{task.feedback}}</span>
                         </td>
@@ -205,9 +201,6 @@
             <span class='new-input-container'>Date occurring: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-date">
             </span>
-            <!-- <span class='new-input-container'>Feedback due: 
-                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="new-task-feedback-due">
-            </span> -->
             <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='task.description' class='task-textarea'></textarea></span>
         </div>
         <div class="modal-footer">
@@ -240,9 +233,6 @@
             </span>
             <span class='new-input-container'>Date occurring: 
                 <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-date">
-            </span>
-            <!-- <span class='new-input-container'>Feedback due: 
-                <input size="10" data-date-format="dd-mm-yyyy" placeholder="Choose Date" type="text" value="" id="edit-task-feedback-due"> -->
             </span>
             <span class='new-input-container task-textarea-container'>Task Description: <textarea ng-model='edit_task.description' class='task-textarea'></textarea></span>
             <span class='new-input-container task-textarea-container'>Feedback: 

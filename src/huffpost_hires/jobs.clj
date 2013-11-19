@@ -1,12 +1,6 @@
 (ns huffpost-hires.jobs
 	"Handles requests to & from the Jobs page on code.huffingtonpost.com (CORS)"
-  (:require [ring.middleware.basic-authentication :as basic]
-            [cemerick.drawbridge :as drawbridge]
-            [environ.core :refer [env]]
-            [clojure.java.io :as io]
-            [clojure.pprint :as pprint]
-
-            [huffpost-hires.api :as api]
+  (:require [huffpost-hires.api :as api]
             [huffpost-hires.util :as util]
             [huffpost-hires.models :as models]
             [huffpost-hires.mailgun :as mailgun]))
