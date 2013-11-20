@@ -1,6 +1,8 @@
 (ns huffpost-hires.jobs
 	"Handles requests to & from the Jobs page on code.huffingtonpost.com (CORS)"
-  (:require [huffpost-hires.api :as api]
+  (:require [environ.core :refer [env]]
+
+            [huffpost-hires.api :as api]
             [huffpost-hires.util :as util]
             [huffpost-hires.models :as models]
             [huffpost-hires.mailgun :as mailgun]))
@@ -61,7 +63,7 @@
                         "\t\tResume: " (new-applicant :resume_url) "\n\n"
                         
                         "To view the applicant's information in the huffpost-hires portal, visit: " 
-                        "http://0.0.0.0:5000/applicant?id=" (new-applicant :id) ".\n\n"
+                        (env :hostname) "/applicant?id=" (new-applicant :id) ".\n\n"
                         "- Huffpost Hires"
                         ))
 
