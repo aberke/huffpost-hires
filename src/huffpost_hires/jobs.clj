@@ -56,7 +56,7 @@
                     "[Huffpost Hires] New applicant submission"
                     (str "Hello,\n\n" 
                         "A new applicant has applied via the code.huffingtonpost.com/jobs page for the " 
-                        (new-applicant :position) "position.\n\n"
+                        (new-applicant :position) " position.\n\n"
                         
                         "Applicant Infomation:\n"
                         "\t\tName: " (new-applicant :name) "\n"

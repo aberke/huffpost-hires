@@ -16,8 +16,7 @@
             [clojure.java.io :as io]
 
             [huffpost-hires.jobs :as jobs]
-            [huffpost-hires.api :as api]
-            [huffpost-hires.mailgun :as mailgun])
+            [huffpost-hires.api :as api])
   )
 (println "basic-auth-user: " (env :basic-auth-user false))
 (println "basic-auth-password: " (env :basic-auth-password false))
@@ -100,7 +99,7 @@
                      {:port port :join? false})))
 
 
-;; For interactive development: -- can't push to heroku with this uncommented!
+; For interactive development: -- can't push to heroku with this uncommented!
 ; (defonce server (-main))
 
 ; (defn stop [] 
