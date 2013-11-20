@@ -110,15 +110,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
       }
     };
     xhr.onerror = function(e) {
-      console.log('XHR error.');
+      console.log('XHR error: ' + e);
     };
     xhr.upload.onprogress = function(e) {
-      console.log('xhr.upload.onprogress:');
-      console.log(e);
       var percentLoaded;
       if (e.lengthComputable) {
         percentLoaded = Math.round((e.loaded / e.total) * 100);
-        console.log('percentLoaded: ' + percentLoaded);
+        //console.log('percentLoaded: ' + percentLoaded);
       }
     };
     xhr.send(form);
