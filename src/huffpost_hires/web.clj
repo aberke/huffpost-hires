@@ -20,36 +20,34 @@
             [huffpost-hires.api :as api]
             [huffpost-hires.mailgun :as mailgun])
   )
+(println "basic-auth-user: " (env :basic-auth-user false))
+(println "basic-auth-password: " (env :basic-auth-password false))
+
+(def cors-allowed-domain "http://127.0.0.1:3000|http://code.huffingtonpost.com")
 
 (defn- authenticated? [user pass]
-  ;; TODO: heroku config:add REPL_USER=[...] REPL_PASSWORD=[...]
-  (= [user pass] [(env :repl-user false) (env :repl-password false)]))
-
-(def ^:private drawbridge
-  (-> (drawbridge/ring-handler)
-      (session/wrap-session)
-      (basic/wrap-basic-authentication authenticated?)))
+  (= [user pass] [(env :basic-auth-user false) (env :basic-auth-password false)]))
 
 (defn serve-partial
   "Handles serving the partial html files"
   [request]
-  (println (request :uri))
-      {:status 200 :headers {} :body (io/file (io/resource (str "public" (request :uri))))})
+  {:status 200 :headers {} :body (io/file (io/resource (str "public" (request :uri))))})
 
 (defn serve-hires
   "Serves the hires.html template"
   [request]
   {:status 200 :headers {} :body (io/file (io/resource "html/hires.html"))})
 
+(def auth->serve-hires
+  (-> #'serve-hires
+      (session/wrap-session)
+      (basic/wrap-basic-authentication authenticated?)))
+
 (defn test-route
   [request]
-  (mailgun/test-mail)
   {:status 200 :headers {} :body (io/file (io/resource "html/test.html"))})
 
 (defroutes app
-  (ANY "/repl" {:as req}
-       (drawbridge req))
-
   (ANY "/test" [] test-route)
 
   (GET "/jobs/*/*" [] jobs/get-handler)
@@ -68,14 +66,14 @@
         :body (pr-str ["Hello" :from 'api])})
 
   (GET "/partials/*" [] serve-partial)
-  (GET "/listings" [] serve-hires)
-  (GET "/applicants" [] serve-hires)
-  (GET "/interviewers" [] serve-hires)
-  (GET "/listing" [] serve-hires)
-  (GET "/applicant" [] serve-hires)
-  (GET "/interviewer" [] serve-hires)
+  (GET "/listings" {:as req} (auth->serve-hires req))
+  (GET "/applicants" {:as req} (auth->serve-hires req))
+  (GET "/interviewers" {:as req} (auth->serve-hires req))
+  (GET "/listing" {:as req} (auth->serve-hires req))
+  (GET "/applicant" {:as req} (auth->serve-hires req))
+  (GET "/interviewer" {:as req} (auth->serve-hires req))
   (route/resources "/") ;; serves static files
-  (GET "/" [] serve-hires)
+  (GET "/" {:as req} (auth->serve-hires req))
   (route/not-found (slurp (io/resource "html/404.html"))))
 
 (defn wrap-error-page [handler]
@@ -88,11 +86,10 @@
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))
-        ;; TODO: heroku config:add SESSION_SECRET=$RANDOM_16_CHARS
         store (cookie/cookie-store {:key (env :session-secret)})]
     (jetty/run-jetty (-> #'app
                           (cors/wrap-cors
-                            :access-control-allow-origin #"http://127.0.0.1:3000"
+                            :access-control-allow-origin (re-pattern (str cors-allowed-domain))
                             :access-control-allow-headers ["Origin" "X-Requested-With" "x-requested-with"
                                                           "Content-Type" "Accept"])
                           ((if (env :production)

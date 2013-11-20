@@ -285,7 +285,9 @@ function AllInterviewersCntl($scope, BasicService, APIService) {
 
 	var getInterviewers = function() {
 		APIService.getInterviewersWithMetadata(function() {
+			console.log('interviewersList')
 			console.log($scope.interviewersList);
+			console.log('interviewersMap')
 			console.log($scope.interviewersMap);
 		});
 	}

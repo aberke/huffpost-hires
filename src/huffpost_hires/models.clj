@@ -13,9 +13,6 @@
 
 
 
-
-
-
 ; Tasks are the glue between Applicants and Interviewers.  
 ; Each task has a relation to an Interviewer and an Applicant
 
@@ -139,10 +136,9 @@
 			[:asof "date not null default CURRENT_DATE"]))
 	(catch Exception e (util/handle-exception "make-table-homeworks" e))))
 
-(defn init-table-homeworks
-	[]
+(defn init-table-homeworks []
 	(make-table-homeworks)
-	(println "Initializing Homeworks Table -- BUT its empty"))
+	(println "Initializing Homeworks Table -- empty"))
 
 (defn make-table-applicants
 	"Create the Applicants Table in our database."
@@ -166,45 +162,9 @@
 		(catch Exception e (util/handle-exception "make-table-applicants" e)))) ;; error -- return false
 
 
-(defn init-table-applicants
-  []
+(defn init-table-applicants []
   (make-table-applicants)
-  (println "Initializing Applicants Table.")
-	(try (jdbc/with-connection database/db
-		(jdbc/insert-records :applicants
-			{:name "Alex Berke"
-				:goalie 1
-				:phone "12223334444"
-				:email "alexandra.berke@huffingtonpost.com"
-				:position "Developer"
-				:referral "Alexandra Berke"
-				:notes "Recent graduate"
-				:resume_url ""
-				:pass 1 ; 0/1 boolean
-				:completed 0} ; 0/1 boolean
-			{:name "Angelina Jolie"
-				:goalie 2
-				:phone "12223334444"
-				:email "angie.jj@gmail.com"
-				:position "Developer"
-				:notes "Junior developer -- previously worked as a designer.  She also has a busy home life."
-				:referral "Alexandra Berke"
-				:resume_url ""
-				:stage 4
-				:pass 1
-				:completed 0}
-			{:name "Mila Kunis"
-				:goalie 3
-				:phone "12223334444"
-				:email "mila.kunis@yahoo.com"
-				:position "Developer"
-				:notes "Recent graduate"
-				:referral "Alexandra Berke"
-				:resume_url ""
-				:pass 1 ; 0/1 boolean
-				:completed 0})) ; 0/1 boolean
-		(catch Exception e (util/handle-exception "init-table-applicants" e)))) ;; error -- return false
-
+  (println "Initializing Applicants Table -- empty"))
 
 (defn make-table-interviewers
 	"Creating the Interviewers Table in our database."
@@ -235,9 +195,9 @@
 				:phone "16178348458"
 				:email "alexandra.berke@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"
-			}{:name "Amy Flintstone"
+			}{:name "Brandon Diamond"
 				:phone "16178348458"
-				:email "alexandra.berke@huffingtonpost.com"
+				:email "brandon.diamond@huffingtonpost.com"
 				:pic_url "/img/default_pic.jpg"}))
 		(catch Exception e (util/handle-exception "init-table-interviewers" e)))) ;; error -- return false
 
@@ -265,65 +225,7 @@
 	"Fill Tasks table with dummy data"
 	[]
 	(make-table-tasks)
-	(println "Initializing Tasks table")
-	(try (jdbc/with-connection database/db
-		(jdbc/insert-records :tasks
-			{:applicant 1
-				:interviewer 1
-				:title "Resume review"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback "She is over qualified -- great internship at Huffpost!"
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 1
-				:pass 1}
-			{:applicant 2
-				:interviewer 2
-				:title "Resume review"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback "She is over qualified -- great internship at Huffpost!"
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 1
-				:pass 1}
-			{:applicant 3
-				:interviewer 1
-				:title "Resume review"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback ""
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 0
-				:pass 1}
-			{:applicant 1
-				:interviewer 2
-				:title "Phone screen"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback "She has such a heavy accent."
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 1
-				:pass 1}
-			{:applicant 2
-				:interviewer 2
-				:title "Phone screen"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback "She has such a heavy accent."
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 1
-				:pass 1}
-			{:applicant 3
-				:interviewer 3
-				:title "Phone screen"
-				:description "Double check she'd fit in with the operations team based on her Ruby background."
-				:feedback ""
-				:date "2013-10-22T20:02:02.920Z"
-				:feedback_due "2013-10-22T20:02:02.920Z"
-				:completed 0
-				:pass 1}))
-		(catch Exception e (util/handle-exception "init-table-tasks" e)))) ;; error -- return false
-
+	(println "Initializing Tasks table -- empty"))
 
 (defn init-tables
   "Create all of the tables in our database and fill each with dummy data."

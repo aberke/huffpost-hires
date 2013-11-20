@@ -14,10 +14,9 @@
 
         <div id='info-well' class="well index-half-right col-xs-5 col-md-5 text-left">
             <button id='updateInfo-btn' ng-click="updateInfo()" class="float-right btn btn-default"><h3>Save</h3></button>
-            
             <p><em>Hiring Manager:</em> 
                 <select ng-model="listing.hiring_manager" ng-options="interviewer.name for interviewer in interviewersList">
-                    <option value="">{{interviewersList[listing.hiring_manager].name}}</option>
+                    <option value="">{{interviewersMap[listing.hiring_manager].name}}</option>
                 </select>
             </p>
         </div>

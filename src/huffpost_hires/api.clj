@@ -330,11 +330,7 @@
 (defn handle-get-request
 	"Called by web upon GET request to url /api/*/*"
 	[request]
-	(println "********************** GET ************************")
-	(println request)
 	(let [params (request :params) route (params :*) route-prefix (first route) route-suffix (second route)]
-		(println (str "params: " params))
-		(println (str "route:" route))
 		(case route-prefix
 			"stage" (handle-get-request-stage route-suffix params)
 			"listing" (handle-get-request-listing route-suffix params)
@@ -456,8 +452,6 @@
 
 (defn handle-put-request
 	[request]
-	(println "**************** API PUT *******************")
-	(println request)
 	(let [params (request :multipart-params) route ((request :route-params) :*)]
 		(case route
 			"listing" (put-listing params)
@@ -470,10 +464,7 @@
 ;; ******************************* DELETE requests below ******************************
 (defn handle-delete-request
 	[request]
-	(println "**************** API DELETE *******************")
 	(let [params (request :params) route (params :*) id (util/string->number (params :id))]
-		(println (str "params: " params))
-		(println (str "route: " route))
 		(case route
 			"listing" (if (models/delete-listing id) "OK" "ERROR")
 			"responsibility" (if (models/delete-responsibility id) "OK" "ERROR")

@@ -278,9 +278,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
 
     getInterviewersWithMetadata: function(callback) {
       httpGET('/interviewer/all?extra-data=true', {'extra-data': true}).then(function(returnedData) {
-        $rootScope.interviewersList = returnedData;
-        $rootScope.interviewersMap = listToMap(returnedData);
-        if (callback) callback();
+        if (returnedData.length) {
+          $rootScope.interviewersList = returnedData;
+          $rootScope.interviewersMap = listToMap(returnedData);
+          if (callback) callback();
+        } else {
+          getInterviewers(false, callback);
+        }
       });
     },
 
