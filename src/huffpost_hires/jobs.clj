@@ -47,7 +47,7 @@
                     "Huffington Post Application Recieved"
                     (str (applicant-attribute-map :name) 
                     	",\n\nThank you for applying to The Huffington Post for the " 
-                    	(get params "position") " position.\nWe will review your resume and reach out to you."
+                    	(get params "position") " position.\nWe will review your resume and reach out to you shortly."
                     	"\n\nBest,\nThe Huffington Post Tech Team"))
 
                 ;; send email to interviewer/interested parties -- TODO: FIX THIS
@@ -55,7 +55,8 @@
                     (list (System/getenv "RECRUITER_EMAIL") "alexandra.berke@huffingtonpost.com")
                     "[Huffpost Hires] New applicant submission"
                     (str "Hello,\n\n" 
-                        "A new applicant has applied via the code.huffingtonpost.com/jobs page.\n\n"
+                        "A new applicant has applied via the code.huffingtonpost.com/jobs page for the " 
+                        (new-applicant :position) "position.\n\n"
                         
                         "Applicant Infomation:\n"
                         "\t\tName: " (new-applicant :name) "\n"
