@@ -13,7 +13,6 @@
                   [ring-cors "0.1.0"]
 
                   [environ "0.2.1"]
-                  [com.cemerick/drawbridge "0.0.6"]
                   [org.clojure/java.jdbc "0.3.0-alpha5"]
                   [postgresql "9.1-901.jdbc4"]
                   [clj-aws-s3 "0.3.7"]]

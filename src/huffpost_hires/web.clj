@@ -12,7 +12,6 @@
             [ring.middleware.cors :as cors]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.basic-authentication :as basic]
-            [cemerick.drawbridge :as drawbridge]
             [environ.core :refer [env]]
             [clojure.java.io :as io]
 

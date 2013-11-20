@@ -3,7 +3,6 @@
   	(:require [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
 
-            [huffpost-hires.models_util :as models_util]
             [huffpost-hires.util :as util]))
 
 (def db (if (System/getenv "DEVELOPMENT")
