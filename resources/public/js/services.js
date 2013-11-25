@@ -1,6 +1,29 @@
-HiresApp.factory('BasicService', function($rootScope) {
+HiresApp.factory('BasicService', function($rootScope, $timeout) {
 
   return {
+
+    flashMessage: function() {
+      var message = $('#flash-message');
+      message.show();
+      $timeout(function() { message.hide(); }, 3000);
+    },
+
+    /* appends an input element of type='text' as a child node */
+    addTextInput: function(elementID) {
+      var input = document.createElement("input");
+      input.type = "text";
+      document.getElementById(elementID).appendChild(input);
+    },
+    /* counterpart to above function 
+      takes selector and limits elements of that type to number 
+      Removes all if no number is provided */
+    limitChildren: function(selector, number) {
+      $.each($(selector), function(i, object) {
+        if (number && (i >= number)) {
+          object.parentNode.removeChild(object)
+        }
+      });
+    },
 
     /* handles checking if given input or select elements are empty and colors with class 'error' if so */
     checkInputEmpty: function(elementIDsList) {
@@ -96,15 +119,13 @@ HiresApp.factory('APIService', function($rootScope, $http, $q){
     xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
 
-    console.log('xhrRequest ' + method + ' with data:');
-    console.log(data);
-
     var form = new FormData();
     $.each(data, function(name) { form.append(name, data[name]); });
 
     xhr.onload = function(e) {
-      if (xhr.status === 200) {
-        callback(xhr.response);
+      if ((e.target.status == 200) || (xhr.status == 200)) {
+        var response = (e.target.response || xhr.response);
+        callback(response);
       } else {
         console.log('Upload error: ' + xhr.status);
       }

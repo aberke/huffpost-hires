@@ -35,28 +35,24 @@
           <h2 class="modal-title">New listing</h2>
         </div>
         <div class="modal-body">
-                        <span class='new-input-container'>Title: <input id='new-listing-title' type='text' required placeholder='eg, Front End Developer' ng-model='new_listing.title'></span>
-                        <span class='new-input-container'>Hiring Manager: <select required ng-model="new_listing.hiring_manager" ng-options="interviewer.name for interviewer in interviewersList">
-                            <option value="">-select-</option>
-                        </select></span>
-                        <span class='new-input-block'>Description: 
-                            <textarea id='new-listing-description' ng-model='new_listing.description' />
-                        </span>
+            <span class='new-input-container'>Title: <input id='new-listing-title' type='text' required placeholder='eg, Front End Developer' ng-model='new_listing.title'></span>
+            <span class='new-input-container'>Hiring Manager: 
+                <select required ng-model="new_listing.hiring_manager" ng-options="interviewer.name for interviewer in interviewersList">
+                    <option value="">-select-</option>
+                </select>
+            </span>
+            <span class='new-input-block'>Description: 
+                <textarea id='new-listing-description' ng-model='new_listing.description' />
+            </span>
 
-                        <span id='new-listing-responsibilities' class='new-input-block'>Responsibilities:                             
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                        </span>
-                        <span id='new-listing-requirements' class='new-input-block'>Requirements:                            
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                            <input type='text' />
-                        </span>
+            <span id='new-listing-responsibilities' class='new-input-block'><span ng-click="addTextInput('new-listing-responsibilities')" class='add-input btn btn-success small-btn'>+</span> Responsibilities:                             
+                <input type='text' />
+                <input type='text' />
+            </span>
+            <span id='new-listing-requirements' class='new-input-block'><span ng-click="addTextInput('new-listing-requirements')" class='add-input btn btn-success small-btn'>+</span>  Requirements:                            
+                <input type='text' />
+                <input type='text' />
+            </span>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">CANCEL</button>

@@ -7,6 +7,7 @@ input[type='file'] {
 .red, .red-true { color: red;}
 .gray {color: gray;}
 .green { color: green; }
+.orange { color: orange;}
 
 .width-10 { max-width: 10px; }
 .width-40{ width: 40%; }
@@ -23,6 +24,10 @@ div.text-left, .text-left{ text-align: left; }
 div.text-right, .text-right, .text-right input{ text-align: right; }
 
 .cursor-pointer{ cursor: pointer; }
+
+#flash-message {
+	background-color: yellow;
+}
 
 /********************* nav **********************/
 .nav-left{
@@ -263,6 +268,10 @@ input.interviewer-info-name{ margin: 0;}
 }
 #info-well-container h3{
 	margin-top: 0;
+}
+#listing-page #flash-message {
+	position: absolute;
+	left: 45%;
 }
 #listing-info-well,#interviewer-info-well{
 	margin: 0;

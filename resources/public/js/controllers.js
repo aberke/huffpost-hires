@@ -17,16 +17,12 @@ function MainCntl($scope, $location, BasicService, APIService) {
 	$scope.stagesMap;
 
 
-	$scope.goTo = function(path) {
-		console.log('goTo')
-		console.log(path);
-	}
-
 	$scope.interviewerByName = function(name) {
 		$.each($scope.interviewersList, function(){
 			if ($(this).name === name) return $(this);
 		});
 	}
+	$scope.addTextInput = BasicService.addTextInput;
 
 	var init = function() {
 		$('.popover-hover').popover({trigger: 'hover'});	
@@ -405,7 +401,9 @@ function AllListingsCntl($scope, APIService, BasicService) {
 	$scope.listingsList;
 
 	$scope.addListing = function(new_listing) {
+
 		$('#newListingModal').modal('hide');
+		console.log(new_listing)
 
 		new_listing.hiring_manager  = new_listing.hiring_manager.id;
 
@@ -419,6 +417,7 @@ function AllListingsCntl($scope, APIService, BasicService) {
 			var val = object.value;
 			if (val && val != undefined && val != '') { new_listing.requirements.push(val); }
 		});
+		console.log(new_listing)
 
 		APIService.postNewListing(new_listing, function(returnedData) {
 			var listing = eval("(" + returnedData + ")");
@@ -433,8 +432,11 @@ function AllListingsCntl($scope, APIService, BasicService) {
 			for (var i=0; i<new_listing.requirements.length; i++) {
 				APIService.postNewRequirement({'listing': listing_id, 'title': new_listing.requirements[i]});
 			};
-
+			$scope.new_listing = null;
 		});
+		/* Reset responsibilities and requirements input lists to only have 2 inputs if inputs were previously added */
+		BasicService.limitChildren('#new-listing-responsibilities input', 2);
+		BasicService.limitChildren('#new-listing-requirements input', 2);
 	}
 	var init = function() {
 		APIService.getAllListings();
@@ -442,7 +444,7 @@ function AllListingsCntl($scope, APIService, BasicService) {
 	};
 	init();
 };
-function ListingCntl($scope, $location, $routeParams, APIService) {
+function ListingCntl($scope, $location, $routeParams, APIService, BasicService) {
 	var spinner;
 	$scope.listing;
 	$scope.responsibilitiesList;
@@ -483,6 +485,7 @@ function ListingCntl($scope, $location, $routeParams, APIService) {
 		
 		APIService.updateListing($scope.listing, function() {
 			spinner.hide();
+			BasicService.flashMessage();
 		});
 	}
 

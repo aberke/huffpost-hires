@@ -68,7 +68,7 @@
 	[params]
 	(println "params->listings-attributeMap -- params: " params)
 	{:id (util/string->number (get params "id"))
-		:hiring_manager (util/string->number (get params "hiring_manager"))
+		:hiring_manager (util/string->number-or-0 (get params "hiring_manager" 0))
 		:title (util/string->sql-safe (get params "title"))
 		:description (util/string->sql-safe (get params "description" ""))
 		:homework_required (util/string->number-or-0 (get params "homework_required" 0))
@@ -100,7 +100,7 @@
 	{:id (util/string->number (get params "id"))
 		:name (util/string->sql-safe (get params "name" ""))
 		:stage (util/string->number-or-0 (get params "stage" 0))
-		:goalie (util/string->number-or-0 (get params "goalie"))
+		:goalie (util/string->number-or-0 (get params "goalie" 0))
 		:phone (get params "phone" "")
 		:email (get params "email" "")
 		:position (util/string->sql-safe (get params "position" ""))

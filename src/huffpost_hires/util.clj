@@ -5,7 +5,9 @@
 (defn string->number-or-0
 	"Convert n to a number if its not already a number, or return 0 if has non numeric characters"
 	[n]
-	(let [n (if (string? n) (read-string n) n)]
+	(let [n (if (and (string? n) (> (count n) 0)) 
+				(read-string n) 
+				n)]
 		(if (number? n) n 0)))
 
 (defn string->number
