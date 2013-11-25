@@ -100,8 +100,8 @@
 
 
 ;For interactive development: -- can't push to heroku with this uncommented!
-(defonce server (-main))
+; (defonce server (-main))
 
-(defn stop [] 
-  (.stop server))
+; (defn stop [] 
+;   (.stop server))
 
