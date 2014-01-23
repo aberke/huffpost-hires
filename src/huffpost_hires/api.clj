@@ -427,6 +427,7 @@
 	merges the url for the resume in with the rest of the parameters to be included in the attribute map
 	before updating the applicant in the table"
 	[params]
+	(println "put-applicant -- params: " params)
 	(let [extra-params (upload-resume params) full-params (merge params extra-params)]
 		(if (models/update-applicant (params->applicants-attributeMap full-params)) 
 			"OK" 

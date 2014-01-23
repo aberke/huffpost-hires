@@ -283,6 +283,15 @@
 		(try (database/execute-sql statement)
 			(catch Exception e (util/handle-exception "update-listing" e)))))
 
+; quick hack to set resume_url
+(defn set-applicant-resume-url
+	[applicant-id resume-url]
+  	(let [statement (str "UPDATE applicants "
+                              "SET resume_url='" resume-url
+                              "' WHERE id=" applicant-id)]
+    	(try (database/execute-sql statement)
+			(catch Exception e (util/handle-exception "set-applicant-resume-url" e))))) ;; error -- return false
+
 (defn update-applicant
 	[attribute-map]
   	(let [statement (str "UPDATE applicants "

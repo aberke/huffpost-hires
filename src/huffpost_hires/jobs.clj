@@ -35,40 +35,45 @@
                     :email (get params "email" "")
                     :notes "Applied via code.huffingtonpost.com/jobs"
                     :referal "code.huffingtonpost.com/jobs"
-                    :resume_url ((api/upload-resume params) "resume_url")
+                    :resume_url ""
                     :completed 0
                     :pass 1}
-            new-applicant (models/insert-applicant applicant-attribute-map)]
+            new-applicant (models/insert-applicant applicant-attribute-map)
+            new-applicant-id (new-applicant :id)
+            resume-url ((api/upload-resume {"resume" (params "resume") "id" new-applicant-id}) "resume_url")]
+        
         (if-not new-applicant "ERROR"
-            (do 
-                ;; send confirmation email to applicant
-                (mailgun/send-notification 
-                    (applicant-attribute-map :email) 
-                    "Huffington Post Application Recieved"
-                    (str (applicant-attribute-map :name) 
-                    	",\n\nThank you for applying to The Huffington Post for the " 
-                    	(get params "position") " position.\nWe will review your resume and reach out to you shortly."
-                    	"\n\nBest,\nThe Huffington Post Tech Team"))
+            (if-not (models/set-applicant-resume-url new-applicant-id resume-url) "ERROR"
+                ;; new-applicant successfully created and resume-url set
+                (do 
+                    ;; send confirmation email to applicant
+                    (mailgun/send-notification 
+                        (applicant-attribute-map :email) 
+                        "Huffington Post Application Recieved"
+                        (str (applicant-attribute-map :name) 
+                        	",\n\nThank you for applying to The Huffington Post for the " 
+                        	(get params "position") " position.\nWe will review your resume and reach out to you shortly."
+                        	"\n\nBest,\nThe Huffington Post Tech Team"))
 
-                ;; send email to interviewer/interested parties -- TODO: FIX THIS
-                (mailgun/send-notification
-                    (list (System/getenv "RECRUITER_EMAIL") "alexandra.berke@huffingtonpost.com")
-                    "[Huffpost Hires] New applicant submission"
-                    (str "Hello,\n\n" 
-                        "A new applicant has applied via the code.huffingtonpost.com/jobs page for the " 
-                        (new-applicant :position) " position.\n\n"
-                        
-                        "Applicant Infomation:\n"
-                        "\t\tName: " (new-applicant :name) "\n"
-                        "\t\tEmail: " (new-applicant :email) "\n"
-                        "\t\tResume: " (new-applicant :resume_url) "\n\n"
-                        
-                        "To view the applicant's information in the huffpost-hires portal, visit: " 
-                        (env :hostname) "/applicant?id=" (new-applicant :id) ".\n\n"
-                        "- Huffpost Hires"
-                        ))
+                    ;; send email to interviewer/interested parties -- TODO: FIX THIS
+                    (mailgun/send-notification
+                        (list (System/getenv "RECRUITER_EMAIL") "alexandra.berke@huffingtonpost.com")
+                        "[Huffpost Hires] New applicant submission"
+                        (str "Hello,\n\n" 
+                            "A new applicant has applied via the code.huffingtonpost.com/jobs page for the " 
+                            (new-applicant :position) " position.\n\n"
+                            
+                            "Applicant Infomation:\n"
+                            "\t\tName: " (new-applicant :name) "\n"
+                            "\t\tEmail: " (new-applicant :email) "\n"
+                            "\t\tResume: " resume-url "\n\n"
+                            
+                            "To view the applicant's information in the huffpost-hires portal, visit: " 
+                            (env :hostname) "/applicant?id=" (new-applicant :id) ".\n\n"
+                            "- Huffpost Hires"
+                            ))
 
-                "OK"))))
+                    "OK")))))
 
 (defn post-handler
 	[request]
